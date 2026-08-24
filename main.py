@@ -3,8 +3,11 @@ def somar(a, b):
 
 def calculadora():
     print("=== Calculadora Simples ===")
-    resultado = somar(5, 3)
-    print(f"Soma (5 + 3): {resultado}")
+    a = float(input("Digite o valor de a: "))
+    b = float(input("Digite o valor de b: "))
+    
+    resultado = somar(a, b)
+    print(f"Resultado da soma: {resultado}")
 
 if __name__ == "__main__":
     calculadora()
