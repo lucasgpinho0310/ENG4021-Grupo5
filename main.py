@@ -1,6 +1,11 @@
 def somar(a, b):
     return a + b
 
+def dividir(,a b):
+    if b == 0:
+       Return "Erro: divisão por zero!"
+    return a / b
+
 def calculadora():
     print("=== Calculadora Simples ===")
     a = float(input("Digite o valor de a: "))
@@ -8,6 +13,9 @@ def calculadora():
     
     resultado = somar(a, b)
     print(f"Resultado da soma: {resultado}")
+
+    resultado_divisao = dividir(a, b)
+    print(f"Resultado da divisão: {resultado_divisao}")
 
 if __name__ == "__main__":
     calculadora()
