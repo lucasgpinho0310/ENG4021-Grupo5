@@ -6,7 +6,7 @@ def dividir(,a b):
        Return "Erro: divisão por zero!"
     return a / b
 
-def subtrair(a, b)
+def subtrair(a, b):
     return a - b
 
 def calculadora():
