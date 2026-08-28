@@ -6,6 +6,9 @@ def dividir(,a b):
        Return "Erro: divisão por zero!"
     return a / b
 
+def subtrair(a, b)
+    return a - b
+
 def calculadora():
     print("=== Calculadora Simples ===")
     a = float(input("Digite o valor de a: "))
@@ -17,5 +20,7 @@ def calculadora():
     resultado_divisao = dividir(a, b)
     print(f"Resultado da divisão: {resultado_divisao}")
 
+    resultado_subtracao = subtrair(a, b)
+    print(f"Resultado da subtração:{resultado_subtracao}")
 if __name__ == "__main__":
     calculadora()
