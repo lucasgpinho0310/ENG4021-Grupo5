@@ -1,37 +1,28 @@
-def somar(a, b):
-    return a + b
+from Soma import somar
+from Subtracao import subtrair
+from Multiplicacao import multiplicar
+from Divisao import dividir
 
-def dividir(a, b):
-    if b == 0:
-       Return "Erro: divisão por zero!"
-    return a / b
+print("--- CALCULADORA ---")
+print("1 - Soma")
+print("2 - Subtração")
+print("3 - Multiplicação")
+print("4 - Divisão")
 
-def subtrair(a, b):
-    return a - b
+operacao = input("Qual operação você deseja fazer? (1, 2, 3 ou 4): ").strip()
 
+a = float(input("Digite o valor de a: "))
+b = float(input("Digite o valor de b: "))
 
-def multiplicar(a, b):
-    return a * b
-
-def operacao():
-    print("=== Escolha a operação ===")
-    somar = 
-
-def calculadora():
-    print("=== Calculadora Simples ===")
-    a = float(input("Digite o valor de a: "))
-    b = float(input("Digite o valor de b: "))
-    
+if operacao == '1' or operacao.lower() == 'soma':
     resultado = somar(a, b)
-    print(f"Resultado da soma: {resultado}")
+elif operacao == '2' or operacao.lower() in ['subtracao', 'subtração']:
+    resultado = subtrair(a, b)
+elif operacao == '3' or operacao.lower() in ['multiplicacao', 'multiplicação']:
+    resultado = multiplicar(a, b)
+elif operacao == '4' or operacao.lower() in ['divisao', 'divisão']:
+    resultado = dividir(a, b)
+else:
+    resultado = "Operação inválida!"
 
-    resultado_divisao = dividir(a, b)
-    print(f"Resultado da divisão: {resultado_divisao}")
-
-    resultado_subtracao = subtrair(a, b)
-    print(f"Resultado da subtração:{resultado_subtracao}")
-
-    resultado_multiplicacao = multiplicar(a, b)
-    print(f"Resultado da multiplicação:{resultado_multiplicacao}")
-if __name__ == "__main__":
-    calculadora()
+print(f"Resultado: {resultado}")
