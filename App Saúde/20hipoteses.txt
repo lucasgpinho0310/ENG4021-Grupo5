@@ -1,0 +1,49 @@
+Fricção & Dieta por Seleção
+
+O registro por seleção em um catálogo pré-cadastrado com porções padrão reduz o tempo de lançamento de uma refeição para menos de 30 segundos.
+
+A poluição e os dados incorretos de bancos de dados abertos em concorrentes são a causa primária de abandono dos apps de nutrição.
+
+A funcionalidade de "Salvar Combo/Prato Frequente" é a ferramenta mais utilizada no módulo de nutrição.
+
+Praticantes com acompanhamento nutricional rejeitam plataformas que não permitem ajustar livremente as metas de macronutrientes.
+
+Visualizar apenas a soma diária de calorias e macronutrientes gera sentimento de controle sem provocar ansiedade.
+
+Treino & Evolução de Cargas
+
+6. Exibir automaticamente a última carga utilizada no exercício evita a estagnação de peso na musculação.
+
+7. Interfaces de treino burocráticas fazem o praticante desistir de registrar o treino ainda no meio da sessão.
+
+8. Um diário de treino focado em registro de cargas gera maior retenção do que rotinas rígidas pré-formatadas.
+
+9. O histórico de volume e evolução de carga por exercício é a métrica visual muito valorizada para quem pratica musculação.
+
+Gamificação & Fator Social 
+
+10. A exibição transparente da frequência do grupo de amigos aciona a pressão social positiva e reduz as faltas na academia.
+
+11. A manutenção da "Ofensiva" (dias consecutivos) ativa o gatilho de preservação e aumenta a retenção diária.
+
+12. Transformar o cumprimento da dieta em pontuação no ranking aumenta a adesão nutricional de quem prefere focar em alimentação.
+
+13. Conquistas visuais (badges) por metas atingidas ou recordes de carga fortalecem a percepção de progresso.
+
+14. A mecânica de competição entre grupos conhecidos gera um loop orgânico de novos convites sem custo de aquisição.
+
+Dashboards & Usabilidade
+
+15. Painéis visuais simples (assiduidade mensal e barras de macros) possuem taxa de consulta superior a relatórios estatísticos complexos.
+
+16. Unificar diário de carga e registro de nutrição em um só lugar elimina a necessidade de transitar entre múltiplos aplicativos. 
+
+17. Manter o tempo total de interação diária com o app abaixo de 2 minutos garante uma retenção acima de 30 dias.
+
+Público-Alvo
+
+18. O público intermediário tem como principal motivação a Evolução de Cargas, enquanto o público iniciante busca Incentivo Social.
+
+19. Praticantes que utilizam a aplicação integrados a um grupo de amigos apresentam uma taxa de retenção duas vezes maior.
+
+20. Usuários engajados no ranking do seu grupo aceitam interagem e trazem mais usuários para a plataforma.
