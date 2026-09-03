@@ -1,0 +1,190 @@
+Análise de produtos similares e principais funcionalidades
+
+1. MyFitnessPal
+Produto: Aplicativo de acompanhamento alimentar e controle nutricional.
+Principais funcionalidades:
+⦁	Registro de refeições e alimentos;
+⦁	Banco de alimentos;
+⦁	Controle de calorias;
+⦁	Acompanhamento de macronutrientes;
+⦁	Definição de metas nutricionais;
+⦁	Histórico alimentar;
+⦁	Acompanhamento de peso;
+⦁	Integrações com outros dispositivos e serviços de saúde/fitness;
+⦁	Recursos relacionados a planejamento alimentar.
+O que ele resolve:
+- Principalmente o problema de acompanhar o consumo alimentar e controlar calorias e nutrientes.
+
+O que observar para nosso SaaS:
+- O MyFitnessPal é uma referência importante para o módulo de alimentação, mas nossa oportunidade seria simplificar a experiência.
+
+
+Oportunidade: criar um catálogo orientado ao cotidiano brasileiro e conectar imediatamente a alimentação ao treino e à evolução.
+
+
+2. FatSecret
+Produto: Plataforma de acompanhamento alimentar e nutricional.
+Principais funcionalidades:
+⦁	Diário alimentar;
+⦁	Registro de refeições;
+⦁	Banco de alimentos;
+⦁	Informações nutricionais;
+⦁	Controle de calorias;
+⦁	Acompanhamento de nutrientes;
+⦁	Histórico alimentar;
+⦁	Acompanhamento de metas.
+O próprio FatSecret descreve o diário alimentar como ferramenta para registrar refeições e acompanhar calorias e nutrientes.
+O que ele resolve:
+"O que eu estou comendo e quanto isso representa nutricionalmente?"
+
+O que observar para nosso SaaS:
+É um concorrente relevante principalmente para o módulo de dieta.
+
+A oportunidade seria sair de uma lógica predominantemente de:
+alimento → calorias → nutrientes
+para:
+alimentação → treino → objetivo → evolução.
+
+3. Strava
+Produto: Plataforma social de atividade física.
+Principais funcionalidades:
+⦁	Registro de atividades físicas
+⦁	Histórico e acompanhamento de desempenho
+⦁	Desafios individuais e em grupo
+⦁	Clubes e comunidades
+⦁	Ranking e comparação de desempenho
+⦁	Feed social, curtidas e comentários
+O Strava possui uma estrutura bastante desenvolvida de clubes, desafios, feed, comentários, conexões e rankings, mostrando como a camada social pode ser utilizada para aumentar o engajamento.
+O que ele resolve:
+"Como tornar a atividade física mais social e motivadora?"
+
+O que observar para nosso SaaS:
+O Strava é uma referência muito forte para o módulo social/gamificação.
+
+Porém, existe espaço para transportar essa lógica para:
+⦁	musculação;
+⦁	alimentação;
+⦁	consistência;
+⦁	metas semanais.
+
+Em vez de:
+"Quem correu mais?"
+Poderíamos ter:
+"Quem foi mais consistente esta semana?"
+
+4. Nike Training Club
+Produto: Plataforma de treinos e conteúdo fitness.
+Principais funcionalidades:
+⦁	Biblioteca de treinos
+⦁	Treinos guiados
+⦁	Programas de treinamento
+⦁	Treinos para diferentes objetivos
+⦁	Planejamento de treinos
+⦁	Acompanhamento da evolução
+O que ele resolve:
+"O que eu devo fazer no meu treino?"
+O foco está muito mais em conteúdo e orientação do que em transformar o aplicativo em um diário detalhado de progressão de cargas.
+
+O que observar para nosso SaaS:
+Acrescentar:
+treino → registro → histórico → progressão → evolução.
+
+A oportunidade está em fazer o plano aprender com o desempenho do usuário, e não apenas entregar um treino pronto.
+
+5. Freeletics
+Produto: Plataforma de treinamento personalizado e treinos guiados.
+Principais funcionalidades:
+⦁	Planos de treino personalizados
+⦁	Treinos guiados
+⦁	Biblioteca de exercícios
+⦁	Adaptação dos treinos ao desempenho
+⦁	Definição de objetivos
+⦁	Personalização por equipamentos e disponibilidade
+O que ele resolve:
+"Como posso treinar sem precisar montar meu próprio treino?"
+
+O que observar para nosso SaaS:
+Utilizar informações como:
+⦁	nível;
+⦁	objetivo;
+⦁	frequência disponível;
+⦁	equipamentos;
+⦁	histórico;
+⦁	desempenho recente;
+A diferença seria integrar isso também com:
+alimentação + evolução + consistência social.
+
+6. Strong / Hevy
+Aqui está um dos concorrentes mais importantes para o projeto, porque está muito próximo da proposta do nosso módulo de treino.
+Principais funcionalidades:
+⦁	Registro de séries, repetições e cargas
+⦁	Histórico dos exercícios
+⦁	Rotinas e programas de treino
+⦁	Registro de PRs e evolução
+⦁	Gráficos de volume e desempenho
+⦁	Timer de descanso e recursos durante o treino
+
+O próprio Hevy informa que possui mais de 400 exercícios e permite acompanhar peso, repetições, volume, PRs, frequência e outras métricas.
+Também permite criar rotinas reutilizáveis, organizar programas e visualizar os valores do treino anterior durante a execução.
+
+O que ele resolve:
+"Como registrar e acompanhar minha evolução na musculação?"
+
+O que isso significa para nosso projeto?
+Aqui precisamos ter bastante cuidado.
+Não podemos considerar simplesmente "registro de carga" como nosso diferencial, porque concorrentes como Hevy já fazem isso muito bem.
+
+O diferencial precisa estar na integração:
+TREINO
+ALIMENTAÇÃO
+EVOLUÇÃO
+CONSISTÊNCIA
+SOCIAL
+
+7. Wellhub / Gympass
+Produto: Plataforma de acesso a academias, estúdios e serviços relacionados a bem-estar.
+Principais funcionalidades:
+⦁	Busca de academias e espaços de atividade física
+⦁	Acesso a diferentes academias
+⦁	Serviços de bem-estar
+⦁	Aplicativo para gerenciamento dos benefícios
+⦁	Rede de parceiros
+⦁	Benefício corporativo para colaboradores
+O que ele resolve:
+"Onde posso realizar minha atividade física?"
+
+O que observar para nosso SaaS:
+Não é exatamente um concorrente direto.
+É mais interessante enxergá-lo como:
+Possível parceiro/distribuidor
+
+Por exemplo:
+Wellhub → aquisição de usuários → nosso SaaS → acompanhamento da rotina
+Isso poderia ser explorado posteriormente como estratégia B2B2C.
+
+8. Google Fit / Apple Saúde
+Essas plataformas são diferentes dos demais concorrentes porque funcionam mais como hubs de dados de saúde e atividade.
+Principais funcionalidades:
+⦁	Centralização de dados de saúde
+⦁	Registro de atividades físicas
+⦁	Monitoramento de métricas de saúde
+⦁	Histórico e gráficos
+⦁	Integração com outros aplicativos e dispositivos
+⦁	Acompanhamento de tendências e evolução
+A Apple descreve o Saúde como um local central para organizar dados como atividade, sono e outras informações, além de oferecer gráficos e análise de tendências.
+
+O que ele resolve:
+"Como centralizar meus dados de saúde?"
+
+Oportunidade para nosso SaaS:
+Não necessariamente devemos competir com essas plataformas.
+Podemos utilizá-las como fontes de dados.
+
+Por exemplo:
+Apple Saúde / Google Fit
+↓
+dados de atividade
+↓
+nosso SaaS
+↓
+análise + metas + consistência + evolução
