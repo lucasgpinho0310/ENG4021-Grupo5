@@ -1,0 +1,27 @@
+Slogan e proposta central: "Seu treino, sua dieta, seu ciclo, seu ritmo". Foco na flexibilidade científica e no equilíbrio, sem punir escolhas fora da rotina, recalculando metas para manter a constância de forma leve.
+
+Onboarding e cadastro de perfil: Coleta rápida de altura, peso, biotipo e objetivo atual (ganho de massa, perda ou manutenção de peso), com opção de gerar uma dieta automática ou cadastrar um plano pronto de forma simples.
+
+Ciclo e ajuste contínuo de metas: Notificação de dois em dois meses perguntando se a rotina e os objetivos continuam os mesmos, além de acompanhar o ciclo hormonal/menstrual e a periodização para ajustar expectativas de força, retenção de líquido e fadiga.
+
+Dashboard de saldo energético: Exibição clara e em tempo real de calorias e macronutrientes restantes no dia, somando automaticamente o gasto estimado dos treinos finalizados.
+
+Recomendações inteligentes em abas: Sugestões automáticas na tela inicial divididas em [Lanches], [Refeições] e [Doces], adaptando as porções exatas de acordo com o saldo disponível do usuário.
+
+Busca de alimentos com selo de viabilidade: Indicador visual na pesquisa de itens (verde para o que cabe na meta e vermelho para o que ultrapassa o limite), alertando o impacto calórico antes do consumo.
+
+Refeição personalizada e combos salvos: Possibilidade de agrupar ingredientes recorrentes sob um nome único (como "Café Padrão") para adicionar refeições completas ao diário com apenas 1 toque.
+
+Fixação de recomendação padrão: Opção de pinar doces ou lanches favoritos no topo das sugestões para que apareçam automaticamente sempre que houver saldo calórico liberado.
+
+Registro de treino: Tela otimizada para o uso na academia com botões grandes de carga e repetições, acesso rápido ao histórico da última sessão, cronômetro de descanso e suporte a musculação, corrida e outros esportes.
+
+Controle de hidratação e bebidas alcoólicas: Contador de água diário e campo exclusivo para registro de álcool, que converte a bebida em calorias e exibe alertas pedagógicos sobre o impacto na síntese proteica, hidratação e sono.
+
+Módulo social e grupos de competição: Salas de disputa entre amigos com rankings baseados na taxa de constância da dieta e frequência aos treinos, e não na quantidade de carga.
+
+Check-in fotográfico obrigatório: Sistema de validação da pontuação nos grupos mediante o envio de foto do prato de comida ou do treino realizado.
+
+Diário de sensações: Check-in rápido em 3 toques para avaliar a qualidade do sono, o humor do dia e a percepção de esforço no treino.
+
+Análise cruzada e insights: Relatórios visuais que conectam os dados para mostrar como o consumo de álcool, o sono ruim ou a baixa ingestão de água e nutrientes afetaram o rendimento dos treinos.
