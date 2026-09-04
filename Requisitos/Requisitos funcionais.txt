@@ -1,0 +1,22 @@
+Requisitos funcionais
+Os requisitos funcionais descrevem o que o aplicativo deve fazer.
+1. RF01 — Cadastro de usuário: O sistema deve permitir que o usuário crie uma conta.
+2. RF02 — Login: O sistema deve permitir que o usuário entre em sua conta.
+3. RF03 — Perfil: O sistema deve permitir cadastrar e editar informações pessoais e preferências.
+4. RF04 — Definição de objetivos: O usuário deve poder definir seus objetivos, como melhorar condicionamento, aumentar força ou organizar sua rotina.
+5. RF05 — Cadastro de treino: O sistema deve permitir criar e organizar treinos.
+6. RF06 — Registro de exercícios: O usuário deve poder registrar exercícios, séries, repetições e cargas utilizadas.
+7. RF07 — Histórico de treinos: O sistema deve armazenar e apresentar o histórico dos treinos realizados.
+8. RF08 — Planejamento semanal: O sistema deve permitir organizar os treinos por dia da semana.
+9. RF09 — Registro de alimentação: O usuário deve poder registrar suas refeições.
+10. RF10 — Registro por porções: O sistema deve permitir registrar alimentos utilizando medidas comuns, como colher, concha, unidade, fatia e prato. Isso atende diretamente à necessidade identificada de tornar o registro alimentar mais rápido.
+11. RF11 — Histórico alimentar: O sistema deve armazenar e apresentar as refeições registradas.
+12. RF12 — Integração treino + alimentação: O aplicativo deve apresentar os dados de treino e alimentação de forma integrada.
+13. RF13 — Acompanhamento de evolução: O sistema deve permitir registrar e acompanhar informações como medidas, peso, fotos, cargas, repetições e frequência.
+14. RF14 — Gráficos de evolução: O sistema deve apresentar gráficos para facilitar a visualização do progresso.
+15. RF15 — Metas: O usuário deve poder criar metas relacionadas à sua rotina.
+16. RF16 — Lembretes: O sistema deve enviar lembretes sobre treinos e outras atividades planejadas.
+17. RF17 — Gamificação: O sistema deve oferecer desafios, conquistas ou recompensas para incentivar a consistência.
+18. RF18 — Grupos: O usuário deve poder participar de grupos privados com amigos.
+19. RF19 — Desafios entre usuários: O sistema deve permitir a criação ou participação em desafios coletivos.
+20. RF20 — Recomendações: O sistema deve fornecer recomendações simples de organização de treino e alimentação, sem substituir profissionais especializados.
