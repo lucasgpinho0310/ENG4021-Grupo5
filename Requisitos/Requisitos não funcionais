@@ -1,0 +1,17 @@
+Requisitos não funcionais
+Os requisitos não funcionais descrevem como o aplicativo deve funcionar, considerando qualidade, segurança, desempenho e facilidade de utilização.
+1. RNF01 — Usabilidade: O aplicativo deve possuir uma interface simples e intuitiva.
+2. RNF02 — Facilidade de registro: O registro de um treino ou refeição deve ser rápido, buscando atingir aproximadamente 30 a 60 segundos, conforme a meta definida na pesquisa.
+3. RNF03 — Desempenho: As telas principais devem carregar rapidamente, sem apresentar atrasos significativos.
+4. RNF04 — Compatibilidade: O aplicativo deve funcionar adequadamente em smartphones Android e iOS.
+5. RNF05 — Segurança: Os dados dos usuários devem ser protegidos contra acesso não autorizado.
+6. RNF06 — Privacidade: O sistema deve preservar a privacidade das informações pessoais, alimentares e de evolução dos usuários.
+7. RNF07 — Disponibilidade: O aplicativo deve estar disponível para utilização sempre que o usuário precisar, salvo períodos de manutenção.
+8. RNF08 — Confiabilidade: Os registros de treinos e refeições não devem ser perdidos após serem salvos.
+9. RNF09 — Escalabilidade: O sistema deve ser capaz de suportar o crescimento do número de usuários sem perda significativa de desempenho.
+10. RNF10 — Acessibilidade: A interface deve possuir textos legíveis, botões adequados e navegação simples.
+11. RNF11 — Manutenibilidade: O sistema deve ser desenvolvido de forma organizada, facilitando futuras correções e atualizações.
+12. RNF12 — Backup: Os dados armazenados devem possuir mecanismos de backup e recuperação.
+13. RNF13 — Integração: O aplicativo deve permitir futuramente integração com dispositivos e aplicativos de saúde, como smartwatches.
+14. RNF14 — Personalização: A experiência deve poder ser adaptada aos diferentes perfis de usuários, desde iniciantes até praticantes intermediários.
+15. RNF15 — Baixa complexidade: O aplicativo deve evitar excesso de informações e telas complexas, priorizando uma orientação simples sobre o que fazer, registrar e acompanhar.
