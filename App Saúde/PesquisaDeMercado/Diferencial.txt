@@ -7,3 +7,75 @@ e motivação para manter uma rotina saudável.
 Enquanto os principais concorrentes são mais especializados em uma determinada dimensão — alimentação,
 treino, atividade física, socialização ou personalização — nosso SaaS busca conectar essas dimensões em
 uma única jornada.
+
+
+1. Integração entre treino e alimentação:
+
+Concorrentes como MyFitnessPal e FatSecret possuem forte foco na alimentação, enquanto Hevy/Strong são
+especializadosno acompanhamento de musculação.
+
+Nosso diferencial seria conectar os dois:
+O usuário registra o que treina e o que come e consegue acompanhar sua evolução dentro da mesma plataforma.
+
+
+2. Foco em consistência, e não apenas em desempenho:
+
+Muitos aplicativos enfatizam calorias, cargas, distância, tempo ou performance.
+Nossa proposta é também valorizar a regularidade da rotina.
+
+Por exemplo:
+"Você treinou 4 de 5 dias planejados esta semana."
+
+"Você manteve sua rotina por 3 semanas consecutivas."
+
+Isso permite que a gamificação seja baseada não apenas em quem tem o melhor desempenho, mas em quem consegue manter seus hábitos.
+
+
+3. Registro simplificado e rápido:
+
+Um dos principais problemas identificados na pesquisa é que registrar treino e alimentação pode ser trabalhoso.
+
+Nossa proposta é reduzir essa fricção:
+- registro rápido do treino;
+- histórico das cargas;
+- alimentos em porções do cotidiano;
+- possibilidade de salvar refeições frequentes;
+- menos etapas para registrar informações.
+
+Objetivo: fazer com que registrar a rotina seja tão simples que o usuário consiga incorporá-lo ao dia a dia.
+
+
+4. Alimentação adaptada ao cotidiano brasileiro:
+
+Em vez de depender exclusivamente de buscas detalhadas ou pesagem dos alimentos, o sistema pode trabalhar com porções comuns do cotidiano brasileiro.
+
+Exemplo:
+- 5 colheres de arroz
+- 1 filé de frango
+- 1 concha de feijão
+- 1 pote de iogurte
+
+Isso torna o registro mais próximo da maneira como as pessoas realmente descrevem suas refeições.
+
+
+5. Transformação dos registros em evolução:
+
+Não queremos que o aplicativo seja apenas um lugar onde o usuário "anota coisas".
+
+A ideia é transformar os dados registrados em informações visuais e úteis:
+- Registro → histórico → análise → evolução
+
+O usuário poderia acompanhar, por exemplo, sua frequência de treino, evolução de cargas, hábitos alimentares e consistência ao longo do tempo.
+
+
+6. Gamificação integrada à rotina
+
+O componente social seria aplicado não apenas à atividade física, mas à consistência da rotina como um todo.
+
+Por exemplo:
+- Ranking de consistência entre amigos
+- Metas semanais
+- Desafios
+- Conquistas
+
+Assim, a experiência social do Strava seria adaptada para uma proposta mais ampla de treino + alimentação + hábitos.
