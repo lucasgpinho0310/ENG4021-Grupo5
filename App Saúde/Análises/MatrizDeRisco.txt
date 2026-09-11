@@ -1,0 +1,58 @@
+MATRIZ DE RISCO
+
+Legenda dos riscos:
+
+R1 — Baixa adesão dos usuários
+R2 — Registro de alimentação continuar sendo trabalhoso
+R3 — Concorrentes lançarem soluções semelhantes
+R4 — Problemas de privacidade e segurança dos dados
+R5 — Recomendações inadequadas ou mal interpretadas
+R6 — Falhas técnicas ou perda de dados
+R7 — Dificuldade para construir e manter um banco de alimentos confiável
+R8 — Baixa diferenciação percebida pelo usuário
+
+🔴 RISCO CRÍTICO
+
+R1 — Baixa adesão dos usuários
+Probabilidade: Alta
+Impacto: Alto
+➡️ Risco Crítico
+
+R4 — Problemas de privacidade e segurança dos dados
+Probabilidade: Média
+Impacto: Muito Alto
+➡️ Risco Crítico
+
+🟠 RISCO ALTO
+
+R2 — Registro de alimentação continuar sendo trabalhoso
+Probabilidade: Média
+Impacto: Alto
+➡️ Risco Alto
+
+R3 — Concorrentes lançarem soluções semelhantes
+Probabilidade: Média
+Impacto: Alto
+➡️ Risco Alto
+
+R5 — Recomendações inadequadas ou mal interpretadas
+Probabilidade: Média
+Impacto: Alto
+➡️ Risco Alto
+
+R8 — Baixa diferenciação percebida pelo usuário
+Probabilidade: Média
+Impacto: Alto
+➡️ Risco Alto
+
+🟡 RISCO MODERADO
+
+R7 — Dificuldade para construir e manter um banco de alimentos confiável
+Probabilidade: Média
+Impacto: Moderado
+➡️ Risco Moderado
+
+R6 — Falhas técnicas ou perda de dados
+Probabilidade: Baixa
+Impacto: Alto
+➡️ Risco Moderado

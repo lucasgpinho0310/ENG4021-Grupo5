@@ -1,0 +1,168 @@
+Análise detalhada de produtos similares
+
+
+1. MyFitnessPal
+Produto: Aplicativo de acompanhamento alimentar e controle nutricional.
+
+O que ele resolve?
+O principal problema abordado pelo MyFitnessPal é o acompanhamento do consumo alimentar, permitindo que o usuário registre suas refeições e compreenda melhor calorias e nutrientes consumidos.
+
+Pontos fortes:
+⦁	Amplo banco de alimentos;
+⦁	Forte estrutura de acompanhamento nutricional;
+⦁	Histórico alimentar;
+⦁	Definição de metas;
+⦁	Integração com outros serviços e dispositivos.
+
+Oportunidades para nosso projeto:
+O foco do produto está fortemente concentrado no acompanhamento alimentar. Para nosso SaaS, existe uma oportunidade de simplificar o registro da alimentação e aproximá-lo da rotina de treino.
+A proposta seria conectar:
+alimentação → treino → objetivo → evolução
+
+2. FatSecret
+Produto: Plataforma de acompanhamento alimentar e nutricional.
+
+O que ele resolve?
+"O que eu estou comendo e quanto isso representa nutricionalmente?"
+O usuário consegue registrar refeições e acompanhar calorias e nutrientes.
+
+Pontos fortes:
+⦁	Diário alimentar;
+⦁	Banco de alimentos;
+⦁	Informações nutricionais;
+⦁	Histórico;
+⦁	Acompanhamento de metas.
+
+Oportunidades para nosso projeto:
+Assim como o MyFitnessPal, o FatSecret é uma referência principalmente para o módulo de alimentação.
+Nossa oportunidade seria transformar o registro alimentar em parte de uma jornada mais ampla:
+alimentação → treino → consistência → evolução.
+
+3. Strava
+Produto: Plataforma social de atividade física.
+
+O que ele resolve?
+"Como tornar a atividade física mais social e motivadora?"
+O aplicativo utiliza recursos como desafios, clubes, rankings e interações entre usuários.
+
+Pontos fortes:
+⦁	Forte componente social;
+⦁	Desafios;
+⦁	Rankings;
+⦁	Comunidades;
+⦁	Feed de atividades;
+⦁	Comparação de desempenho.
+
+Oportunidades para nosso projeto:
+O Strava é uma referência importante para nosso módulo social e de gamificação.
+Existe uma oportunidade de adaptar essa lógica para:
+- musculação;
+- alimentação;
+- consistência;
+- metas semanais.
+
+4. Nike Training Club
+Produto: Plataforma de treinos e conteúdo fitness.
+
+O que ele resolve?
+"O que eu devo fazer no meu treino?"
+O produto oferece treinos guiados, programas e conteúdos para diferentes objetivos.
+
+Pontos fortes:
+⦁	Grande biblioteca de treinos;
+⦁	Treinos guiados;
+⦁	Programas estruturados;
+⦁	Diversidade de objetivos;
+⦁	Planejamento de treinamento.
+
+Oportunidades para nosso projeto:
+O foco está principalmente em orientar o usuário sobre o que fazer.
+Para nosso SaaS, podemos ampliar essa jornada:
+treino → registro → histórico → progressão → evolução.
+
+5. Freeletics
+Produto: Plataforma de treinamento personalizado e treinos guiados.
+
+O que ele resolve?
+"Como posso treinar sem precisar montar meu próprio treino?"
+O sistema utiliza informações do usuário para personalizar sua experiência.
+
+Pontos fortes:
+⦁	Personalização;
+⦁	Planos de treinamento;
+⦁	Treinos guiados;
+⦁	Adaptação ao desempenho;
+⦁	Consideração de objetivos, disponibilidade e equipamentos.
+
+Oportunidades para nosso projeto:
+O Freeletics é uma referência importante para a personalização dos treinos.
+Nosso diferencial seria utilizar informações como:
+- nível;
+- objetivo;
+- frequência disponível;
+- equipamentos;
+- histórico;
+- desempenho recente.
+
+6. Strong / Hevy
+Produto: Aplicativos de registro e acompanhamento de musculação.
+
+O que ele resolve?
+"Como registrar e acompanhar minha evolução na musculação?"
+O usuário consegue registrar cargas, séries e repetições e consultar seu histórico.
+
+Pontos fortes:
+⦁	Registro detalhado dos treinos;
+⦁	Histórico de exercícios;
+⦁	Rotinas e programas;
+⦁	Acompanhamento de recordes pessoais;
+⦁	Gráficos de desempenho;
+⦁	Recursos específicos para musculação.
+
+Oportunidades para nosso projeto:
+Este é um dos concorrentes mais próximos da nossa proposta no módulo de treino.
+Por isso, não devemos considerar simplesmente "registro de cargas" como nosso diferencial, pois soluções como Hevy já fazem isso muito bem.
+Nossa oportunidade está na integração entre diferentes dimensões da rotina saudável:
+
+Treino + Alimentacão  + Evolução + Consistência + Social
+
+7. Wellhub / Gympass
+Produto: Plataforma de acesso a academias, estúdios e serviços de bem-estar.
+
+O que ele resolve?
+"Onde posso realizar minha atividade física?"
+O usuário pode encontrar e acessar diferentes estabelecimentos e serviços por meio da plataforma.
+
+Pontos fortes:
+⦁	Grande rede de parceiros;
+⦁	Diversidade de academias e serviços;
+⦁	Facilidade de acesso;
+⦁	Integração com benefícios corporativos.
+⦁	Relação com nosso projeto
+
+O Wellhub não é exatamente um concorrente direto do nosso SaaS.
+Ele pode ser analisado como uma possível oportunidade de parceria e distribuição:
+
+Wellhub → aquisição de usuários → nosso SaaS → acompanhamento da rotina
+Isso poderia formar uma estratégia B2B2C.
+
+8. Google Fit / Apple Saúde
+Produto: Plataformas de centralização de dados de saúde e atividade.
+
+O que elas resolvem?
+"Como centralizar meus dados de saúde?"
+Essas plataformas reúnem informações provenientes de diferentes aplicativos e dispositivos.
+
+Pontos fortes:
+⦁	Centralização de dados;
+⦁	Histórico;
+⦁	Gráficos;
+⦁	Integração com dispositivos;
+⦁	Integração com outros aplicativos;
+⦁	Acompanhamento de tendências.
+
+Também não são concorrentes diretos.
+Podem ser vistas principalmente como fontes de dados e possíveis plataformas de integração.
+A lógica poderia ser:
+
+Apple Saúde / Google Fit →  dados de atividade → nosso SaaS → análise + metas + consistência + evolução.

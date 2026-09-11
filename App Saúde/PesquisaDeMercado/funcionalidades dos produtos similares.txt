@@ -1,0 +1,97 @@
+Mapeamento das principais funcionalidades dos produtos similares
+
+
+1. MyFitnessPal
+Produto: Aplicativo de acompanhamento alimentar e controle nutricional.
+
+Principais funcionalidades:
+⦁	Registro de refeições e alimentos;
+⦁	Banco de alimentos;
+⦁	Controle de calorias;
+⦁	Acompanhamento de macronutrientes;
+⦁	Definição de metas nutricionais;
+⦁	Histórico alimentar.
+
+
+2. FatSecret
+Produto: Plataforma de acompanhamento alimentar e nutricional.
+
+Principais funcionalidades:
+⦁	Diário alimentar;
+⦁	Registro de refeições;
+⦁	Banco de alimentos;
+⦁	Informações nutricionais;
+⦁	Controle de calorias;
+⦁	Acompanhamento de nutrientes.
+
+
+3. Strava
+Produto: Plataforma social de atividade física.
+
+Principais funcionalidades:
+⦁	Registro de atividades físicas;
+⦁	Histórico e acompanhamento de desempenho;
+⦁	Desafios individuais e em grupo;
+⦁	Clubes e comunidades;
+⦁	Rankings e comparação de desempenho;
+⦁	Feed social, curtidas e comentários.
+
+
+4. Nike Training Club
+Produto: Plataforma de treinos e conteúdo fitness.
+
+Principais funcionalidades:
+⦁	Biblioteca de treinos;
+⦁	Treinos guiados;
+⦁	Programas de treinamento;
+⦁	Treinos para diferentes objetivos;
+⦁	Planejamento de treinos;
+⦁	Acompanhamento da evolução.
+
+
+5. Freeletics
+Produto: Plataforma de treinamento personalizado e treinos guiados.
+
+Principais funcionalidades:
+⦁	Planos de treino personalizados;
+⦁	Treinos guiados;
+⦁	Biblioteca de exercícios;
+⦁	Adaptação dos treinos ao desempenho;
+⦁	Definição de objetivos;
+⦁	Personalização por equipamentos e disponibilidade.
+
+
+6. Strong / Hevy
+Produto: Aplicativos de registro e acompanhamento de musculação.
+
+Principais funcionalidades:
+⦁	Registro de séries, repetições e cargas;
+⦁	Histórico dos exercícios;
+⦁	Rotinas e programas de treino;
+⦁	Registro de recordes pessoais e evolução;
+⦁	Gráficos de volume e desempenho;
+⦁	Timer de descanso.
+
+
+7. Wellhub / Gympass
+Produto: Plataforma de acesso a academias, estúdios e serviços relacionados a bem-estar.
+
+Principais funcionalidades:
+⦁	Busca de academias e espaços de atividade física;
+⦁	Acesso a diferentes academias;
+⦁	Serviços de bem-estar;
+⦁	Gerenciamento de benefícios;
+⦁	Rede de parceiros;
+⦁	Benefícios corporativos.
+
+
+8. Google Fit / Apple Saúde
+Produto: Plataformas de centralização de dados de saúde e atividade física.
+
+Principais funcionalidades:
+⦁	Centralização de dados de saúde;
+⦁	Registro de atividades físicas;
+⦁	Monitoramento de métricas de saúde;
+⦁	Histórico e gráficos;
+⦁	Integração com aplicativos e dispositivos;
+⦁	Acompanhamento de tendências e evolução.
