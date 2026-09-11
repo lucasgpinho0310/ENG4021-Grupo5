@@ -1,0 +1,90 @@
+Implementações melhores que as dos concorrentes
+
+1. Registro de alimentação — mais rápido e simples
+
+Nossa implementação:
+⦁	Catálogo com alimentos e porções do cotidiano brasileiro;
+⦁	Registro por porções, sem exigir que o usuário pense sempre em gramas;
+⦁	Reutilização de refeições frequentes;
+⦁	Possibilidade de salvar refeições como "Café da manhã padrão";
+⦁	Redução da quantidade de etapas necessárias para registrar uma refeição.
+Melhoria proposta:
+- Transformar o registro alimentar em uma tarefa rápida, baseada na forma como as pessoas realmente descrevem suas refeições.
+
+
+2. Registro de treino — mais integrado ao histórico
+
+Nossa implementação:
+Durante o treino, o sistema pode mostrar automaticamente:
+⦁	carga utilizada anteriormente;
+⦁	número de repetições anteriores;
+⦁	histórico do exercício;
+⦁	evolução recente;
+⦁	informações relevantes para o próximo registro.
+Além disso, o histórico do treino seria conectado à evolução geral do usuário.
+
+Melhoria proposta:
+- Não apenas registrar o treino, mas utilizar o histórico para tornar o próximo treino mais informativo e facilitar o acompanhamento da evolução.
+
+
+3. Gamificação — foco em consistência
+
+Nossa implementação:
+Criar uma gamificação voltada para a consistência da rotina, utilizando:
+⦁	metas semanais;
+⦁	desafios entre amigos;
+⦁	sequência de hábitos;
+⦁	conquistas;
+⦁	ranking de consistência.
+Melhoria proposta:
+- Utilizar a competição social para incentivar a regularidade, e não apenas o desempenho físico.
+
+
+
+4. Personalização — mais conectada aos dados do usuário
+
+Nossa implementação:
+A personalização poderia considerar conjuntamente:
+⦁	objetivo;
+⦁	nível;
+⦁	frequência disponível;
+⦁	equipamentos;
+⦁	histórico de treinos;
+⦁	desempenho recente;
+⦁	consistência;
+⦁	informações registradas sobre alimentação.
+Assim, o sistema poderia ajustar a experiência de acordo com o comportamento do usuário.
+
+Melhoria proposta:
+- Fazer a personalização considerar a jornada completa do usuário, e não apenas as características necessárias para montar um treino.
+
+
+
+5. Evolução — visão mais completa
+
+Nossa implementação:
+Criar uma área de evolução que reúna, em um mesmo lugar:
+⦁	frequência de treinos;
+⦁	evolução de cargas e repetições;
+⦁	histórico alimentar;
+⦁	cumprimento de metas;
+⦁	consistência;
+⦁	gráficos de evolução.
+
+Melhoria proposta:
+- Transformar dados isolados em uma visão integrada da evolução do usuário.
+
+
+6. Integração entre funcionalidades
+
+Hoje, o usuário pode precisar utilizar:
+⦁	MyFitnessPal → alimentação
+⦁	Hevy → musculação
+⦁	Strava → atividade/social
+⦁	Apple Saúde → dados de saúde
+Nossa proposta de melhoria é diminuir essa fragmentação:
+
+Treino →  Alimentação →  Evolução →  Consistência → Gamificação
+
+Tudo dentro da mesma experiência.
+Em vez de oferecer funcionalidades isoladas, conectar os dados gerados por cada uma delas para que uma funcionalidade alimente a outra.
