@@ -1,0 +1,189 @@
+/* ==========================================================================
+   BioForm Health OS — estilo das telas de usuários (edição e listagem)
+   Usa os mesmos tokens da apresentação (módulos 01 a 08).
+   ========================================================================== */
+
+:root {
+  --stage: #09090B;
+  --app-bg: #111113;
+  --surface: #1A1A1D;
+  --surface-2: #232327;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #8A8A93;
+
+  --flame: #FF5722;
+  --flame-soft: rgba(255, 87, 34, 0.12);
+  --flame-line: rgba(255, 87, 34, 0.55);
+  --green: #10B981;
+  --green-soft: rgba(16, 185, 129, 0.12);
+  --danger: #F87171;
+  --danger-soft: rgba(248, 113, 113, 0.10);
+  --danger-line: rgba(248, 113, 113, 0.45);
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { color-scheme: dark; }
+
+body {
+  background: var(--stage);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+:focus-visible { outline: 2px solid var(--flame); outline-offset: 2px; }
+
+/* ---------- Estrutura da página ---------- */
+.page { width: 100%; max-width: 720px; margin: 0 auto; padding: 24px 20px 120px; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--text-2); text-decoration: none;
+  padding: 6px 10px 6px 6px; margin-left: -6px; border-radius: 10px;
+}
+.back-link:hover { color: var(--text); background: var(--surface); }
+.back-link svg { width: 16px; height: 16px; }
+
+.page-head { margin: 16px 0 24px; }
+.page-title { font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+.page-sub { margin-top: 6px; color: var(--text-2); }
+
+/* ---------- Resumo do usuário ---------- */
+.user-summary {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; margin-bottom: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+}
+.avatar {
+  width: 56px; height: 56px; flex-shrink: 0; border-radius: 99px;
+  background: var(--flame); color: #fff;
+  display: grid; place-items: center; font-size: 18px; font-weight: 700;
+}
+.user-summary .name { font-size: 16px; font-weight: 600; }
+.user-summary .meta { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.badge {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+  background: var(--green-soft); color: var(--green);
+}
+
+/* ---------- Seções ---------- */
+.section {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px; margin-bottom: 16px; border-width: 1px;
+}
+.section > legend, .section-title { font-size: 15px; font-weight: 600; padding: 0; }
+.section-hint { margin-top: 4px; font-size: 12px; color: var(--text-2); }
+fieldset.section { min-width: 0; }
+fieldset.section > legend { float: left; width: 100%; }
+fieldset.section > legend + * { clear: both; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.grid .full { grid-column: 1 / -1; }
+
+/* ---------- Campos ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field > label, .field > .label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+
+.input, .select {
+  width: 100%; height: 44px; padding: 0 12px;
+  background: var(--app-bg); color: var(--text);
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  font: inherit; font-size: 14px; font-variant-numeric: tabular-nums;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input::placeholder { color: var(--text-3); }
+.input:hover, .select:hover { border-color: rgba(255, 255, 255, .28); }
+.input:focus, .select:focus {
+  outline: none; border-color: var(--flame); box-shadow: 0 0 0 3px var(--flame-soft);
+}
+.input[readonly] { background: var(--surface-2); color: var(--text-2); border-color: var(--line); cursor: not-allowed; }
+.select {
+  appearance: none; padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A8A93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+
+.input-unit { position: relative; }
+.input-unit .input { padding-right: 44px; }
+.input-unit span {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; font-weight: 500; color: var(--text-3); pointer-events: none;
+}
+
+.help { font-size: 11px; color: var(--text-3); }
+.field-error .input { border-color: var(--danger); }
+.field-error .help { color: var(--danger); }
+
+/* ---------- Opções em segmento (radios nativos estilizados) ---------- */
+.segmented { display: flex; gap: 4px; }
+.segmented label { flex: 1; min-width: 0; cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented span {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 46px; padding: 6px 4px; text-align: center; line-height: 1.2;
+  background: var(--surface-2); border: 1px solid transparent; border-radius: 10px;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  transition: background .15s, border-color .15s;
+}
+.segmented small { font-size: 10px; font-weight: 400; color: var(--text-3); margin-top: 2px; }
+.segmented label:hover span { color: var(--text); }
+.segmented input:checked + span {
+  background: var(--flame-soft); border-color: var(--flame-line); color: var(--text); font-weight: 600;
+}
+.segmented input:checked + span small { color: var(--flame); }
+.segmented input:focus-visible + span { outline: 2px solid var(--flame); outline-offset: 2px; }
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 46px; padding: 0 20px; border-radius: 14px; border: 1px solid transparent;
+  font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btn svg { width: 16px; height: 16px; }
+.btn-primary { background: var(--flame); color: #fff; }
+.btn-primary:hover { background: #ff6a3d; }
+.btn-secondary { background: var(--surface); border-color: var(--line-strong); color: var(--text); }
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-danger { background: transparent; border-color: var(--danger-line); color: var(--danger); }
+.btn-danger:hover { background: var(--danger-soft); }
+
+/* ---------- Zona de perigo ---------- */
+.section.danger { border-color: var(--danger-line); background: var(--danger-soft); }
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.danger-row p { font-size: 12px; color: var(--text-2); margin-top: 4px; max-width: 46ch; }
+
+/* ---------- Barra de ações fixa ---------- */
+.action-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: rgba(17, 17, 19, .92); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.action-bar-inner { max-width: 720px; margin: 0 auto; display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ---------- Telas pequenas ---------- */
+@media (max-width: 560px) {
+  .page { padding: 16px 16px 120px; }
+  .page-title { font-size: 22px; }
+  .grid { grid-template-columns: 1fr; }
+  .section { padding: 16px; }
+  .danger-row { flex-direction: column; align-items: stretch; }
+  .action-bar-inner .btn { flex: 1; }
+  .segmented span { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
