@@ -1,0 +1,21 @@
+{% extends "bem_estar/base.html" %}
+{% block titulo %}Histórico{% endblock %}
+{% block conteudo %}
+  <h1>Histórico de bem-estar</h1>
+  <p class="muted">Seus últimos registros.</p>
+
+  {% for d in diarios %}
+    <article class="card">
+      <h2><a href="{% url 'bem_estar:registro' %}?data={{ d.data_referencia|date:'Y-m-d' }}">{{ d.data_referencia|date:"d/m/Y" }}</a></h2>
+      <p>
+        {% if d.humor %}<span class="tag">Humor: {{ d.get_humor_display }}</span>{% endif %}
+        {% if d.horas_sono is not None %}<span class="tag">Sono: {{ d.horas_sono }} h</span>{% endif %}
+        {% if d.qualidade_sono %}<span class="tag">Qualidade do sono: {{ d.qualidade_sono }}/5</span>{% endif %}
+      </p>
+      {% for dor in d.dores.all %}<span class="tag">{{ dor }}</span>{% endfor %}
+      {% if d.observacao %}<p class="muted">{{ d.observacao }}</p>{% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">Nenhum registro ainda. <a href="{% url 'bem_estar:registro' %}">Registrar hoje</a>.</p>
+  {% endfor %}
+{% endblock %}

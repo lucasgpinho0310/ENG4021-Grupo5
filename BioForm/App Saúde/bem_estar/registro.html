@@ -1,0 +1,31 @@
+{% extends "bem_estar/base.html" %}
+{% block titulo %}Registro do dia{% endblock %}
+{% block conteudo %}
+  <h1>Como você está?</h1>
+  <p class="muted">
+    <a href="?data={{ anterior|date:'Y-m-d' }}">&larr; Dia anterior</a>
+    &nbsp;·&nbsp; <strong>{{ dia|date:"d/m/Y" }}</strong>
+    {% if proximo %}&nbsp;·&nbsp; <a href="?data={{ proximo|date:'Y-m-d' }}">Próximo dia &rarr;</a>{% endif %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <section class="card">
+      <h2>Humor e sono</h2>
+      {{ form.non_field_errors }}
+      {{ form.as_p }}
+    </section>
+
+    <section class="card">
+      <h2>Dores</h2>
+      <p class="muted">Intensidade de 0 (sem dor) a 10. Para apagar uma dor já salva, marque a caixa de remoção ao lado dela. Uma dor por região.</p>
+      {{ formset.management_form }}
+      {{ formset.non_form_errors }}
+      {% for f in formset %}
+        <div class="dor">{{ f.as_p }}</div>
+      {% endfor %}
+    </section>
+
+    <button type="submit">Salvar</button>
+  </form>
+{% endblock %}

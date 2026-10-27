@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}Bem-estar{% endblock %} | BioForm Health OS</title>
+  <style>
+    :root { --bg:#0d0d10; --card:#1a1a1e; --line:#2c2c32; --text:#f4f4f5; --muted:#a1a1aa; --flame:#ff5722; --danger:#f87171; --ok:#34d399; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height:1.5; }
+    nav { padding:16px 24px; border-bottom:1px solid var(--line); display:flex; gap:20px; align-items:center; }
+    nav strong { color:var(--flame); }
+    a { color:var(--flame); text-decoration:none; }
+    main { max-width:720px; margin:0 auto; padding:32px 20px 64px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:0 0 12px; font-size:17px; }
+    .muted { color:var(--muted); font-size:14px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin:16px 0; }
+    p { margin:0 0 12px; }
+    label { display:block; font-size:14px; color:var(--muted); margin-bottom:4px; }
+    input, select, textarea { width:100%; padding:10px 12px; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:10px; font:inherit; }
+    input[type=checkbox] { width:auto; }
+    button, .btn { display:inline-block; padding:12px 22px; background:var(--flame); color:#fff; border:0; border-radius:10px; font:inherit; font-weight:700; cursor:pointer; }
+    .errorlist { list-style:none; margin:0 0 6px; padding:0; color:var(--danger); font-size:14px; }
+    .msg { padding:12px 16px; border-radius:10px; border:1px solid var(--ok); color:var(--ok); margin-bottom:16px; }
+    .dor { border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
+    .dor:first-of-type { border-top:0; padding-top:0; margin-top:0; }
+    .tag { display:inline-block; padding:2px 10px; border-radius:999px; background:var(--bg); border:1px solid var(--line); font-size:13px; margin:2px 4px 2px 0; }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>BioForm</strong>
+    <a href="{% url 'bem_estar:registro' %}">Registrar hoje</a>
+    <a href="{% url 'bem_estar:historico' %}">Histórico</a>
+  </nav>
+  <main>
+    {% if messages %}{% for m in messages %}<div class="msg">{{ m }}</div>{% endfor %}{% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>
