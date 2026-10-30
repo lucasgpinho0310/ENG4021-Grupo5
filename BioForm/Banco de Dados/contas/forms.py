@@ -14,6 +14,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.text import slugify
 
+from rotina import campos as campos_rotina
 from saude.models import INTENSIDADES, OBJETIVOS, Esporte, Usuario
 from .templatetags.bioform import celular_formatado
 
@@ -298,7 +299,8 @@ FREQUENCIAS = [(str(n), '%dx' % n) for n in range(1, 7)] + [('7', 'Diário')]
 class EsportesForm(forms.Form):
     """
     Passo 3: um grupo de campos por esporte do catálogo:
-    pratica_<slug> (marcou?), freq_<slug> (vezes por semana) e int_<slug> (intensidade).
+    pratica_<slug> (marcou?), freq_<slug> (vezes por semana) e int_<slug> (intensidade),
+    mais a duração e os dias fixos (dur_<slug>, fixos_<slug>, dias_<slug>, em rotina/campos.py).
     """
 
     def __init__(self, *args, usuario=None, **kwargs):
@@ -319,6 +321,7 @@ class EsportesForm(forms.Form):
                 choices=INTENSIDADES.items(), required=False,
                 initial=atual.intensidade if atual else 'moderada',
             )
+            campos_rotina.adicionar_campos(self, slug, atual)
             emoji, nome = APARENCIA_ESPORTES.get(slug, ('🏅', esporte.nome))
             self.esportes.append({'esporte': esporte, 'slug': slug, 'emoji': emoji, 'nome': nome})
 
@@ -328,12 +331,21 @@ class EsportesForm(forms.Form):
             slug = item['slug']
             if dados.get('pratica_' + slug) and not (dados.get('freq_' + slug) and dados.get('int_' + slug)):
                 raise forms.ValidationError('Escolha a frequência e a intensidade de %s.' % item['nome'])
+            if dados.get('pratica_' + slug):
+                erro = campos_rotina.validar(dados, slug, item['nome'])
+                if erro:
+                    raise forms.ValidationError(erro)
         return dados
 
     def escolhidos(self):
-        """Lista de (esporte, vezes por semana, intensidade) dos esportes marcados."""
+        """Lista de (esporte, vezes por semana, intensidade, minutos, dias fixos) dos esportes marcados."""
         return [
-            (item['esporte'], int(self.cleaned_data['freq_' + item['slug']]), self.cleaned_data['int_' + item['slug']])
+            (
+                item['esporte'],
+                int(self.cleaned_data['freq_' + item['slug']]),
+                self.cleaned_data['int_' + item['slug']],
+                *campos_rotina.valores(self.cleaned_data, item['slug']),
+            )
             for item in self.esportes
             if self.cleaned_data.get('pratica_' + item['slug'])
         ]
@@ -350,4 +362,5 @@ class EsportesForm(forms.Form):
                 'int_nome': self['int_' + slug].html_name,
                 'int_valor': self['int_' + slug].value(),
                 'pratica_nome': self['pratica_' + slug].html_name,
+                **campos_rotina.contexto(self, slug),
             }

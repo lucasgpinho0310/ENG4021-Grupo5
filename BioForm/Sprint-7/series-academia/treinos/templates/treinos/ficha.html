@@ -1,0 +1,80 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform treinos_tags %}
+{% block titulo %}{{ ficha.nome_ficha }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos_lista' %}">← Séries</a></p>
+    <div class="treinos-topo">
+      <div>
+        <h1>{{ ficha.nome_ficha }} {% if ficha.ativa %}<span class="tag tag-green">Ativa</span>{% else %}<span class="tag tag-neutra">Inativa</span>{% endif %}</h1>
+        <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</p>
+      </div>
+      <div class="ficha-acoes">
+        <a href="{% url 'treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
+        <form method="post" action="{% url 'treinos_alternar_ativa' ficha.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-mini">{% if ficha.ativa %}Inativar{% else %}Ativar{% endif %}</button>
+        </form>
+      </div>
+    </div>
+
+    {% if not exercicios %}
+    <section class="block">
+      <h2 class="block-title">Série vazia</h2>
+      <p class="block-sub">Adicione os exercícios um por um ou cole o texto da sua ficha.</p>
+    </section>
+    {% endif %}
+
+    <ol class="exercicios">
+      {% for bloco in blocos %}
+      <li class="bloco{% if bloco.combinado %} bloco-combinado{% endif %}">
+        {% if bloco.combinado %}<p class="bloco-titulo">Exercícios combinados · alterne {% for e in bloco.exercicios %}{{ e.letra }}{% if not forloop.last %} e {% endif %}{% endfor %}</p>{% endif %}
+        {% for e in bloco.exercicios %}
+        <article class="exercicio" id="ex-{{ e.id }}">
+          {% if e.imagem %}
+          <a href="{{ e.imagem.url }}" target="_blank" rel="noopener" class="exercicio-img"><img src="{{ e.imagem.url }}" alt="{{ e.nome_exercicio }}" loading="lazy"></a>
+          {% endif %}
+          <div class="exercicio-info">
+            <h2>{% if e.letra %}<span class="letra">{{ e.letra }}</span>{% else %}<span class="ordem">{{ e.ordem_execucao }}</span>{% endif %} {{ e.nome_exercicio }}</h2>
+            <p class="exercicio-dados">
+              <span><small>Séries</small>{{ e|series_de }}</span>
+              <span><small>Carga</small>{{ e.carga_kg|carga }}</span>
+              {% if e.intervalo_segundos %}<span><small>Intervalo</small>{{ e.intervalo_segundos|intervalo }}</span>{% endif %}
+            </p>
+            {% if e.instrucoes %}<p class="instrucao">{{ e.instrucoes|linebreaksbr }}</p>{% endif %}
+            {% if e.video_url %}
+              {% with embed=e.video_url|video_embed %}
+              {% if embed %}
+              <details class="video">
+                <summary>▶ Ver vídeo</summary>
+                <iframe src="{{ embed }}" title="Vídeo: {{ e.nome_exercicio }}" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>
+              </details>
+              {% else %}
+              <p><a href="{{ e.video_url }}" target="_blank" rel="noopener noreferrer" class="video-link">▶ Ver vídeo</a></p>
+              {% endif %}
+              {% endwith %}
+            {% endif %}
+          </div>
+          <div class="exercicio-acoes">
+            <form method="post" action="{% url 'treinos_mover_exercicio' e.id %}">
+              {% csrf_token %}
+              <button type="submit" name="direcao" value="cima" class="btn-icone" title="Subir" aria-label="Subir {{ e.nome_exercicio }}"{% if forloop.parentloop.first and forloop.first %} disabled{% endif %}>↑</button>
+              <button type="submit" name="direcao" value="baixo" class="btn-icone" title="Descer" aria-label="Descer {{ e.nome_exercicio }}"{% if forloop.parentloop.last and forloop.last %} disabled{% endif %}>↓</button>
+            </form>
+            <a href="{% url 'treinos_editar_exercicio' e.id %}" class="btn-icone" title="Editar" aria-label="Editar {{ e.nome_exercicio }}">✎</a>
+            <form method="post" action="{% url 'treinos_excluir_exercicio' e.id %}" onsubmit="return confirm('Remover {{ e.nome_exercicio|escapejs }} da série?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-icone perigo" title="Remover" aria-label="Remover {{ e.nome_exercicio }}">×</button>
+            </form>
+          </div>
+        </article>
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ol>
+
+    <div class="actions">
+      <a href="{% url 'treinos_colar' ficha.id %}" class="btn btn-ghost">Colar exercícios</a>
+      <a href="{% url 'treinos_novo_exercicio' ficha.id %}" class="btn btn-primary">+ Adicionar exercício</a>
+    </div>
+{% endblock %}

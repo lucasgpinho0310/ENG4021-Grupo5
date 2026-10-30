@@ -10,6 +10,8 @@
       {% else %}
         <nav class="top-nav" aria-label="Menu">
           {% url 'diario_hoje' as url_diario %}{% if url_diario %}<a href="{{ url_diario }}"{% if secao == 'diario' %} class="ativo"{% endif %}>Diário</a>{% endif %}
+          {% url 'treinos_lista' as url_treinos %}{% if url_treinos %}<a href="{{ url_treinos }}"{% if secao == 'treinos' %} class="ativo"{% endif %}>Treinos</a>{% endif %}
+          {% url 'rotina_semana' as url_semana %}{% if url_semana %}<a href="{{ url_semana }}"{% if secao == 'rotina' %} class="ativo"{% endif %}>Semana</a>{% endif %}
           <a href="{% url 'perfil_metas' %}"{% if passo == 4 %} class="ativo"{% endif %}>Metas</a>
           <a href="{% url 'conta' %}">Editar perfil</a>
           {% if user.is_staff %}<a href="{% url 'usuarios' %}">Usuários</a>{% endif %}
@@ -24,6 +26,7 @@
 
   <main class="onb-main">
     {% include 'contas/_mensagens.html' %}
+    {% if rotina_a_confirmar is not None %}{% include 'rotina/_confirmar_rotina.html' %}{% endif %}
     {% block conteudo %}{% endblock %}
   </main>
 {% endblock %}

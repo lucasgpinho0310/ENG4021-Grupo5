@@ -1,5 +1,7 @@
 from django import template
 
+from saude.models import nomes_curtos_dos_dias
+
 register = template.Library()
 
 
@@ -66,3 +68,9 @@ def celular_formatado(celular):
     if len(celular) == 10:
         return '(%s) %s-%s' % (celular[:2], celular[2:6], celular[6:])
     return celular
+
+
+@register.filter
+def dias_curtos(dias):
+    """'seg,qua' -> 'Seg, Qua'."""
+    return nomes_curtos_dos_dias(dias)

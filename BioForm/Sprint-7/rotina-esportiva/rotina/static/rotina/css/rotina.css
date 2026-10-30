@@ -1,0 +1,77 @@
+/* Rotina esportiva: dias fixos no passo 3 do perfil e a página "Minha semana" */
+
+/* Passo 3: os dias só aparecem depois de responder "Sim" */
+.dias-fixos { display: none; }
+.cfg-hint { font-size: 13px; color: var(--text-3); margin: 4px 0 10px; }
+
+/* Números da semana */
+.semana-numeros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.semana-numeros > div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.semana-numeros small { display: block; font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+.semana-numeros strong { font-size: 22px; font-weight: 800; }
+.semana-numeros strong span { font-size: 13px; font-weight: 600; color: var(--text-2); }
+
+/* Dias fixos */
+.semana-dias {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.semana-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 92px;
+  padding: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.semana-dia b { font-size: 13px; }
+.semana-dia em { font-style: normal; font-size: 11px; color: var(--flame); margin-left: 2px; }
+.semana-dia.hoje { border-color: var(--flame-line); }
+.semana-dia .tag { font-size: 12px; white-space: normal; }
+.semana-sem { color: var(--text-3); }
+.semana-livres { margin: 16px 0 0; font-size: 14px; color: var(--text-2); }
+.semana-livres b { color: var(--text); }
+.semana-livres small { display: block; color: var(--text-3); margin-top: 4px; }
+
+@media (max-width: 720px) {
+  .semana-numeros { grid-template-columns: repeat(2, 1fr); }
+  .semana-dias { grid-template-columns: repeat(2, 1fr); }
+  .semana-dia { min-height: 0; }
+}
+
+/* Aviso mensal: a rotina continua a mesma? */
+.confirmar-rotina {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: var(--flame-soft);
+  border: 1px solid var(--flame-line);
+  border-radius: var(--radius);
+}
+.confirmar-rotina p { margin: 4px 0; font-size: 14px; color: var(--text-2); }
+.confirmar-rotina small { font-size: 12px; color: var(--text-3); }
+.confirmar-rotina-botoes { display: flex; gap: 8px; flex-shrink: 0; }
+.confirmar-rotina-botoes form { margin: 0; }
+.confirmar-rotina-botoes .btn { width: auto; height: 42px; padding: 0 18px; font-size: 14px; white-space: nowrap; }
+@media (max-width: 720px) {
+  .confirmar-rotina { flex-direction: column; align-items: stretch; }
+}

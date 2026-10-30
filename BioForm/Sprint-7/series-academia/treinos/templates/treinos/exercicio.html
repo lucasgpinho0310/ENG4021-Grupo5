@@ -1,0 +1,44 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% block titulo %}{% if exercicio %}Editar exercício{% else %}Novo exercício{% endif %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <h1>{% if exercicio %}{{ exercicio.nome_exercicio }}{% else %}Novo exercício{% endif %}</h1>
+    <p class="subtitle">{% if exercicio %}Exercício {{ exercicio.ordem_execucao }} de "{{ ficha.nome_ficha }}".{% else %}Entra no fim de "{{ ficha.nome_ficha }}".{% endif %}</p>
+
+    <form method="post" enctype="multipart/form-data" class="form-treino">
+      {% csrf_token %}
+      {% include 'contas/_erros_gerais.html' %}
+      <section class="block">
+        {% include 'treinos/_campo.html' with campo=form.nome_exercicio %}
+        <div class="grade-3">
+          {% include 'treinos/_campo.html' with campo=form.series %}
+          {% include 'treinos/_campo.html' with campo=form.carga_kg %}
+          {% include 'treinos/_campo.html' with campo=form.intervalo %}
+        </div>
+        <label class="check">{{ form.cada_lado }} {{ form.cada_lado.label }}</label>
+        <label class="check">{{ form.combinado_com_anterior }} {{ form.combinado_com_anterior.label }}</label>
+        {% include 'treinos/_campo.html' with campo=form.instrucoes %}
+      </section>
+
+      <section class="block">
+        <h2 class="block-title">Imagem e vídeo</h2>
+        <p class="block-sub">Opcional: uma foto do aparelho ou da execução e o link de um vídeo (YouTube aparece aqui mesmo).</p>
+        {% if exercicio.imagem %}
+        <div class="imagem-atual">
+          <img src="{{ exercicio.imagem.url }}" alt="Imagem atual de {{ exercicio.nome_exercicio }}">
+          <label class="check">{{ form.remover_imagem }} {{ form.remover_imagem.label }}</label>
+        </div>
+        {% endif %}
+        {% include 'treinos/_campo.html' with campo=form.imagem %}
+        {% include 'treinos/_campo.html' with campo=form.video_url %}
+      </section>
+
+      <div class="actions">
+        <a href="{% url 'treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
+        {% if not exercicio %}<button type="submit" name="acao" value="outro" class="btn btn-ghost">Salvar e adicionar outro</button>{% endif %}
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+{% endblock %}
