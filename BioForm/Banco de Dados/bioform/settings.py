@@ -36,7 +36,8 @@ DEBUG = True
 
 # .app.github.dev: endereço do site quando o projeto roda num GitHub Codespace
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.app.github.dev']
-CSRF_TRUSTED_ORIGINS = ['https://*.app.github.dev']
+# O proxy do Codespace repassa o login com a origem https://localhost:8000
+CSRF_TRUSTED_ORIGINS = ['https://*.app.github.dev', 'https://localhost:8000']
 
 
 # Application definition
