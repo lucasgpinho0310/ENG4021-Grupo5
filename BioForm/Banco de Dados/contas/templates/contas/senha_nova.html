@@ -23,6 +23,6 @@
   {% else %}
         <h1>Link inválido</h1>
         <p class="subtitle">Este link de recuperação já foi usado ou expirou. Peça um novo.</p>
-        <a href="{% url 'senha_esqueci' %}" class="btn btn-primary">Pedir novo link</a>
+        <a href="{% url 'password_reset' %}" class="btn btn-primary">Pedir novo link</a>
   {% endif %}
 {% endblock %}

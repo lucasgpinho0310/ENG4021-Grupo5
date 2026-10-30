@@ -15,7 +15,7 @@
           <a href="{% url 'perfil_metas' %}"{% if passo == 4 %} class="ativo"{% endif %}>Metas</a>
           <a href="{% url 'conta' %}">Editar perfil</a>
           {% if user.is_staff %}<a href="{% url 'usuarios' %}">Usuários</a>{% endif %}
-          <form method="post" action="{% url 'sair' %}">{% csrf_token %}<button type="submit">Sair</button></form>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Sair</button></form>
         </nav>
       {% endif %}
     </div>

@@ -73,7 +73,7 @@ class CadastroELoginTest(TestCase):
 
     def test_cpf_e_email_nao_repetem(self):
         self.client.post(reverse('cadastro'), dados_cadastro())
-        self.client.post(reverse('sair'))
+        self.client.post(reverse('logout'))
         resposta = self.client.post(reverse('cadastro'), dados_cadastro(email='ANA@email.com', cpf=CPF_BRUNO))
         self.assertIn('email', resposta.context['form'].errors)
         resposta = self.client.post(reverse('cadastro'), dados_cadastro(email='outra@email.com'))
@@ -84,25 +84,25 @@ class CadastroELoginTest(TestCase):
         self.client.post(reverse('cadastro'), dados_cadastro())
         for identificador in ('ana@email.com', 'ANA@EMAIL.COM', CPF_ANA, '529.982.247-25'):
             with self.subTest(identificador=identificador):
-                self.client.post(reverse('sair'))
-                resposta = self.client.post(reverse('entrar'), {'username': identificador, 'password': SENHA})
+                self.client.post(reverse('logout'))
+                resposta = self.client.post(reverse('login'), {'username': identificador, 'password': SENHA})
                 self.assertRedirects(resposta, reverse('inicio'), fetch_redirect_response=False)
 
     def test_senha_errada_nao_entra(self):
         self.client.post(reverse('cadastro'), dados_cadastro())
-        self.client.post(reverse('sair'))
-        resposta = self.client.post(reverse('entrar'), {'username': CPF_ANA, 'password': 'errada-123'})
+        self.client.post(reverse('logout'))
+        resposta = self.client.post(reverse('login'), {'username': CPF_ANA, 'password': 'errada-123'})
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, 'E-mail/CPF ou senha incorretos.')
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_lembrar_de_mim(self):
         self.client.post(reverse('cadastro'), dados_cadastro())
-        self.client.post(reverse('sair'))
-        self.client.post(reverse('entrar'), {'username': CPF_ANA, 'password': SENHA})
+        self.client.post(reverse('logout'))
+        self.client.post(reverse('login'), {'username': CPF_ANA, 'password': SENHA})
         self.assertTrue(self.client.session.get_expire_at_browser_close())
-        self.client.post(reverse('sair'))
-        self.client.post(reverse('entrar'), {'username': CPF_ANA, 'password': SENHA, 'lembrar': 'on'})
+        self.client.post(reverse('logout'))
+        self.client.post(reverse('login'), {'username': CPF_ANA, 'password': SENHA, 'lembrar': 'on'})
         self.assertFalse(self.client.session.get_expire_at_browser_close())
 
     def test_paginas_do_perfil_exigem_login(self):
@@ -110,19 +110,85 @@ class CadastroELoginTest(TestCase):
             with self.subTest(pagina=nome):
                 resposta = self.client.get(reverse(nome))
                 self.assertEqual(resposta.status_code, 302)
-                self.assertTrue(resposta.url.startswith(reverse('entrar')))
+                self.assertTrue(resposta.url.startswith(reverse('login')))
 
     def test_esqueci_minha_senha_envia_link(self):
         self.client.post(reverse('cadastro'), dados_cadastro())
-        self.client.post(reverse('sair'))
-        resposta = self.client.post(reverse('senha_esqueci'), {'email': 'ana@email.com'})
-        self.assertRedirects(resposta, reverse('senha_enviada'))
+        self.client.post(reverse('logout'))
+        resposta = self.client.post(reverse('password_reset'), {'email': 'ana@email.com'})
+        self.assertRedirects(resposta, reverse('password_reset_done'))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('/senha/nova/', mail.outbox[0].body)
+        self.assertIn('/accounts/reset/', mail.outbox[0].body)
 
     def test_pagina_404_personalizada(self):
         resposta = self.client.get('/pagina-que-nao-existe/')
         self.assertContains(resposta, 'Página não encontrada', status_code=404)
+
+
+class HomeERotasDoRoteiroTest(TestCase):
+    """Home-page e rotas accounts/ do roteiro da disciplina, sem perder os endereços antigos."""
+
+    def test_home_sem_login_mostra_entrar_e_cadastro(self):
+        resposta = self.client.get(reverse('home'))
+        self.assertEqual(resposta.status_code, 200)
+        self.assertTemplateUsed(resposta, 'home.html')
+        self.assertContains(resposta, reverse('login'))
+        self.assertContains(resposta, reverse('cadastro'))
+
+    def test_home_com_login_mostra_as_paginas(self):
+        self.client.post(reverse('cadastro'), dados_cadastro())
+        resposta = self.client.get(reverse('home'))
+        for nome in ('inicio', 'diario_hoje', 'treinos_lista', 'rotina_semana', 'perfil_metas', 'conta', 'logout'):
+            with self.subTest(link=nome):
+                self.assertContains(resposta, reverse(nome))
+
+    def test_rotas_accounts_usam_as_telas_do_bioform(self):
+        self.assertEqual(reverse('login'), '/accounts/login/')
+        paginas = [
+            ('login', 'registration/login.html', 'contas/entrar.html'),
+            ('password_reset', 'registration/password_reset_form.html', 'contas/senha_esqueci.html'),
+            ('password_reset_done', 'registration/password_reset_done.html', 'contas/senha_enviada.html'),
+            ('password_reset_complete', 'registration/password_reset_complete.html', 'contas/senha_concluida.html'),
+        ]
+        for nome, template, tela in paginas:
+            with self.subTest(pagina=nome):
+                resposta = self.client.get(reverse(nome))
+                self.assertTemplateUsed(resposta, template)
+                self.assertTemplateUsed(resposta, tela)
+
+    def test_trocar_senha_em_accounts_volta_para_editar_perfil(self):
+        self.client.post(reverse('cadastro'), dados_cadastro())
+        resposta = self.client.get(reverse('password_change'))
+        self.assertTemplateUsed(resposta, 'contas/trocar_senha.html')
+        resposta = self.client.post(reverse('password_change'), {
+            'old_password': SENHA, 'new_password1': 'outra-senha-2026', 'new_password2': 'outra-senha-2026',
+        })
+        self.assertRedirects(resposta, reverse('conta'), fetch_redirect_response=False)
+
+    def test_link_do_email_cria_nova_senha(self):
+        self.client.post(reverse('cadastro'), dados_cadastro())
+        self.client.post(reverse('logout'))
+        self.client.post(reverse('password_reset'), {'email': 'ana@email.com'})
+        self.assertEqual(mail.outbox[0].subject, 'BioForm: crie uma nova senha')
+        link = next(linha for linha in mail.outbox[0].body.splitlines() if '/accounts/reset/' in linha)
+        resposta = self.client.get(link.split('testserver')[1], follow=True)
+        self.assertTemplateUsed(resposta, 'contas/senha_nova.html')
+        resposta = self.client.post(resposta.redirect_chain[-1][0], {
+            'new_password1': 'outra-senha-2026', 'new_password2': 'outra-senha-2026',
+        })
+        self.assertRedirects(resposta, reverse('password_reset_complete'))
+        self.assertTrue(self.client.login(username=CPF_ANA, password='outra-senha-2026'))
+
+    def test_enderecos_antigos_continuam_funcionando(self):
+        self.client.post(reverse('cadastro'), dados_cadastro())
+        self.client.post('/sair/')
+        self.assertNotIn('_auth_user_id', self.client.session)
+        for url in ('/entrar/', '/senha/esqueci/', '/senha/esqueci/enviado/', '/senha/nova/pronto/'):
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 200)
+        resposta = self.client.post('/entrar/', {'username': CPF_ANA, 'password': SENHA})
+        self.assertRedirects(resposta, reverse('inicio'), fetch_redirect_response=False)
+        self.assertEqual(self.client.get('/conta/senha/').status_code, 200)
 
 
 class OnboardingTest(TestCase):
@@ -218,8 +284,8 @@ class ContaEUsuariosTest(TestCase):
         self.conta.refresh_from_db()
         self.assertEqual(self.conta.email, 'nova@email.com')
         self.assertEqual(self.conta.usuario.nome_completo, 'Ana Souza Lima')
-        self.client.post(reverse('sair'))
-        resposta = self.client.post(reverse('entrar'), {'username': 'nova@email.com', 'password': SENHA})
+        self.client.post(reverse('logout'))
+        resposta = self.client.post(reverse('login'), {'username': 'nova@email.com', 'password': SENHA})
         self.assertEqual(resposta.status_code, 302)
 
     def test_email_de_outra_conta_nao_pode(self):
@@ -234,7 +300,7 @@ class ContaEUsuariosTest(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertTrue(User.objects.filter(pk=self.conta.pk).exists())
         resposta = self.client.post(reverse('excluir_conta'), {'senha': SENHA})
-        self.assertRedirects(resposta, reverse('entrar'))
+        self.assertRedirects(resposta, reverse('login'))
         self.assertFalse(User.objects.filter(pk=self.conta.pk).exists())
         self.assertFalse(Usuario.objects.filter(cpf=CPF_ANA).exists())
 
@@ -256,6 +322,6 @@ class ContaEUsuariosTest(TestCase):
         self.assertEqual(len(resposta.context['pagina']), 0)
 
     def test_sair(self):
-        resposta = self.client.post(reverse('sair'))
-        self.assertRedirects(resposta, reverse('entrar'))
+        resposta = self.client.post(reverse('logout'))
+        self.assertRedirects(resposta, reverse('login'))
         self.assertNotIn('_auth_user_id', self.client.session)

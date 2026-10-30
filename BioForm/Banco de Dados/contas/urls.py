@@ -4,9 +4,11 @@ from django.urls import path, reverse_lazy
 from . import views
 
 urlpatterns = [
-    path('', views.inicio, name='inicio'),
+    # Leva o usuário ao próximo passo do perfil ou às metas (a home-page fica em bioform/urls.py)
+    path('inicio/', views.inicio, name='inicio'),
 
-    # Conta
+    # Endereços antigos de login e senha. O site agora usa as rotas accounts/ (ver bioform/urls.py);
+    # estas continuam funcionando para os links que já foram compartilhados.
     path('entrar/', views.EntrarView.as_view(), name='entrar'),
     path('sair/', auth_views.LogoutView.as_view(), name='sair'),
     path('cadastro/', views.cadastro, name='cadastro'),

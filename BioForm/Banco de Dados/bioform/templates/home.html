@@ -1,0 +1,33 @@
+{% extends 'contas/base_acesso.html' %}
+{% load static %}
+{% block titulo %}Início{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
+{% block conteudo %}
+  {% if user.is_authenticated %}
+        <h1>Olá, {{ user.first_name|default:user.username }}!</h1>
+        <p class="subtitle">Escolha para onde quer ir.</p>
+
+        <nav class="home-links" aria-label="Páginas do BioForm">
+          <a href="{% url 'inicio' %}" class="btn btn-primary">Continuar de onde parei</a>
+          <a href="{% url 'diario_hoje' %}" class="btn btn-ghost">Diário</a>
+          <a href="{% url 'treinos_lista' %}" class="btn btn-ghost">Treinos</a>
+          <a href="{% url 'rotina_semana' %}" class="btn btn-ghost">Semana</a>
+          <a href="{% url 'perfil_metas' %}" class="btn btn-ghost">Metas</a>
+          <a href="{% url 'conta' %}" class="btn btn-ghost">Editar perfil</a>
+          {% if user.is_staff %}<a href="{% url 'usuarios' %}" class="btn btn-ghost">Usuários</a>{% endif %}
+        </nav>
+
+        <form method="post" action="{% url 'logout' %}" class="home-sair">
+          {% csrf_token %}
+          <button type="submit">Sair</button>
+        </form>
+  {% else %}
+        <h1>Bem-vindo ao BioForm</h1>
+        <p class="subtitle">Treino e alimentação no mesmo lugar, com metas calculadas para o seu corpo e os seus esportes.</p>
+
+        <nav class="home-links" aria-label="Acesso">
+          <a href="{% url 'login' %}" class="btn btn-primary">Entrar</a>
+          <a href="{% url 'cadastro' %}" class="btn btn-ghost">Criar uma conta</a>
+        </nav>
+  {% endif %}
+{% endblock %}

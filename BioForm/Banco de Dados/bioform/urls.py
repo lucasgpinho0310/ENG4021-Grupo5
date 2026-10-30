@@ -19,8 +19,20 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from bioform import views  # home-page
+from contas.views import EntrarView, TrocarSenhaView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.home, name='home'),
+
+    # Login e senha no padrão do Django (rotas accounts/...).
+    # As duas primeiras usam as telas do BioForm: login com e-mail ou CPF e troca de senha
+    # que volta para "Editar perfil". As demais vêm de django.contrib.auth.urls.
+    path('accounts/login/', EntrarView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/password_change/', TrocarSenhaView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
+    path('accounts/', include('django.contrib.auth.urls')),
+
     path('', include('contas.urls')),
     path('', include('metas.urls')),
     path('', include('diario.urls')),
