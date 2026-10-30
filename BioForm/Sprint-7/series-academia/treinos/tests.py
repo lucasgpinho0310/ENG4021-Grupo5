@@ -15,8 +15,8 @@ from metas.calculo import salvar_meta
 from saude.models import ExercicioFicha, FichaTreino, HistoricoMedida, Usuario
 
 from . import servicos
-from .leitor import ler_intervalo, ler_series, ler_texto
-from .templatetags.treinos_tags import carga, intervalo, video_embed
+from .leitor import ler_intervalo, ler_series, ler_series_por_tempo, ler_texto
+from .templatetags.treinos_tags import carga, intervalo, series_de, video_embed
 
 User = get_user_model()
 SENHA = 'treino-forte-2026'
@@ -160,6 +160,22 @@ class LeitorTest(TestCase):
         self.assertEqual(ler_intervalo('1:30'), 90)
         self.assertIsNone(ler_intervalo('livre'))
 
+    def test_exercicio_por_tempo(self):
+        leitura = ler_texto('Prancha\nSéries: 3x30s\n\nPrancha lateral\nSéries: 3\nTempo: 40s cada lado\n\n'
+                            'Agachamento\nSéries: 3x12')
+        prancha, lateral, agachamento = leitura.exercicios
+        self.assertEqual((prancha.series, prancha.tempo_segundos), (3, 30))
+        self.assertEqual((lateral.series, lateral.tempo_segundos, lateral.cada_lado), (3, 40, True))
+        self.assertIsNone(agachamento.tempo_segundos)
+        self.assertEqual(agachamento.repeticoes, 12)
+        self.assertEqual(leitura.avisos, [])
+
+    def test_formatos_de_tempo(self):
+        self.assertEqual(ler_series_por_tempo('3x30s'), (3, 30, False))
+        self.assertEqual(ler_series_por_tempo('2x1min cada lado'), (2, 60, True))
+        self.assertEqual(ler_series_por_tempo('4x1:30'), (4, 90, False))
+        self.assertIsNone(ler_series_por_tempo('3x10'))
+
     def test_texto_vazio(self):
         self.assertEqual(ler_texto('  \n\n ').exercicios, [])
 
@@ -185,7 +201,7 @@ class CadastroDeSeriesTest(TestCase):
 
     def test_previa_nao_salva(self):
         resposta = self.client.post(reverse('treinos_nova'), {
-            'nome': 'Inferiores', 'dias': ['seg', 'qui'], 'ativa': 'on', 'texto': INFERIORES, 'acao': 'previa'})
+            'nome': 'Inferiores', 'dias': ['seg', 'qui'], 'ativa': 'on', 'modo': 'texto', 'texto': INFERIORES, 'acao': 'previa'})
         self.assertEqual(resposta.status_code, 200)
         self.assertContains(resposta, 'Entendi 10 exercícios, com 1 grupo de combinados')
         self.assertContains(resposta, 'Salvar série com 10 exercícios')
@@ -193,7 +209,7 @@ class CadastroDeSeriesTest(TestCase):
 
     def test_salvar_cria_a_serie_com_os_exercicios(self):
         resposta = self.client.post(reverse('treinos_nova'), {
-            'nome': 'Inferiores', 'dias': ['qui', 'seg'], 'ativa': 'on', 'texto': INFERIORES, 'acao': 'salvar'})
+            'nome': 'Inferiores', 'dias': ['qui', 'seg'], 'ativa': 'on', 'modo': 'texto', 'texto': INFERIORES, 'acao': 'salvar'})
         ficha = FichaTreino.objects.get()
         self.assertRedirects(resposta, reverse('treinos_ficha', args=[ficha.id]))
         self.assertEqual(ficha.usuario, self.usuario)
@@ -214,19 +230,86 @@ class CadastroDeSeriesTest(TestCase):
         self.assertContains(resposta, '15 kg')
 
     def test_serie_sem_texto_para_ir_exercicio_por_exercicio(self):
-        self.client.post(reverse('treinos_nova'), {'nome': 'Superiores', 'ativa': 'on', 'acao': 'salvar'})
+        self.client.post(reverse('treinos_nova'), {'nome': 'Superiores', 'ativa': 'on', 'modo': 'texto', 'acao': 'salvar'})
         ficha = FichaTreino.objects.get()
         self.assertFalse(ficha.exercicios.exists())
         resposta = self.client.post(reverse('treinos_novo_exercicio', args=[ficha.id]), {
-            'nome_exercicio': 'Supino reto', 'series': '4x8', 'carga_kg': '40', 'intervalo': '90s'})
+            'nome_exercicio': 'Supino reto', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '8', 'carga_kg': '40', 'intervalo': '90s'})
         self.assertRedirects(resposta, reverse('treinos_ficha', args=[ficha.id]))
         supino = ficha.exercicios.get()
         self.assertEqual((supino.series_planejadas, supino.repeticoes_planejadas, supino.carga_kg), (4, 8, Decimal('40')))
         self.assertEqual(supino.intervalo_segundos, 90)
         self.assertEqual(supino.ordem_execucao, 1)
 
+    def linhas(self, *exercicios, extra=0):
+        """Dados do formulário "um por um": uma linha por exercício (+ linhas em branco)."""
+        dados = {'ex-TOTAL_FORMS': str(len(exercicios) + extra), 'ex-INITIAL_FORMS': '0',
+                 'ex-MIN_NUM_FORMS': '0', 'ex-MAX_NUM_FORMS': '60'}
+        for i, campos in enumerate(exercicios):
+            base = {'series': '3', 'medida': 'repeticoes', 'repeticoes': '10'}
+            base.update(campos)
+            dados.update({'ex-%d-%s' % (i, k): v for k, v in base.items()})
+        for i in range(len(exercicios), len(exercicios) + extra):
+            dados.update({'ex-%d-series' % i: '3', 'ex-%d-medida' % i: 'repeticoes', 'ex-%d-repeticoes' % i: '10'})
+        return dados
+
+    def test_montar_um_por_um(self):
+        dados = {'nome': 'Core', 'ativa': 'on', 'modo': 'linhas', 'acao': 'salvar'}
+        dados.update(self.linhas(
+            {'nome': 'Cadeira extensora', 'series': '4', 'repeticoes': '12', 'carga': '35', 'intervalo': '60'},
+            {'nome': 'Prancha', 'medida': 'tempo', 'tempo': '45s', 'intervalo': '30s'},
+            {'nome': 'Afundo', 'repeticoes': '10', 'cada_lado': 'on'},
+            extra=2,  # linhas em branco são ignoradas
+        ))
+        resposta = self.client.post(reverse('treinos_nova'), dados)
+        ficha = FichaTreino.objects.get()
+        self.assertRedirects(resposta, reverse('treinos_ficha', args=[ficha.id]))
+        extensora, prancha, afundo = ficha.exercicios.order_by('ordem_execucao')
+        self.assertEqual((extensora.series_planejadas, extensora.repeticoes_planejadas, extensora.carga_kg,
+                          extensora.intervalo_segundos, extensora.tempo_segundos), (4, 12, Decimal('35'), 60, None))
+        self.assertEqual((prancha.series_planejadas, prancha.tempo_segundos, prancha.intervalo_segundos), (3, 45, 30))
+        self.assertTrue(afundo.cada_lado)
+        pagina = self.client.get(reverse('treinos_ficha', args=[ficha.id]))
+        self.assertContains(pagina, '3x45s')
+        self.assertContains(pagina, '3x10 cada lado')
+
+    def test_linha_por_tempo_sem_tempo_da_erro(self):
+        dados = {'nome': 'Core', 'modo': 'linhas', 'acao': 'salvar'}
+        dados.update(self.linhas({'nome': 'Prancha', 'medida': 'tempo', 'tempo': ''}))
+        resposta = self.client.post(reverse('treinos_nova'), dados)
+        self.assertContains(resposta, 'Informe o tempo de cada série')
+        self.assertFalse(FichaTreino.objects.exists())
+
+    def test_tela_nova_tem_os_dois_modos(self):
+        resposta = self.client.get(reverse('treinos_nova'))
+        self.assertContains(resposta, 'Um por um')
+        self.assertContains(resposta, 'Colar o texto')
+        self.assertContains(resposta, 'name="ex-0-nome"')
+        self.assertContains(resposta, 'id="linha-modelo"')
+
+    def test_exercicio_por_tempo_no_formulario(self):
+        ficha = servicos.criar_ficha(self.usuario, 'Core', [])
+        self.client.post(reverse('treinos_novo_exercicio', args=[ficha.id]), {
+            'nome_exercicio': 'Prancha', 'series': '3', 'medida': 'tempo', 'tempo': '1min', 'carga_kg': '0'})
+        prancha = ficha.exercicios.get()
+        self.assertEqual(prancha.tempo_segundos, 60)
+        self.assertEqual(series_de(prancha), '3x60s')
+
+    def test_editar_numeros_descarta_o_texto_da_ficha(self):
+        ficha = servicos.criar_ficha(self.usuario, 'Pernas', [], exercicios_lidos=ler_texto(
+            'Agachamento\nSéries: 3x10+10').exercicios)
+        agachamento = ficha.exercicios.get()
+        base = {'nome_exercicio': 'Agachamento', 'series': '3', 'medida': 'repeticoes', 'repeticoes': '10',
+                'carga_kg': '0'}
+        self.client.post(reverse('treinos_editar_exercicio', args=[agachamento.id]), {**base, 'carga_kg': '20'})
+        agachamento.refresh_from_db()
+        self.assertEqual(agachamento.series_texto, '3x10+10')  # só mudou a carga
+        self.client.post(reverse('treinos_editar_exercicio', args=[agachamento.id]), {**base, 'repeticoes': '12'})
+        agachamento.refresh_from_db()
+        self.assertEqual((agachamento.series_texto, agachamento.repeticoes_planejadas), ('', 12))
+
     def test_texto_sem_exercicio_da_erro(self):
-        resposta = self.client.post(reverse('treinos_nova'), {'nome': 'X', 'texto': 'Séries: 3x10', 'acao': 'salvar'})
+        resposta = self.client.post(reverse('treinos_nova'), {'nome': 'X', 'modo': 'texto', 'texto': 'Séries: 3x10', 'acao': 'salvar'})
         self.assertContains(resposta, 'Não encontrei nenhum exercício no texto.')
         self.assertFalse(FichaTreino.objects.exists())
 
@@ -239,8 +322,8 @@ class CadastroDeSeriesTest(TestCase):
     def test_series_invalidas_no_formulario(self):
         ficha = servicos.criar_ficha(self.usuario, 'A', [])
         resposta = self.client.post(reverse('treinos_novo_exercicio', args=[ficha.id]), {
-            'nome_exercicio': 'Rosca', 'series': 'muitas', 'carga_kg': '0'})
-        self.assertContains(resposta, 'Escreva séries x repetições')
+            'nome_exercicio': 'Rosca', 'series': '3', 'medida': 'repeticoes', 'repeticoes': '', 'carga_kg': '0'})
+        self.assertContains(resposta, 'Informe as repetições.')
         self.assertFalse(ficha.exercicios.exists())
 
 
@@ -340,7 +423,7 @@ class ImagemEVideoTest(TestCase):
         self.ficha = servicos.criar_ficha(self.usuario, 'Inferiores', [])
 
     def criar(self, **extra):
-        dados = {'nome_exercicio': 'Leg press', 'series': '4x12', 'carga_kg': '100', 'imagem': imagem_png(),
+        dados = {'nome_exercicio': 'Leg press', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '12', 'carga_kg': '100', 'imagem': imagem_png(),
                  'video_url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
         dados.update(extra)
         self.client.post(reverse('treinos_novo_exercicio', args=[self.ficha.id]), dados)
@@ -357,7 +440,7 @@ class ImagemEVideoTest(TestCase):
     def test_arquivo_que_nao_e_imagem_e_recusado(self):
         falso = SimpleUploadedFile('virus.png', b'nao sou imagem', content_type='image/png')
         resposta = self.client.post(reverse('treinos_novo_exercicio', args=[self.ficha.id]), {
-            'nome_exercicio': 'Leg press', 'series': '4x12', 'carga_kg': '0', 'imagem': falso})
+            'nome_exercicio': 'Leg press', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '12', 'carga_kg': '0', 'imagem': falso})
         self.assertEqual(resposta.status_code, 200)
         self.assertFalse(self.ficha.exercicios.exists())
 
@@ -365,7 +448,7 @@ class ImagemEVideoTest(TestCase):
         exercicio = self.criar()
         antiga = exercicio.imagem.name
         self.client.post(reverse('treinos_editar_exercicio', args=[exercicio.id]), {
-            'nome_exercicio': 'Leg press', 'series': '4x12', 'carga_kg': '100', 'imagem': imagem_png('novo.png')})
+            'nome_exercicio': 'Leg press', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '12', 'carga_kg': '100', 'imagem': imagem_png('novo.png')})
         exercicio.refresh_from_db()
         self.assertNotEqual(exercicio.imagem.name, antiga)
         self.assertTrue(exercicio.imagem.storage.exists(exercicio.imagem.name))
@@ -375,7 +458,7 @@ class ImagemEVideoTest(TestCase):
         exercicio = self.criar()
         antiga = exercicio.imagem.name
         self.client.post(reverse('treinos_editar_exercicio', args=[exercicio.id]), {
-            'nome_exercicio': 'Leg press', 'series': '4x12', 'carga_kg': '100', 'remover_imagem': 'on'})
+            'nome_exercicio': 'Leg press', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '12', 'carga_kg': '100', 'remover_imagem': 'on'})
         exercicio.refresh_from_db()
         self.assertFalse(exercicio.imagem)
         self.assertFalse(exercicio.imagem.storage.exists(antiga))
@@ -391,7 +474,7 @@ class ImagemEVideoTest(TestCase):
         exercicio = self.criar()
         nome = exercicio.imagem.name
         self.client.post(reverse('treinos_editar_exercicio', args=[exercicio.id]), {
-            'nome_exercicio': 'Leg press 45°', 'series': '4x10', 'carga_kg': '110', 'intervalo': '2min',
+            'nome_exercicio': 'Leg press 45°', 'series': '4', 'medida': 'repeticoes', 'repeticoes': '10', 'carga_kg': '110', 'intervalo': '2min',
             'video_url': ''})
         exercicio.refresh_from_db()
         self.assertEqual(exercicio.imagem.name, nome)

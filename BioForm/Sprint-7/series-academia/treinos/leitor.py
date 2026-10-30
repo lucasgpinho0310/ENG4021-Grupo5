@@ -11,7 +11,8 @@ Formato esperado (o mesmo dos apps de treino e das fichas do personal), um exerc
     Última série até não conseguir mais
 
 - A primeira linha do bloco é o nome do exercício.
-- "Séries" aceita 3x15, 3/15, 3 x 15, "3/10 cada lado", "3x10+10"...
+- "Séries" aceita 3x15, 3/15, 3 x 15, "3/10 cada lado", "3x10+10"... Exercício por tempo (prancha,
+  isometria): "3x30s", "3x1min", ou "Séries: 3" com "Tempo: 40s".
 - "Carga" em kg, "Intervalo" em segundos (60s) ou minutos (2min, 1:30). As instruções vão até o fim do bloco.
 - Exercícios combinados: cada nome seguido de uma letra (A, B...). As séries, a carga e o intervalo
   escritos uma vez valem para todos os exercícios do grupo.
@@ -33,8 +34,10 @@ def sem_acento(texto):
     return ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn').lower()
 
 
-CAMPO = re.compile(r'^\s*(series?|repeticoes|reps|carga|peso|intervalo|descanso|instrucoes|obs|observacoes)\s*:\s*(.*)$')
+CAMPO = re.compile(r'^\s*(series?|repeticoes|reps|tempo|duracao|carga|peso|intervalo|descanso|instrucoes|obs|observacoes)\s*:\s*(.*)$')
 SERIES = re.compile(r'(\d+)\s*(?:x|/|×|series? de)\s*(\d+)')
+SERIES_TEMPO = re.compile(r'(\d+)\s*(?:x|/|×|series? de)\s*(\d+(?::\d{2}|(?:[.,]\d+)?\s*(?:s\b|seg|segundos?|min|minutos?|")))')
+SO_NUMERO = re.compile(r'^\s*(\d+)\s*(?:series?)?\s*$')
 NUMERO = re.compile(r'\d+(?:[.,]\d+)?')
 LETRA = re.compile(r'^[A-H]$')
 ABRE_GRUPO = ('exercicios combinados', 'exercicio combinado', 'bi-set', 'biset', 'tri-set', 'triset', 'superserie')
@@ -50,6 +53,7 @@ class ExercicioLido:
     cada_lado: bool = False
     carga_kg: Decimal = Decimal('0')
     intervalo_segundos: int | None = None
+    tempo_segundos: int | None = None  # exercício por tempo: segundos de cada série
     instrucoes: str = ''
     combinado_com_anterior: bool = False
     letra: str = ''           # A, B... quando faz parte de exercícios combinados
@@ -61,6 +65,15 @@ class ExercicioLido:
     @property
     def completo(self):
         return self.tem_series or self.tem_carga or self.tem_intervalo or bool(self.instrucoes)
+
+    # mesmos nomes do modelo ExercicioFicha, para as telas mostrarem os dois do mesmo jeito
+    @property
+    def series_planejadas(self):
+        return self.series
+
+    @property
+    def repeticoes_planejadas(self):
+        return self.repeticoes
 
 
 @dataclass
@@ -83,6 +96,17 @@ def ler_series(texto):
     if not (1 <= series <= 20 and 1 <= repeticoes <= 200):
         return None
     return series, repeticoes, 'cada lado' in sem_acento(texto)
+
+
+def ler_series_por_tempo(texto):
+    """'3x30s' -> (3, 30, False); '2x1min cada lado' -> (2, 60, True). None se não for por tempo."""
+    achado = SERIES_TEMPO.search(sem_acento(texto))
+    if not achado:
+        return None
+    series, segundos = int(achado.group(1)), ler_intervalo(achado.group(2).replace('"', 's'))
+    if not (1 <= series <= 20) or segundos is None:
+        return None
+    return series, segundos, 'cada lado' in sem_acento(texto)
 
 
 def ler_carga(texto):
@@ -127,7 +151,21 @@ def _blocos(texto):
 
 def _ler_campo(atual, nome_campo, valor, leitura):
     """Preenche um campo do exercício. Devolve True quando começam as instruções."""
-    if nome_campo.startswith('serie') or nome_campo in ('repeticoes', 'reps'):
+    if nome_campo.startswith('serie') and ler_series_por_tempo(valor):
+        atual.series, atual.tempo_segundos, atual.cada_lado = ler_series_por_tempo(valor)
+        atual.series_texto, atual.tem_series = valor[:60], True
+    elif nome_campo.startswith('serie') and SO_NUMERO.match(sem_acento(valor)):
+        # só o número de séries; as repetições ou o tempo vêm em outra linha
+        atual.series = max(min(int(SO_NUMERO.match(sem_acento(valor)).group(1)), 20), 1)
+        atual.tem_series = True
+    elif nome_campo in ('tempo', 'duracao'):
+        segundos = ler_intervalo(valor)
+        if segundos is None:
+            leitura.avisos.append('%s: não entendi o tempo "%s".' % (atual.nome, valor))
+        else:
+            atual.tempo_segundos, atual.tem_series = segundos, True
+            atual.cada_lado = atual.cada_lado or 'cada lado' in sem_acento(valor)
+    elif nome_campo.startswith('serie') or nome_campo in ('repeticoes', 'reps'):
         lido = ler_series(valor)
         if lido:
             atual.series, atual.repeticoes, atual.cada_lado = lido
@@ -185,7 +223,7 @@ def _formar_grupos(exercicios):
             for posicao, e in enumerate(membros):
                 if modelo and modelo.tem_series and not e.tem_series:
                     e.series, e.repeticoes, e.series_texto = modelo.series, modelo.repeticoes, modelo.series_texto
-                    e.cada_lado, e.tem_series = modelo.cada_lado, True
+                    e.tempo_segundos, e.cada_lado, e.tem_series = modelo.tempo_segundos, modelo.cada_lado, True
                 if modelo and modelo.tem_intervalo and not e.tem_intervalo:
                     e.intervalo_segundos, e.tem_intervalo = modelo.intervalo_segundos, True
                 if modelo and modelo.tem_carga and not e.tem_carga:

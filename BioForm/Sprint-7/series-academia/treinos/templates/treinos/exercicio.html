@@ -12,11 +12,16 @@
       {% include 'contas/_erros_gerais.html' %}
       <section class="block">
         {% include 'treinos/_campo.html' with campo=form.nome_exercicio %}
-        <div class="grade-3">
+        <div class="grade-series">
           {% include 'treinos/_campo.html' with campo=form.series %}
+          {% include 'treinos/_campo.html' with campo=form.medida %}
+          {% include 'treinos/_campo.html' with campo=form.repeticoes classe='campo-reps' %}
+          {% include 'treinos/_campo.html' with campo=form.tempo classe='campo-tempo' %}
           {% include 'treinos/_campo.html' with campo=form.carga_kg %}
           {% include 'treinos/_campo.html' with campo=form.intervalo %}
         </div>
+        {% if exercicio.series_texto %}<p class="help">Na ficha original: {{ exercicio.series_texto }}. Se mudar séries, repetições ou tempo, vale o que você preencher aqui.</p>{% endif %}
+        <p class="help">Prancha, isometria e estabilidade: troque "Por" para Tempo (ex.: 30s, 1min).</p>
         <label class="check">{{ form.cada_lado }} {{ form.cada_lado.label }}</label>
         <label class="check">{{ form.combinado_com_anterior }} {{ form.combinado_com_anterior.label }}</label>
         {% include 'treinos/_campo.html' with campo=form.instrucoes %}

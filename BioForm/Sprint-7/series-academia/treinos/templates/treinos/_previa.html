@@ -14,7 +14,7 @@
       <span class="previa-num">{{ forloop.counter }}</span>
       <div>
         <b>{% if e.letra %}<span class="letra">{{ e.letra }}</span> {% endif %}{{ e.nome }}</b>
-        <small>{{ e.series_texto|default:"3x10" }}{% if e.cada_lado and 'cada lado' not in e.series_texto %} cada lado{% endif %} · {{ e.carga_kg|carga }}{% if e.intervalo_segundos %} · intervalo {{ e.intervalo_segundos|intervalo }}{% endif %}</small>
+        <small>{{ e|series_de }} · {{ e.carga_kg|carga }}{% if e.intervalo_segundos %} · intervalo {{ e.intervalo_segundos|intervalo }}{% endif %}</small>
         {% if e.instrucoes %}<small class="instrucao">{{ e.instrucoes|linebreaksbr }}</small>{% endif %}
       </div>
     </li>
