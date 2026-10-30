@@ -34,10 +34,16 @@ SECRET_KEY = 'django-insecure-!zoqqn2=!_a)2lw-kn0-do!hrpxz30hzzf88&tl)bqhj#cn$vj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# .app.github.dev: endereço do site quando o projeto roda num GitHub Codespace
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.app.github.dev']
+# Configuração recomendada pelo roteiro da disciplina (ENG4021, AI2-MeuProjeto: "CORS ou CSRF")
+ALLOWED_HOSTS = ['*']
 # O proxy do Codespace repassa o login com a origem https://localhost:8000
-CSRF_TRUSTED_ORIGINS = ['https://*.app.github.dev', 'https://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+    'http://localhost:8000',
+    'https://*.app.github.dev',
+]
+# Pedido pelo roteiro; só passa a ter efeito se o pacote django-cors-headers for instalado
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition

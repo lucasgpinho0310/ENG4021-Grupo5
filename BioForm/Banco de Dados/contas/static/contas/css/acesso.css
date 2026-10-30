@@ -560,18 +560,7 @@ form { display: grid; gap: 18px; }
 .macro small { display: block; margin: 4px 0 12px; font-size: 13px; color: var(--text-3); }
 .bar { height: 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
 .bar span { display: block; height: 100%; border-radius: 6px; }
-.m-prot b { color: var(--flame); }  .m-prot .bar span { background: var(--flame); }
-.m-carb b { color: var(--violet); } .m-carb .bar span { background: var(--violet); }
-.m-gord b { color: var(--green); }  .m-gord .bar span { background: var(--green); }
 .m-agua b { color: var(--water); }  .m-agua .bar span { background: var(--water); }
-
-.pratica {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--line-strong);
-  font-size: 13px;
-  color: var(--text-2);
-}
 
 .info {
   margin-top: 16px;
