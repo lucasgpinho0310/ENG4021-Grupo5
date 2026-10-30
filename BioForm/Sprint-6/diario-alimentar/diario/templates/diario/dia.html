@@ -5,14 +5,14 @@
 {% block conteudo %}
     <!-- Navegação entre os dias -->
     <div class="dia-nav">
-      <a href="{% url 'diario_dia' anterior %}" class="dia-seta" aria-label="Dia anterior">‹</a>
+      <a href="{% url 'diario:diario_dia' anterior %}" class="dia-seta" aria-label="Dia anterior">‹</a>
       <div class="dia-titulo">
         <h1>{{ data|nome_do_dia }}</h1>
         <small>{{ data|date:'d/m/Y' }}{% if not eh_hoje %} · dia passado{% endif %}</small>
       </div>
-      {% if eh_hoje %}<span class="dia-seta desativada" aria-hidden="true">›</span>{% else %}<a href="{% url 'diario_dia' proximo %}" class="dia-seta" aria-label="Próximo dia">›</a>{% endif %}
+      {% if eh_hoje %}<span class="dia-seta desativada" aria-hidden="true">›</span>{% else %}<a href="{% url 'diario:diario_dia' proximo %}" class="dia-seta" aria-label="Próximo dia">›</a>{% endif %}
     </div>
-    <p class="dia-links">{% if not eh_hoje %}<a href="{% url 'diario_hoje' %}">Ir para hoje</a> · {% endif %}<a href="{% url 'diario_historico' %}">Histórico</a></p>
+    <p class="dia-links">{% if not eh_hoje %}<a href="{% url 'diario:diario_hoje' %}">Ir para hoje</a> · {% endif %}<a href="{% url 'diario:diario_historico' %}">Histórico</a></p>
 
     <!-- Saldo do dia -->
     <div class="goal">
@@ -42,9 +42,9 @@
           <small>de {{ resumo.meta.meta_agua_ml|milhar }} ml · {{ resumo.percentual_agua }}%</small>
           <div class="bar"><span style="width: {% if resumo.percentual_agua > 100 %}100{% else %}{{ resumo.percentual_agua }}{% endif %}%"></span></div>
           <div class="agua-acoes">
-            <form method="post" action="{% url 'diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="250"><button class="btn-mini">+ 1 copo</button></form>
-            <form method="post" action="{% url 'diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="500"><button class="btn-mini">+ 500 ml</button></form>
-            {% if resumo.agua_ml %}<form method="post" action="{% url 'diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="-250"><button class="btn-mini fraco" aria-label="Tirar 1 copo">− 1 copo</button></form>{% endif %}
+            <form method="post" action="{% url 'diario:diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="250"><button class="btn-mini">+ 1 copo</button></form>
+            <form method="post" action="{% url 'diario:diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="500"><button class="btn-mini">+ 500 ml</button></form>
+            {% if resumo.agua_ml %}<form method="post" action="{% url 'diario:diario_agua' data %}" class="form-inline">{% csrf_token %}<input type="hidden" name="ml" value="-250"><button class="btn-mini fraco" aria-label="Tirar 1 copo">− 1 copo</button></form>{% endif %}
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@
           <h2 class="block-title">{{ refeicao.nome }}</h2>
           <p class="refeicao-total">{% if refeicao.itens %}{{ refeicao.total.kcal|inteiro|milhar }} kcal · P {{ refeicao.total.proteina_g|inteiro }} g · C {{ refeicao.total.carbo_g|inteiro }} g · G {{ refeicao.total.gordura_g|inteiro }} g{% else %}Nada registrado{% endif %}</p>
         </div>
-        <a href="{% url 'diario_adicionar' data %}?refeicao={{ refeicao.tipo }}" class="btn-mini destaque">+ Adicionar</a>
+        <a href="{% url 'diario:diario_adicionar' data %}?refeicao={{ refeicao.tipo }}" class="btn-mini destaque">+ Adicionar</a>
       </div>
 
       {% if refeicao.itens %}
@@ -70,7 +70,7 @@
             <small>{{ item|porcao }}</small>
           </div>
           <span class="item-kcal">{{ item.macros.kcal|inteiro }} kcal</span>
-          <form method="post" action="{% url 'diario_remover_item' item.id %}" class="form-inline">{% csrf_token %}<button class="btn-remover" aria-label="Remover {{ item.alimento.nome }}">×</button></form>
+          <form method="post" action="{% url 'diario:diario_remover_item' item.id %}" class="form-inline">{% csrf_token %}<button class="btn-remover" aria-label="Remover {{ item.alimento.nome }}">×</button></form>
         </li>
         {% endfor %}
       </ul>
@@ -78,7 +78,7 @@
       {% with registro=refeicao.registros.0 %}
       <details class="salvar-combo">
         <summary>Salvar esta refeição como combo</summary>
-        <form method="post" action="{% url 'diario_salvar_combo' registro.id %}" class="form-linha">
+        <form method="post" action="{% url 'diario:diario_salvar_combo' registro.id %}" class="form-linha">
           {% csrf_token %}
           <input type="text" name="nome" placeholder="Ex.: Café da manhã padrão" maxlength="100" minlength="2" required aria-label="Nome do combo">
           <button class="btn-mini destaque">Salvar</button>
@@ -95,10 +95,10 @@
       <h2 class="block-title">Check-in de dieta perfeita</h2>
       {% if resumo.dieta_confirmada %}
         <p class="block-sub">Você fechou {% if eh_hoje %}o dia{% else %}este dia{% endif %} dentro da meta de calorias e macros. 🔥</p>
-        <form method="post" action="{% url 'diario_checkin' data %}">{% csrf_token %}<input type="hidden" name="acao" value="desfazer"><button class="btn btn-ghost">Desfazer check-in</button></form>
+        <form method="post" action="{% url 'diario:diario_checkin' data %}">{% csrf_token %}<input type="hidden" name="acao" value="desfazer"><button class="btn btn-ghost">Desfazer check-in</button></form>
       {% elif resumo.dentro_da_meta %}
         <p class="block-sub">Calorias e macros estão dentro da meta. Terminou de comer {% if eh_hoje %}hoje{% else %}neste dia{% endif %}? Confirme.</p>
-        <form method="post" action="{% url 'diario_checkin' data %}">{% csrf_token %}<button class="btn btn-primary">Confirmar dieta perfeita</button></form>
+        <form method="post" action="{% url 'diario:diario_checkin' data %}">{% csrf_token %}<button class="btn btn-primary">Confirmar dieta perfeita</button></form>
       {% else %}
         <p class="block-sub">Para confirmar, o dia precisa ficar entre {{ minimo }}% e {{ maximo }}% da meta de calorias e de cada macro.</p>
       {% endif %}

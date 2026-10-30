@@ -21,7 +21,7 @@
         <span class="tag tag-green">Sem esportes marcados</span>
         {% endfor %}
       </div>
-      <p class="disclaimer"><a href="{% url 'perfil_dados' %}">Editar dados</a> · <a href="{% url 'perfil_objetivo' %}">Editar objetivo</a> · <a href="{% url 'perfil_esportes' %}">Editar esportes</a>{% url 'rotina_semana' as url_semana %}{% if url_semana and esportes %} · <a href="{{ url_semana }}">Ver minha semana</a>{% endif %}</p>
+      <p class="disclaimer"><a href="{% url 'contas:perfil_dados' %}">Editar dados</a> · <a href="{% url 'contas:perfil_objetivo' %}">Editar objetivo</a> · <a href="{% url 'contas:perfil_esportes' %}">Editar esportes</a>{% url 'rotina:rotina_semana' as url_semana %}{% if url_semana and esportes %} · <a href="{{ url_semana }}">Ver minha semana</a>{% endif %}</p>
     </section>
 
     <!-- Conta das calorias -->
@@ -108,8 +108,8 @@
 
     {% if onboarding %}
     <div class="actions">
-      <a href="{% url 'perfil_esportes' %}" class="btn btn-ghost">Voltar</a>
-      <a href="{% url 'perfil_concluir' %}" class="btn btn-primary">Começar a usar o BioForm</a>
+      <a href="{% url 'contas:perfil_esportes' %}" class="btn btn-ghost">Voltar</a>
+      <a href="{% url 'contas:perfil_concluir' %}" class="btn btn-primary">Começar a usar o BioForm</a>
     </div>
     {% endif %}
 {% endblock %}

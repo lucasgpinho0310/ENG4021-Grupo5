@@ -3,7 +3,7 @@
 {% block titulo %}Adicionar alimento{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'diario/css/diario.css' %}">{% endblock %}
 {% block conteudo %}
-    <p class="dia-links"><a href="{% if eh_hoje %}{% url 'diario_hoje' %}{% else %}{% url 'diario_dia' data %}{% endif %}">‹ Voltar ao diário de {{ data|nome_do_dia|lower }}</a></p>
+    <p class="dia-links"><a href="{% if eh_hoje %}{% url 'diario:diario_hoje' %}{% else %}{% url 'diario:diario_dia' data %}{% endif %}">‹ Voltar ao diário de {{ data|nome_do_dia|lower }}</a></p>
     <h1>Adicionar alimento</h1>
     <p class="subtitle">Busque no catálogo TACO e registre do jeito que você come: colher, concha, fatia ou gramas.</p>
 
@@ -69,13 +69,13 @@
               <small>{% for i in combo.itens.all %}{{ i.alimento.nome }}{% if not forloop.last %} · {% endif %}{% endfor %}</small>
             </div>
             <span class="item-kcal">{{ combo.total.kcal|inteiro }} kcal</span>
-            <form method="post" action="{% url 'diario_usar_combo' data %}" class="form-inline">
+            <form method="post" action="{% url 'diario:diario_usar_combo' data %}" class="form-inline">
               {% csrf_token %}
               <input type="hidden" name="combo" value="{{ combo.id }}">
               <input type="hidden" name="tipo_refeicao" value="{{ tipo }}">
               <button class="btn-mini destaque">Usar</button>
             </form>
-            <form method="post" action="{% url 'diario_excluir_combo' combo.id %}" class="form-inline">
+            <form method="post" action="{% url 'diario:diario_excluir_combo' combo.id %}" class="form-inline">
               {% csrf_token %}
               <input type="hidden" name="voltar" value="{{ request.get_full_path }}">
               <button class="btn-remover" aria-label="Excluir combo {{ combo.nome_refeicao }}">×</button>

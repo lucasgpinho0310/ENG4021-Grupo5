@@ -197,27 +197,27 @@ class TelasDoDiarioTest(TestCase):
 
     def test_diario_exige_login(self):
         self.client.logout()
-        resposta = self.client.get(reverse('diario_hoje'))
+        resposta = self.client.get(reverse('diario:diario_hoje'))
         self.assertTrue(resposta.url.startswith(reverse('login')))
 
     def test_diario_exige_perfil_completo(self):
         MetaNutricional.objects.all().delete()
-        resposta = self.client.get(reverse('diario_hoje'))
-        self.assertRedirects(resposta, reverse('perfil_esportes'))
+        resposta = self.client.get(reverse('diario:diario_hoje'))
+        self.assertRedirects(resposta, reverse('contas:perfil_esportes'))
 
     def test_dia_futuro_volta_para_hoje(self):
-        resposta = self.client.get(reverse('diario_dia', args=[self.hoje + timedelta(days=1)]))
-        self.assertRedirects(resposta, reverse('diario_hoje'))
+        resposta = self.client.get(reverse('diario:diario_dia', args=[self.hoje + timedelta(days=1)]))
+        self.assertRedirects(resposta, reverse('diario:diario_hoje'))
 
     def test_pagina_do_dia(self):
         servicos.registrar_item(self.usuario, self.hoje, 'almoco', alimento(ARROZ), Decimal('1'))
-        resposta = self.client.get(reverse('diario_hoje'))
+        resposta = self.client.get(reverse('diario:diario_hoje'))
         self.assertContains(resposta, 'Hoje')
         self.assertContains(resposta, ARROZ)
         self.assertContains(resposta, '1.872')  # 2000 - 128 kcal restantes
 
     def test_buscar_escolher_e_adicionar(self):
-        url = reverse('diario_adicionar', args=[self.hoje])
+        url = reverse('diario:diario_adicionar', args=[self.hoje])
         resposta = self.client.get(url, {'q': 'pao frances', 'refeicao': 'cafe_manha'})
         self.assertContains(resposta, 'Pão, trigo, francês')
 
@@ -229,13 +229,13 @@ class TelasDoDiarioTest(TestCase):
         resposta = self.client.post(url + '?refeicao=cafe_manha', {
             'alimento': pao.id, 'medida': unidade.id, 'quantidade': '2', 'tipo_refeicao': 'cafe_manha',
         })
-        self.assertRedirects(resposta, reverse('diario_hoje'))
+        self.assertRedirects(resposta, reverse('diario:diario_hoje'))
         item = RegistroRefeicaoItem.objects.get()
         self.assertEqual(item.gramas(), Decimal('100'))
         self.assertEqual(item.registro.tipo_refeicao, 'cafe_manha')
 
     def test_adicionar_em_gramas_valida_no_servidor(self):
-        url = reverse('diario_adicionar', args=[self.hoje])
+        url = reverse('diario:diario_adicionar', args=[self.hoje])
         frango = alimento(FRANGO)
         resposta = self.client.post(url, {'alimento': frango.id, 'medida': 'g', 'quantidade': '5000', 'tipo_refeicao': 'jantar'})
         self.assertEqual(resposta.status_code, 200)
@@ -244,26 +244,26 @@ class TelasDoDiarioTest(TestCase):
         self.assertEqual(RegistroRefeicaoItem.objects.get().gramas(), Decimal('120'))
 
     def test_agua_pela_tela(self):
-        self.client.post(reverse('diario_agua', args=[self.hoje]), {'ml': '500'})
-        self.client.post(reverse('diario_agua', args=[self.hoje]), {'ml': '9999'})  # valor não permitido
+        self.client.post(reverse('diario:diario_agua', args=[self.hoje]), {'ml': '500'})
+        self.client.post(reverse('diario:diario_agua', args=[self.hoje]), {'ml': '9999'})  # valor não permitido
         self.assertEqual(DiarioConsumo.objects.get().total_agua_consumida_ml, 500)
 
     def test_remover_pela_tela(self):
         item = servicos.registrar_item(self.usuario, self.hoje, 'almoco', alimento(ARROZ), Decimal('1'))
-        resposta = self.client.post(reverse('diario_remover_item', args=[item.id]))
-        self.assertRedirects(resposta, reverse('diario_hoje'))
+        resposta = self.client.post(reverse('diario:diario_remover_item', args=[item.id]))
+        self.assertRedirects(resposta, reverse('diario:diario_hoje'))
         self.assertFalse(RegistroRefeicaoItem.objects.exists())
 
     def test_combo_pela_tela(self):
         item = servicos.registrar_item(self.usuario, self.hoje, 'cafe_manha', alimento(ARROZ), Decimal('1'))
-        self.client.post(reverse('diario_salvar_combo', args=[item.registro_id]), {'nome': 'Meu café'})
+        self.client.post(reverse('diario:diario_salvar_combo', args=[item.registro_id]), {'nome': 'Meu café'})
         combo = RefeicaoPersonalizada.objects.get(nome_refeicao='Meu café')
-        self.client.post(reverse('diario_usar_combo', args=[self.hoje]), {'combo': combo.id, 'tipo_refeicao': 'ceia'})
+        self.client.post(reverse('diario:diario_usar_combo', args=[self.hoje]), {'combo': combo.id, 'tipo_refeicao': 'ceia'})
         self.assertEqual(RegistroRefeicaoItem.objects.filter(registro__tipo_refeicao='ceia').count(), 1)
 
     def test_historico(self):
         servicos.registrar_item(self.usuario, self.hoje - timedelta(days=1), 'almoco', alimento(ARROZ), Decimal('1'))
-        resposta = self.client.get(reverse('diario_historico'))
+        resposta = self.client.get(reverse('diario:diario_historico'))
         self.assertEqual(len(resposta.context['dias']), 14)
         self.assertContains(resposta, 'Ontem')
         self.assertContains(resposta, 'fora da meta')

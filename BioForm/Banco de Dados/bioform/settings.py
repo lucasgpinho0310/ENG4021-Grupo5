@@ -162,7 +162,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 LOGIN_URL = '/accounts/login/'          # URL de login (padrão do Django)
-LOGIN_REDIRECT_URL = 'inicio'           # depois do login: próximo passo do perfil ou metas
+LOGIN_REDIRECT_URL = 'contas:inicio'           # depois do login: próximo passo do perfil ou metas
 LOGOUT_REDIRECT_URL = '/accounts/login/'  # para onde vai após logout
 
 # Em desenvolvimento os e-mails (ex.: link de nova senha) são impressos no terminal do runserver

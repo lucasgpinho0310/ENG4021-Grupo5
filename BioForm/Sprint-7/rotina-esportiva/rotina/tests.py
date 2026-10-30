@@ -44,10 +44,10 @@ class PassoEsportesTest(TestCase):
         dados = {'pratica_musculacao': 'on', 'freq_musculacao': '4', 'int_musculacao': 'intensa',
                  'dur_musculacao': '45', 'fixos_musculacao': 'sim', 'dias_musculacao': ['seg', 'qua']}
         dados.update(extra)
-        return self.client.post(reverse('perfil_esportes'), dados)
+        return self.client.post(reverse('contas:perfil_esportes'), dados)
 
     def test_salva_minutos_e_dois_dias_fixos_de_quatro(self):
-        self.assertRedirects(self.enviar(), reverse('perfil_metas'), fetch_redirect_response=False)
+        self.assertRedirects(self.enviar(), reverse('metas:perfil_metas'), fetch_redirect_response=False)
         musculacao = self.usuario.esportes.get()
         self.assertEqual(musculacao.duracao_minutos, 45)
         self.assertEqual(musculacao.dias_fixos, 'seg,qua')
@@ -74,7 +74,7 @@ class PassoEsportesTest(TestCase):
         self.assertEqual(musculacao.treinos_livres, 4)
 
     def test_sem_duracao_usa_uma_hora(self):
-        self.client.post(reverse('perfil_esportes'), {
+        self.client.post(reverse('contas:perfil_esportes'), {
             'pratica_corrida': 'on', 'freq_corrida': '3', 'int_corrida': 'moderada'})
         self.assertEqual(self.usuario.esportes.get().duracao_minutos, 60)
 
@@ -85,7 +85,7 @@ class PassoEsportesTest(TestCase):
 
     def test_tela_mostra_os_valores_salvos(self):
         self.enviar()
-        resposta = self.client.get(reverse('perfil_esportes'))
+        resposta = self.client.get(reverse('contas:perfil_esportes'))
         self.assertContains(resposta, 'name="dur_musculacao" value="45" checked')
         self.assertContains(resposta, 'id="fixos-musculacao" name="fixos_musculacao" value="sim" checked')
         self.assertContains(resposta, 'name="dias_musculacao" value="seg" checked')
@@ -140,7 +140,7 @@ class SemanaTest(TestCase):
 
     def test_pagina_da_semana(self):
         self.client.login(username='bia@email.com', password=SENHA)
-        resposta = self.client.get(reverse('rotina_semana'))
+        resposta = self.client.get(reverse('rotina:rotina_semana'))
         self.assertContains(resposta, 'Sua semana de treinos')
         self.assertContains(resposta, 'Treinos livres:')
         self.assertContains(resposta, '1.380')
@@ -165,28 +165,28 @@ class ConfirmacaoMensalTest(TestCase):
 
     def test_aviso_aparece_nas_paginas_e_some_ao_confirmar(self):
         self.envelhecer(31)
-        resposta = self.client.get(reverse('perfil_metas'))
+        resposta = self.client.get(reverse('metas:perfil_metas'))
         self.assertContains(resposta, 'Sua rotina de treinos continua a mesma?')
         self.assertContains(resposta, 'Musculação 4x por semana · 60 min · fixos Seg, Qua')
 
-        resposta = self.client.post(reverse('rotina_confirmar'), {'voltar': reverse('perfil_metas')})
-        self.assertRedirects(resposta, reverse('perfil_metas'), fetch_redirect_response=False)
+        resposta = self.client.post(reverse('rotina:rotina_confirmar'), {'voltar': reverse('metas:perfil_metas')})
+        self.assertRedirects(resposta, reverse('metas:perfil_metas'), fetch_redirect_response=False)
         self.usuario.refresh_from_db()
         self.assertEqual(self.usuario.rotina_confirmada_em, timezone.localdate())
-        self.assertNotContains(self.client.get(reverse('perfil_metas')), 'continua a mesma?')
+        self.assertNotContains(self.client.get(reverse('metas:perfil_metas')), 'continua a mesma?')
 
     def test_aviso_nao_aparece_no_proprio_passo_3(self):
         self.envelhecer(31)
-        self.assertNotContains(self.client.get(reverse('perfil_esportes')), 'continua a mesma?')
+        self.assertNotContains(self.client.get(reverse('contas:perfil_esportes')), 'continua a mesma?')
 
     def test_quem_nunca_confirmou_recebe_o_aviso(self):
         self.usuario.rotina_confirmada_em = None
         self.usuario.save()
-        self.assertContains(self.client.get(reverse('perfil_metas')), 'continua a mesma?')
+        self.assertContains(self.client.get(reverse('metas:perfil_metas')), 'continua a mesma?')
 
     def test_confirmar_nao_redireciona_para_outro_site(self):
-        resposta = self.client.post(reverse('rotina_confirmar'), {'voltar': 'https://site-estranho.com/'})
-        self.assertRedirects(resposta, reverse('rotina_semana'), fetch_redirect_response=False)
+        resposta = self.client.post(reverse('rotina:rotina_confirmar'), {'voltar': 'https://site-estranho.com/'})
+        self.assertRedirects(resposta, reverse('rotina:rotina_semana'), fetch_redirect_response=False)
 
     def test_confirmar_so_por_post(self):
-        self.assertEqual(self.client.get(reverse('rotina_confirmar')).status_code, 405)
+        self.assertEqual(self.client.get(reverse('rotina:rotina_confirmar')).status_code, 405)

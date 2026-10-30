@@ -54,7 +54,7 @@
       {% endfor %}
 
       <div class="actions">
-        <a href="{% if onboarding %}{% url 'perfil_objetivo' %}{% else %}{% url 'perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
+        <a href="{% if onboarding %}{% url 'contas:perfil_objetivo' %}{% else %}{% url 'metas:perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
         <button type="submit" class="btn btn-primary">{% if onboarding %}Calcular minhas metas{% else %}Salvar e recalcular metas{% endif %}</button>
       </div>
     </form>

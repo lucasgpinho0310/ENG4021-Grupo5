@@ -30,4 +30,4 @@ def confirmar(request, usuario):
     voltar = request.POST.get('voltar', '')
     if url_has_allowed_host_and_scheme(voltar, allowed_hosts={request.get_host()}):
         return redirect(voltar)
-    return redirect('rotina_semana')
+    return redirect('rotina:rotina_semana')

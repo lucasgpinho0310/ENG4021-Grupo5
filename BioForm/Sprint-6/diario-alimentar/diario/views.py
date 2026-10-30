@@ -29,15 +29,15 @@ def diario_view(view):
         data = kwargs.get('data')
         if data is not None and data > servicos.hoje():
             messages.error(request, 'Não dá para registrar dias futuros.')
-            return redirect('diario_hoje')
+            return redirect('diario:diario_hoje')
         return view(request, usuario, *args, **kwargs)
     return envoltorio
 
 
 def voltar_para(data):
     if data == servicos.hoje():
-        return redirect('diario_hoje')
-    return redirect('diario_dia', data=data)
+        return redirect('diario:diario_hoje')
+    return redirect('diario:diario_dia', data=data)
 
 
 @diario_view
@@ -176,7 +176,7 @@ def excluir_combo(request, usuario, combo_id):
     voltar = request.POST.get('voltar', '')
     if url_has_allowed_host_and_scheme(voltar, allowed_hosts={request.get_host()}):
         return redirect(voltar)
-    return redirect('diario_hoje')
+    return redirect('diario:diario_hoje')
 
 
 @diario_view
