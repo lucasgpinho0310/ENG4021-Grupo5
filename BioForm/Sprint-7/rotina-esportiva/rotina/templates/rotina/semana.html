@@ -10,7 +10,7 @@
     <section class="block">
       <h2 class="block-title">Nenhum esporte no perfil</h2>
       <p class="block-sub">Marque o que você pratica para ver a sua semana e ter uma meta de calorias mais certa.</p>
-      <div class="actions"><a href="{% url 'perfil_esportes' %}" class="btn btn-primary">Marcar esportes</a></div>
+      <div class="actions"><a href="{% url 'contas:perfil_esportes' %}" class="btn btn-primary">Marcar esportes</a></div>
     </section>
     {% else %}
 
@@ -65,7 +65,7 @@
     {% endif %}
 
     <div class="actions">
-      <a href="{% url 'perfil_metas' %}" class="btn btn-ghost">Ver metas</a>
-      <a href="{% url 'perfil_esportes' %}" class="btn btn-primary">Editar rotina</a>
+      <a href="{% url 'metas:perfil_metas' %}" class="btn btn-ghost">Ver metas</a>
+      <a href="{% url 'contas:perfil_esportes' %}" class="btn btn-primary">Editar rotina</a>
     </div>
 {% endblock %}

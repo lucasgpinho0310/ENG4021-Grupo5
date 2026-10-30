@@ -8,13 +8,13 @@
         <p class="subtitle">Escolha para onde quer ir.</p>
 
         <nav class="home-links" aria-label="Páginas do BioForm">
-          <a href="{% url 'inicio' %}" class="btn btn-primary">Continuar de onde parei</a>
-          <a href="{% url 'diario_hoje' %}" class="btn btn-ghost">Diário</a>
-          <a href="{% url 'treinos_lista' %}" class="btn btn-ghost">Treinos</a>
-          <a href="{% url 'rotina_semana' %}" class="btn btn-ghost">Semana</a>
-          <a href="{% url 'perfil_metas' %}" class="btn btn-ghost">Metas</a>
-          <a href="{% url 'conta' %}" class="btn btn-ghost">Editar perfil</a>
-          {% if user.is_staff %}<a href="{% url 'usuarios' %}" class="btn btn-ghost">Usuários</a>{% endif %}
+          <a href="{% url 'contas:inicio' %}" class="btn btn-primary">Continuar de onde parei</a>
+          <a href="{% url 'diario:diario_hoje' %}" class="btn btn-ghost">Diário</a>
+          <a href="{% url 'treinos:treinos_lista' %}" class="btn btn-ghost">Treinos</a>
+          <a href="{% url 'rotina:rotina_semana' %}" class="btn btn-ghost">Semana</a>
+          <a href="{% url 'metas:perfil_metas' %}" class="btn btn-ghost">Metas</a>
+          <a href="{% url 'contas:conta' %}" class="btn btn-ghost">Editar perfil</a>
+          {% if user.is_staff %}<a href="{% url 'contas:usuarios' %}" class="btn btn-ghost">Usuários</a>{% endif %}
         </nav>
 
         <form method="post" action="{% url 'logout' %}" class="home-sair">
@@ -27,7 +27,7 @@
 
         <nav class="home-links" aria-label="Acesso">
           <a href="{% url 'login' %}" class="btn btn-primary">Entrar</a>
-          <a href="{% url 'cadastro' %}" class="btn btn-ghost">Criar uma conta</a>
+          <a href="{% url 'contas:cadastro' %}" class="btn btn-ghost">Criar uma conta</a>
         </nav>
   {% endif %}
 {% endblock %}

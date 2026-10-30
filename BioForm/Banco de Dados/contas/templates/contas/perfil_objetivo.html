@@ -83,7 +83,7 @@
       </section>
 
       <div class="actions">
-        <a href="{% if onboarding %}{% url 'perfil_dados' %}{% else %}{% url 'perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
+        <a href="{% if onboarding %}{% url 'contas:perfil_dados' %}{% else %}{% url 'metas:perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
         <button type="submit" class="btn btn-primary">{% if onboarding %}Continuar{% else %}Salvar e recalcular metas{% endif %}</button>
       </div>
     </form>

@@ -3,15 +3,15 @@
 {% block titulo %}{{ ficha.nome_ficha }}{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
 {% block conteudo %}
-    <p class="voltar"><a href="{% url 'treinos_lista' %}">← Séries</a></p>
+    <p class="voltar"><a href="{% url 'treinos:treinos_lista' %}">← Séries</a></p>
     <div class="treinos-topo">
       <div>
         <h1>{{ ficha.nome_ficha }} {% if ficha.ativa %}<span class="tag tag-green">Ativa</span>{% else %}<span class="tag tag-neutra">Inativa</span>{% endif %}</h1>
         <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</p>
       </div>
       <div class="ficha-acoes">
-        <a href="{% url 'treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
-        <form method="post" action="{% url 'treinos_alternar_ativa' ficha.id %}">
+        <a href="{% url 'treinos:treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
+        <form method="post" action="{% url 'treinos:treinos_alternar_ativa' ficha.id %}">
           {% csrf_token %}
           <button type="submit" class="btn-mini">{% if ficha.ativa %}Inativar{% else %}Ativar{% endif %}</button>
         </form>
@@ -56,13 +56,13 @@
             {% endif %}
           </div>
           <div class="exercicio-acoes">
-            <form method="post" action="{% url 'treinos_mover_exercicio' e.id %}">
+            <form method="post" action="{% url 'treinos:treinos_mover_exercicio' e.id %}">
               {% csrf_token %}
               <button type="submit" name="direcao" value="cima" class="btn-icone" title="Subir" aria-label="Subir {{ e.nome_exercicio }}"{% if forloop.parentloop.first and forloop.first %} disabled{% endif %}>↑</button>
               <button type="submit" name="direcao" value="baixo" class="btn-icone" title="Descer" aria-label="Descer {{ e.nome_exercicio }}"{% if forloop.parentloop.last and forloop.last %} disabled{% endif %}>↓</button>
             </form>
-            <a href="{% url 'treinos_editar_exercicio' e.id %}" class="btn-icone" title="Editar" aria-label="Editar {{ e.nome_exercicio }}">✎</a>
-            <form method="post" action="{% url 'treinos_excluir_exercicio' e.id %}" onsubmit="return confirm('Remover {{ e.nome_exercicio|escapejs }} da série?');">
+            <a href="{% url 'treinos:treinos_editar_exercicio' e.id %}" class="btn-icone" title="Editar" aria-label="Editar {{ e.nome_exercicio }}">✎</a>
+            <form method="post" action="{% url 'treinos:treinos_excluir_exercicio' e.id %}" onsubmit="return confirm('Remover {{ e.nome_exercicio|escapejs }} da série?');">
               {% csrf_token %}
               <button type="submit" class="btn-icone perigo" title="Remover" aria-label="Remover {{ e.nome_exercicio }}">×</button>
             </form>
@@ -74,7 +74,7 @@
     </ol>
 
     <div class="actions">
-      <a href="{% url 'treinos_colar' ficha.id %}" class="btn btn-ghost">Colar exercícios</a>
-      <a href="{% url 'treinos_novo_exercicio' ficha.id %}" class="btn btn-primary">+ Adicionar exercício</a>
+      <a href="{% url 'treinos:treinos_colar' ficha.id %}" class="btn btn-ghost">Colar exercícios</a>
+      <a href="{% url 'treinos:treinos_novo_exercicio' ficha.id %}" class="btn btn-primary">+ Adicionar exercício</a>
     </div>
 {% endblock %}

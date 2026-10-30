@@ -11,7 +11,7 @@
           {% else %}Monte suas séries exercício por exercício ou colando o texto da ficha.{% endif %}
         </p>
       </div>
-      <a href="{% url 'treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+      <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
     </div>
 
     {% if ativas %}
@@ -20,7 +20,7 @@
       {% for dia, fichas in semana.items %}
       <li{% if not fichas %} class="vazio"{% endif %}>
         <b>{{ dia|dias_curtos }}</b>
-        {% for f in fichas %}<a href="{% url 'treinos_ficha' f.id %}">{{ f.nome_ficha }}</a>{% empty %}<span>—</span>{% endfor %}
+        {% for f in fichas %}<a href="{% url 'treinos:treinos_ficha' f.id %}">{{ f.nome_ficha }}</a>{% empty %}<span>—</span>{% endfor %}
       </li>
       {% endfor %}
     </ol>
@@ -32,11 +32,11 @@
       <ul class="fichas">
         {% for f in ativas %}
         <li class="ficha-card">
-          <a href="{% url 'treinos_ficha' f.id %}" class="ficha-link">
+          <a href="{% url 'treinos:treinos_ficha' f.id %}" class="ficha-link">
             <b>{{ f.nome_ficha }}</b>
             <small>{{ f.total_exercicios }} exercício{{ f.total_exercicios|pluralize }}{% if f.dias_semana %} · {{ f.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</small>
           </a>
-          <form method="post" action="{% url 'treinos_alternar_ativa' f.id %}">
+          <form method="post" action="{% url 'treinos:treinos_alternar_ativa' f.id %}">
             {% csrf_token %}<input type="hidden" name="voltar" value="lista">
             <button type="submit" class="btn-mini">Inativar</button>
           </form>
@@ -55,11 +55,11 @@
       <ul class="fichas">
         {% for f in inativas %}
         <li class="ficha-card inativa">
-          <a href="{% url 'treinos_ficha' f.id %}" class="ficha-link">
+          <a href="{% url 'treinos:treinos_ficha' f.id %}" class="ficha-link">
             <b>{{ f.nome_ficha }}</b>
             <small>{{ f.total_exercicios }} exercício{{ f.total_exercicios|pluralize }}</small>
           </a>
-          <form method="post" action="{% url 'treinos_alternar_ativa' f.id %}">
+          <form method="post" action="{% url 'treinos:treinos_alternar_ativa' f.id %}">
             {% csrf_token %}<input type="hidden" name="voltar" value="lista">
             <button type="submit" class="btn-mini">Ativar</button>
           </form>

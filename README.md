@@ -130,6 +130,10 @@ Uma vez por mês ele pede para confirmar se a rotina continua a mesma.
 | [`BioForm/Escopo Técnico`](BioForm/Escopo%20T%C3%A9cnico), [`BioForm/Sprint-Usuarios`](BioForm/Sprint-Usuarios), [`BioForm/usuários`](BioForm/usu%C3%A1rios) | documentos e protótipos HTML das primeiras sprints |
 | [`Calculadora`](Calculadora) | tarefa da Sprint 1 (Git e Codespace) |
 
+Cada app tem o seu `urls.py` com `app_name` e entra no `urls.py` principal com o seu prefixo
+(`path('diario/', include('diario.urls'))`). Nos templates, os links usam o nome do app,
+por exemplo `{% url 'diario:diario_hoje' %}`.
+
 Os apps das Sprints 6 e 7 ficam na pasta da sprint em que foram entregues, para que os links das entregas
 continuem valendo. O `settings.py` acrescenta essas pastas ao caminho do Python, então o Django os carrega
 como se estivessem ao lado do `manage.py`.

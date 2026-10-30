@@ -33,11 +33,12 @@ urlpatterns = [
     path('accounts/password_change/', TrocarSenhaView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
     path('accounts/', include('django.contrib.auth.urls')),
 
-    path('', include('contas.urls')),
-    path('', include('metas.urls')),
-    path('', include('diario.urls')),
-    path('', include('rotina.urls')),
-    path('', include('treinos.urls')),
+    # Cada app tem o seu urls.py (com app_name) e o seu prefixo de rota
+    path('', include('contas.urls')),             # cadastro, perfil e conta
+    path('perfil/metas/', include('metas.urls')),  # Sprint-6/calculadora-metas
+    path('diario/', include('diario.urls')),       # Sprint-6/diario-alimentar
+    path('rotina/', include('rotina.urls')),       # Sprint-7/rotina-esportiva
+    path('treinos/', include('treinos.urls')),     # Sprint-7/series-academia
 ]
 
 # Em desenvolvimento, o próprio Django entrega as imagens enviadas

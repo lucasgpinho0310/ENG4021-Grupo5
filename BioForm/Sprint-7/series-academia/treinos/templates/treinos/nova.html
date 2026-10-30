@@ -3,7 +3,7 @@
 {% block titulo %}Nova série{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
 {% block conteudo %}
-    <p class="voltar"><a href="{% url 'treinos_lista' %}">← Séries</a></p>
+    <p class="voltar"><a href="{% url 'treinos:treinos_lista' %}">← Séries</a></p>
     <h1>Nova série</h1>
     <p class="subtitle">Dê um nome e monte os exercícios um por um ou colando o texto da sua ficha.</p>
 
@@ -51,7 +51,7 @@
       </section>
 
       <div class="actions">
-        <a href="{% url 'treinos_lista' %}" class="btn btn-ghost">Cancelar</a>
+        <a href="{% url 'treinos:treinos_lista' %}" class="btn btn-ghost">Cancelar</a>
         <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% if leitura and modo == 'texto' %}Salvar série com {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% else %}Criar série{% endif %}</button>
       </div>
     </form>

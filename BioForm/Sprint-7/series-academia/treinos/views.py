@@ -74,7 +74,7 @@ def nova(request, usuario):
                     ficha.nome_ficha, total, '' if total == 1 else 's'))
             else:
                 messages.success(request, 'Série "%s" criada. Agora adicione os exercícios.' % ficha.nome_ficha)
-            return redirect('treinos_ficha', ficha_id=ficha.id)
+            return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
     return render(request, 'treinos/nova.html', _contexto(
         usuario, form=form, linhas=linhas, modo=modo, leitura=leitura,
     ))
@@ -101,7 +101,7 @@ def editar_ficha(request, usuario, ficha_id):
         ficha.ativa = form.cleaned_data['ativa']
         ficha.save(update_fields=['nome_ficha', 'dias_semana', 'ativa'])
         messages.success(request, 'Série atualizada.')
-        return redirect('treinos_ficha', ficha_id=ficha.id)
+        return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
     return render(request, 'treinos/editar_ficha.html', _contexto(usuario, ficha=ficha, form=form))
 
 
@@ -114,8 +114,8 @@ def alternar_ativa(request, usuario, ficha_id):
     else:
         messages.success(request, 'Série "%s" inativada. Ela continua salva e pode ser ativada de novo.' % ficha.nome_ficha)
     if request.POST.get('voltar') == 'lista':
-        return redirect('treinos_lista')
-    return redirect('treinos_ficha', ficha_id=ficha.id)
+        return redirect('treinos:treinos_lista')
+    return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
 
 
 @require_POST
@@ -125,7 +125,7 @@ def excluir_ficha(request, usuario, ficha_id):
     nome = ficha.nome_ficha
     servicos.excluir_ficha(ficha)
     messages.success(request, 'Série "%s" excluída.' % nome)
-    return redirect('treinos_lista')
+    return redirect('treinos:treinos_lista')
 
 
 @treinos_view
@@ -141,7 +141,7 @@ def colar(request, usuario, ficha_id):
             servicos.adicionar_lidos(ficha, leitura.exercicios)
             total = len(leitura.exercicios)
             messages.success(request, '%d exercício%s adicionado%s.' % (total, '' if total == 1 else 's', '' if total == 1 else 's'))
-            return redirect('treinos_ficha', ficha_id=ficha.id)
+            return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
     return render(request, 'treinos/colar.html', _contexto(usuario, ficha=ficha, form=form, leitura=leitura))
 
 
@@ -156,8 +156,8 @@ def novo_exercicio(request, usuario, ficha_id):
         exercicio.save()
         messages.success(request, '"%s" adicionado.' % exercicio.nome_exercicio)
         if request.POST.get('acao') == 'outro':
-            return redirect('treinos_novo_exercicio', ficha_id=ficha.id)
-        return redirect('treinos_ficha', ficha_id=ficha.id)
+            return redirect('treinos:treinos_novo_exercicio', ficha_id=ficha.id)
+        return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
     return render(request, 'treinos/exercicio.html', _contexto(usuario, ficha=ficha, form=form, exercicio=None))
 
 
@@ -168,7 +168,7 @@ def editar_exercicio(request, usuario, exercicio_id):
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, '"%s" atualizado.' % exercicio.nome_exercicio)
-        return redirect('treinos_ficha', ficha_id=exercicio.ficha_id)
+        return redirect('treinos:treinos_ficha', ficha_id=exercicio.ficha_id)
     return render(request, 'treinos/exercicio.html', _contexto(
         usuario, ficha=exercicio.ficha, form=form, exercicio=exercicio,
     ))
@@ -181,7 +181,7 @@ def excluir_exercicio(request, usuario, exercicio_id):
     ficha_id, nome = exercicio.ficha_id, exercicio.nome_exercicio
     servicos.excluir_exercicio(exercicio)
     messages.success(request, '"%s" removido da série.' % nome)
-    return redirect('treinos_ficha', ficha_id=ficha_id)
+    return redirect('treinos:treinos_ficha', ficha_id=ficha_id)
 
 
 @require_POST
@@ -189,4 +189,4 @@ def excluir_exercicio(request, usuario, exercicio_id):
 def mover_exercicio(request, usuario, exercicio_id):
     exercicio = _exercicio(usuario, exercicio_id)
     servicos.mover(exercicio, para_cima=request.POST.get('direcao') == 'cima')
-    return redirect('%s#ex-%s' % (reverse('treinos_ficha', args=[exercicio.ficha_id]), exercicio.id))
+    return redirect('%s#ex-%s' % (reverse('treinos:treinos_ficha', args=[exercicio.ficha_id]), exercicio.id))

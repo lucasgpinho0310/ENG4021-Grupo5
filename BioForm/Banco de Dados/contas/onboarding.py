@@ -16,11 +16,11 @@ SESSAO_PESO = 'peso_onboarding'
 def proximo_passo(usuario):
     """Nome da URL do primeiro passo do perfil que falta preencher, ou None se está completo."""
     if not (usuario.apelido and usuario.data_nascimento and usuario.sexo_biologico and usuario.altura_cm):
-        return 'perfil_dados'
+        return 'contas:perfil_dados'
     if not usuario.biotipo or usuario.medida_atual() is None:
-        return 'perfil_objetivo'
+        return 'contas:perfil_objetivo'
     if usuario.meta_atual() is None:
-        return 'perfil_esportes'
+        return 'contas:perfil_esportes'
     return None
 
 
@@ -36,9 +36,9 @@ def perfil_obrigatorio(view):
         usuario = Usuario.objects.filter(conta=request.user).first()
         if usuario is None:
             if request.user.is_staff:  # ex.: superusuário criado pelo createsuperuser
-                return redirect('usuarios')
+                return redirect('contas:usuarios')
             logout(request)
             messages.error(request, 'Esta conta não tem perfil no BioForm. Crie uma conta para continuar.')
-            return redirect('cadastro')
+            return redirect('contas:cadastro')
         return view(request, usuario, *args, **kwargs)
     return envoltorio

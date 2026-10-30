@@ -3,7 +3,7 @@
 {% block titulo %}{% if exercicio %}Editar exercício{% else %}Novo exercício{% endif %}{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
 {% block conteudo %}
-    <p class="voltar"><a href="{% url 'treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <p class="voltar"><a href="{% url 'treinos:treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
     <h1>{% if exercicio %}{{ exercicio.nome_exercicio }}{% else %}Novo exercício{% endif %}</h1>
     <p class="subtitle">{% if exercicio %}Exercício {{ exercicio.ordem_execucao }} de "{{ ficha.nome_ficha }}".{% else %}Entra no fim de "{{ ficha.nome_ficha }}".{% endif %}</p>
 
@@ -41,7 +41,7 @@
       </section>
 
       <div class="actions">
-        <a href="{% url 'treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
+        <a href="{% url 'treinos:treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
         {% if not exercicio %}<button type="submit" name="acao" value="outro" class="btn btn-ghost">Salvar e adicionar outro</button>{% endif %}
         <button type="submit" class="btn btn-primary">Salvar</button>
       </div>

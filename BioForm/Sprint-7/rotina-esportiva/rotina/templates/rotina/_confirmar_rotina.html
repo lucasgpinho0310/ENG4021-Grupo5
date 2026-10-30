@@ -10,8 +10,8 @@
     <small>Confirmamos uma vez por mês para manter sua meta de calorias certa.</small>
   </div>
   <div class="confirmar-rotina-botoes">
-    <a href="{% url 'perfil_esportes' %}" class="btn btn-ghost">Ajustar</a>
-    <form method="post" action="{% url 'rotina_confirmar' %}">
+    <a href="{% url 'contas:perfil_esportes' %}" class="btn btn-ghost">Ajustar</a>
+    <form method="post" action="{% url 'rotina:rotina_confirmar' %}">
       {% csrf_token %}
       <input type="hidden" name="voltar" value="{{ request.get_full_path }}">
       <button type="submit" class="btn btn-primary">Sim, continua</button>
