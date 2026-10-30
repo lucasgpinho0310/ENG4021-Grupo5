@@ -1,6 +1,7 @@
 {% extends 'contas/base_perfil.html' %}
-{% load bioform %}
+{% load static bioform %}
 {% block titulo %}{% if onboarding %}Seu perfil (4/4){% else %}Minhas metas{% endif %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'metas/css/metas.css' %}">{% endblock %}
 {% block conteudo %}
     <h1>{% if onboarding %}Suas metas estão prontas!{% else %}Olá, {{ usuario }}! Estas são suas metas{% endif %}</h1>
     <p class="subtitle">Calculamos tudo a partir do seu perfil. Veja de onde vem cada número.</p>
