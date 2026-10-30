@@ -1,0 +1,31 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% block titulo %}Editar série{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <h1>Editar série</h1>
+
+    <form method="post" class="form-treino">
+      {% csrf_token %}
+      {% include 'contas/_erros_gerais.html' %}
+      <section class="block">
+        {% include 'treinos/_campo.html' with campo=form.nome %}
+        {% include 'treinos/_dias.html' %}
+        <label class="check">{{ form.ativa }} Série ativa (aparece na semana)</label>
+      </section>
+      <div class="actions">
+        <a href="{% url 'treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+
+    <section class="block zona-perigo">
+      <h2 class="block-title">Excluir série</h2>
+      <p class="block-sub">Apaga a série e todos os exercícios, com as imagens. Se só não está usando agora, prefira inativar.</p>
+      <form method="post" action="{% url 'treinos_excluir_ficha' ficha.id %}" onsubmit="return confirm('Excluir a série {{ ficha.nome_ficha|escapejs }}? Não dá para desfazer.');">
+        {% csrf_token %}
+        <button type="submit" class="btn-mini perigo">Excluir série</button>
+      </form>
+    </section>
+{% endblock %}

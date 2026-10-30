@@ -1,0 +1,71 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform %}
+{% block titulo %}Meus treinos{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <div class="treinos-topo">
+      <div>
+        <h1>Suas séries de academia</h1>
+        <p class="subtitle">
+          {% if musculacao %}Musculação no perfil: {{ musculacao.frequencia_semanal|vezes_por_semana }}{% if musculacao.frequencia_semanal < 7 %} por semana{% endif %}{% if musculacao.dias_fixos %}, fixos {{ musculacao.dias_fixos|dias_curtos }}{% if musculacao.treinos_livres %} + {{ musculacao.treinos_livres }} livre{{ musculacao.treinos_livres|pluralize }}{% endif %}{% endif %} · {{ musculacao.duracao_minutos }} min.
+          {% else %}Monte suas séries exercício por exercício ou colando o texto da ficha.{% endif %}
+        </p>
+      </div>
+      <a href="{% url 'treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+    </div>
+
+    {% if ativas %}
+    <!-- Semana com as séries ativas -->
+    <ol class="semana-series" aria-label="Séries por dia">
+      {% for dia, fichas in semana.items %}
+      <li{% if not fichas %} class="vazio"{% endif %}>
+        <b>{{ dia|dias_curtos }}</b>
+        {% for f in fichas %}<a href="{% url 'treinos_ficha' f.id %}">{{ f.nome_ficha }}</a>{% empty %}<span>—</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+
+    <section class="block">
+      <h2 class="block-title">Ativas</h2>
+      {% if ativas %}
+      <ul class="fichas">
+        {% for f in ativas %}
+        <li class="ficha-card">
+          <a href="{% url 'treinos_ficha' f.id %}" class="ficha-link">
+            <b>{{ f.nome_ficha }}</b>
+            <small>{{ f.total_exercicios }} exercício{{ f.total_exercicios|pluralize }}{% if f.dias_semana %} · {{ f.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</small>
+          </a>
+          <form method="post" action="{% url 'treinos_alternar_ativa' f.id %}">
+            {% csrf_token %}<input type="hidden" name="voltar" value="lista">
+            <button type="submit" class="btn-mini">Inativar</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="block-sub">Nenhuma série ativa. Crie a primeira, por exemplo "Inferiores", e cole os exercícios da sua ficha.</p>
+      {% endif %}
+    </section>
+
+    {% if inativas %}
+    <details class="block inativas">
+      <summary class="block-title">Inativas ({{ inativas|length }})</summary>
+      <p class="block-sub">Ficam guardadas, fora da semana. Ative quando voltar a usar.</p>
+      <ul class="fichas">
+        {% for f in inativas %}
+        <li class="ficha-card inativa">
+          <a href="{% url 'treinos_ficha' f.id %}" class="ficha-link">
+            <b>{{ f.nome_ficha }}</b>
+            <small>{{ f.total_exercicios }} exercício{{ f.total_exercicios|pluralize }}</small>
+          </a>
+          <form method="post" action="{% url 'treinos_alternar_ativa' f.id %}">
+            {% csrf_token %}<input type="hidden" name="voltar" value="lista">
+            <button type="submit" class="btn-mini">Ativar</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+{% endblock %}

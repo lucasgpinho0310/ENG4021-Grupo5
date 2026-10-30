@@ -1,0 +1,20 @@
+{% comment %}Aviso mensal (rotina/contexto.py): a rotina esportiva continua a mesma?{% endcomment %}
+{% load static bioform %}
+<link rel="stylesheet" href="{% static 'rotina/css/rotina.css' %}">
+<section class="confirmar-rotina" aria-label="Confirmar rotina">
+  <div>
+    <b>Sua rotina de treinos continua a mesma?</b>
+    <p>
+      {% for e in rotina_a_confirmar %}{{ e.esporte.nome }} {{ e.frequencia_semanal|vezes_por_semana }}{% if e.frequencia_semanal < 7 %} por semana{% endif %} · {{ e.duracao_minutos }} min{% if e.dias_fixos %} · fixos {{ e.dias_fixos|dias_curtos }}{% endif %}{% if not forloop.last %}; {% endif %}{% empty %}Nenhum esporte marcado no perfil.{% endfor %}
+    </p>
+    <small>Confirmamos uma vez por mês para manter sua meta de calorias certa.</small>
+  </div>
+  <div class="confirmar-rotina-botoes">
+    <a href="{% url 'perfil_esportes' %}" class="btn btn-ghost">Ajustar</a>
+    <form method="post" action="{% url 'rotina_confirmar' %}">
+      {% csrf_token %}
+      <input type="hidden" name="voltar" value="{{ request.get_full_path }}">
+      <button type="submit" class="btn btn-primary">Sim, continua</button>
+    </form>
+  </div>
+</section>

@@ -16,10 +16,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Apps da Sprint 6: cada tarefa fica na sua pasta em BioForm/Sprint-6
+# Apps das sprints: cada tarefa fica na sua pasta em BioForm/Sprint-N
 SPRINT_6 = BASE_DIR.parent / 'Sprint-6'
 for pasta in ('diario-alimentar', 'medidas-caseiras', 'calculadora-metas'):
     sys.path.insert(0, str(SPRINT_6 / pasta))
+SPRINT_7 = BASE_DIR.parent / 'Sprint-7'
+for pasta in ('rotina-esportiva', 'series-academia'):
+    sys.path.insert(0, str(SPRINT_7 / pasta))
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,7 +34,9 @@ SECRET_KEY = 'django-insecure-!zoqqn2=!_a)2lw-kn0-do!hrpxz30hzzf88&tl)bqhj#cn$vj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# .app.github.dev: endereço do site quando o projeto roda num GitHub Codespace
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.app.github.dev']
+CSRF_TRUSTED_ORIGINS = ['https://*.app.github.dev']
 
 
 # Application definition
@@ -48,6 +53,8 @@ INSTALLED_APPS = [
     'medidas_caseiras',  # Sprint-6/medidas-caseiras
     'metas',             # Sprint-6/calculadora-metas
     'diario',            # Sprint-6/diario-alimentar
+    'rotina',            # Sprint-7/rotina-esportiva
+    'treinos',           # Sprint-7/series-academia
 ]
 
 MIDDLEWARE = [
@@ -72,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'rotina.contexto.confirmacao_da_rotina',  # aviso mensal da rotina
             ],
         },
     },
@@ -126,6 +134,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Arquivos enviados pelos usuários (imagens dos exercícios)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

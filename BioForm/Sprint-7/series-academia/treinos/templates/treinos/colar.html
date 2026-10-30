@@ -1,0 +1,22 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% block titulo %}Colar exercícios{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <h1>Colar exercícios</h1>
+    <p class="subtitle">Os exercícios entram no fim de "{{ ficha.nome_ficha }}".</p>
+
+    <form method="post" class="form-treino">
+      {% csrf_token %}
+      <section class="block">
+        {% include 'treinos/_campo.html' with campo=form.texto %}
+      </section>
+      <div class="actions">
+        <button type="submit" name="acao" value="previa" class="btn btn-ghost">Ver prévia</button>
+        <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% if leitura %}Adicionar {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% else %}Adicionar{% endif %}</button>
+      </div>
+    </form>
+
+    {% if leitura and leitura.exercicios %}{% include 'treinos/_previa.html' %}{% endif %}
+{% endblock %}

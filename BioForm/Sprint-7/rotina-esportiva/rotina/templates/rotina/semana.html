@@ -1,0 +1,71 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform %}
+{% block titulo %}Minha semana{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'rotina/css/rotina.css' %}">{% endblock %}
+{% block conteudo %}
+    <h1>Sua semana de treinos</h1>
+    <p class="subtitle">Montada com os esportes do seu perfil: os dias fixos, os treinos livres e quanto cada um gasta.</p>
+
+    {% if not semana.esportes %}
+    <section class="block">
+      <h2 class="block-title">Nenhum esporte no perfil</h2>
+      <p class="block-sub">Marque o que você pratica para ver a sua semana e ter uma meta de calorias mais certa.</p>
+      <div class="actions"><a href="{% url 'perfil_esportes' %}" class="btn btn-primary">Marcar esportes</a></div>
+    </section>
+    {% else %}
+
+    <!-- Números da semana -->
+    <div class="semana-numeros">
+      <div><small>Treinos</small><strong>{{ semana.treinos_semana }}</strong></div>
+      <div><small>Tempo</small><strong>{{ semana.horas_semana }}</strong></div>
+      <div><small>Gasto na semana</small><strong>{% if semana.kcal_semana is not None %}{{ semana.kcal_semana|milhar }} <span>kcal</span>{% else %}—{% endif %}</strong></div>
+      <div><small>Média por dia</small><strong>{% if semana.kcal_por_dia is not None %}{{ semana.kcal_por_dia|milhar }} <span>kcal</span>{% else %}—{% endif %}</strong></div>
+    </div>
+
+    <!-- Dias fixos -->
+    <section class="block">
+      <h2 class="block-title">Dias fixos</h2>
+      <ol class="semana-dias">
+        {% for dia in semana.dias %}
+        <li class="semana-dia{% if dia.hoje %} hoje{% endif %}{% if not dia.esportes %} vazio{% endif %}">
+          <b>{{ dia.nome|slice:":3" }}{% if dia.hoje %} <em>hoje</em>{% endif %}</b>
+          {% for e in dia.esportes %}
+          <span class="tag tag-green">{{ e.emoji }} {{ e.nome }}</span>
+          {% empty %}
+          <span class="semana-sem">—</span>
+          {% endfor %}
+        </li>
+        {% endfor %}
+      </ol>
+      {% if semana.livres %}
+      <p class="semana-livres">
+        <b>Treinos livres:</b>
+        {% for e in semana.livres %}{{ e.emoji }} {{ e.nome }} {{ e.livres }}x{% if not forloop.last %} · {% endif %}{% endfor %}
+        <small>Encaixe em qualquer dia da semana.</small>
+      </p>
+      {% endif %}
+    </section>
+
+    <!-- Gasto de cada esporte -->
+    <section class="block">
+      <h2 class="block-title">Quanto cada esporte gasta</h2>
+      <div class="calc">
+        {% for e in semana.esportes %}
+        <div class="calc-row">
+          <div>
+            <span>{{ e.emoji }} {{ e.nome }}</span>
+            <small>{{ e.registro.frequencia_semanal|vezes_por_semana }} de {{ e.registro.duracao_minutos }} min · {{ e.registro.get_intensidade_display|lower }}{% if e.dias_fixos %} · fixos: {{ e.registro.dias_fixos|dias_curtos }}{% endif %}{% if e.livres and e.dias_fixos %} + {{ e.livres }} livre{{ e.livres|pluralize }}{% endif %}</small>
+          </div>
+          <b class="plus">{% if e.kcal_semana is not None %}{{ e.kcal_semana|milhar }} kcal/sem{% else %}—{% endif %}</b>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="disclaimer">A média por dia é o "gasto dos esportes" que entra na sua meta de calorias. É uma estimativa pelo MET de cada esporte.{% if proxima_confirmacao %} Vamos pedir para você confirmar a rotina de novo em {{ proxima_confirmacao|date:"d/m" }}.{% endif %}</p>
+    </section>
+    {% endif %}
+
+    <div class="actions">
+      <a href="{% url 'perfil_metas' %}" class="btn btn-ghost">Ver metas</a>
+      <a href="{% url 'perfil_esportes' %}" class="btn btn-primary">Editar rotina</a>
+    </div>
+{% endblock %}

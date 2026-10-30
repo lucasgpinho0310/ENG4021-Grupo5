@@ -1,0 +1,5 @@
+<div class="field{% if campo.errors %} field-error{% endif %}{% if classe %} {{ classe }}{% endif %}">
+  <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+  {{ campo }}
+  {% if campo.errors %}<span class="help erro">{{ campo.errors|join:' ' }}</span>{% elif campo.help_text %}<span class="help">{{ campo.help_text }}</span>{% endif %}
+</div>

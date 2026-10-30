@@ -10,6 +10,8 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 
 from metas.calculo import salvar_meta
+from rotina.campos import DIAS, DURACOES, TEM_DIAS_FIXOS
+from rotina.confirmacao import confirmar_rotina
 from saude.models import INTENSIDADES, EsporteUsuario, HistoricoMedida, MetaNutricional, Usuario
 
 from .forms import (
@@ -156,16 +158,21 @@ def perfil_esportes(request, usuario):
         with transaction.atomic():
             usuario.esportes.all().delete()
             EsporteUsuario.objects.bulk_create([
-                EsporteUsuario(usuario=usuario, esporte=esporte, frequencia_semanal=freq, intensidade=intensidade)
-                for esporte, freq, intensidade in form.escolhidos()
+                EsporteUsuario(
+                    usuario=usuario, esporte=esporte, frequencia_semanal=freq, intensidade=intensidade,
+                    duracao_minutos=minutos, dias_fixos=dias_fixos,
+                )
+                for esporte, freq, intensidade, minutos, dias_fixos in form.escolhidos()
             ])
             salvar_meta(usuario)
+            confirmar_rotina(usuario)
         if not onboarding:
             messages.success(request, 'Esportes atualizados. Suas metas foram recalculadas.')
         return redirect('perfil_metas')
     return render(request, 'contas/perfil_esportes.html', {
         'form': form, 'usuario': usuario, 'passo': 3, 'onboarding': onboarding,
         'frequencias': FREQUENCIAS, 'intensidades': INTENSIDADES.items(),
+        'duracoes': DURACOES, 'dias': DIAS, 'tem_dias_fixos': TEM_DIAS_FIXOS,
     })
 
 

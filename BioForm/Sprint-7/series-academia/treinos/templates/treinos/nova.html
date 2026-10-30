@@ -1,0 +1,37 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% block titulo %}Nova série{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos_lista' %}">← Séries</a></p>
+    <h1>Nova série</h1>
+    <p class="subtitle">Dê um nome e, se quiser, cole os exercícios da ficha. Sem texto, você adiciona um por um depois.</p>
+
+    <form method="post" class="form-treino">
+      {% csrf_token %}
+      {% include 'contas/_erros_gerais.html' %}
+      <section class="block">
+        {% include 'treinos/_campo.html' with campo=form.nome %}
+        {% include 'treinos/_dias.html' %}
+        <label class="check">{{ form.ativa }} Série ativa (aparece na semana)</label>
+      </section>
+
+      <section class="block">
+        {% include 'treinos/_campo.html' with campo=form.texto %}
+        <details class="formato">
+          <summary>Como escrever</summary>
+          <p>Um exercício por bloco, separados por uma linha em branco. A primeira linha é o nome; depois, se tiver:
+            <code>Séries: 3x10</code> (ou 3/10, "3/10 cada lado", 3x10+10), <code>Carga: 20kg</code>,
+            <code>Intervalo: 60s</code> e <code>Instruções:</code> com o texto nas linhas de baixo.</p>
+          <p>Exercícios combinados: escreva a letra (A, B...) na linha de baixo de cada nome. As séries escritas no último valem para o grupo.</p>
+        </details>
+      </section>
+
+      <div class="actions">
+        <button type="submit" name="acao" value="previa" class="btn btn-ghost">Ver prévia</button>
+        <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% if leitura %}Salvar série com {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% else %}Criar série{% endif %}</button>
+      </div>
+    </form>
+
+    {% if leitura %}{% include 'treinos/_previa.html' %}{% endif %}
+{% endblock %}
