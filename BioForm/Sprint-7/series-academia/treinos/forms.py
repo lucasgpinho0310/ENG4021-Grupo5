@@ -4,15 +4,18 @@ from django import forms
 
 from saude.models import DIAS_DA_SEMANA, ExercicioFicha
 
-from .leitor import ler_intervalo, ler_series
+from .leitor import ExercicioLido, ler_intervalo
 
 DIAS = [(dia, nome[:3]) for dia, nome in DIAS_DA_SEMANA.items()]
 IMAGEM_MAXIMA_MB = 5
 TEXTO_MAXIMO = 20000
+MEDIDAS = [('repeticoes', 'Repetições'), ('tempo', 'Tempo')]
+LINHAS_INICIAIS = 4
+LINHAS_MAXIMAS = 60
 
 
 class FichaForm(forms.Form):
-    """Nome, dias e situação da série. O texto colado é opcional (dá para ir exercício por exercício)."""
+    """Nome, dias e situação da série. Os exercícios vêm do texto colado ou das linhas (um por um)."""
     nome = forms.CharField(
         label='Nome da série', max_length=100,
         widget=forms.TextInput(attrs={'placeholder': 'Ex.: Inferiores, Treino A, Peito e tríceps'}),
@@ -22,10 +25,10 @@ class FichaForm(forms.Form):
     )
     ativa = forms.BooleanField(label='Série ativa', required=False, initial=True)
     texto = forms.CharField(
-        label='Cole os exercícios (opcional)', required=False, max_length=TEXTO_MAXIMO,
+        label='Cole os exercícios', required=False, max_length=TEXTO_MAXIMO,
         widget=forms.Textarea(attrs={
             'rows': 12,
-            'placeholder': 'Cadeira Extensora\nSéries: 3x15\nCarga: 20kg\nIntervalo: 60s\n\nCadeira Flexora\nSéries: 3x10\n...',
+            'placeholder': 'Cadeira Extensora\nSéries: 3x15\nCarga: 20kg\nIntervalo: 60s\n\nPrancha\nSéries: 3x30s\n...',
         }),
     )
 
@@ -50,18 +53,110 @@ class TextoForm(forms.Form):
     )
 
 
-class ExercicioForm(forms.ModelForm):
-    """Um exercício de cada vez. "Séries" é escrito como na ficha (3x10, 3/10 cada lado, 3x10+10)."""
-    series = forms.CharField(
-        label='Séries', max_length=60,
-        widget=forms.TextInput(attrs={'placeholder': '3x10'}),
-        help_text='Como na ficha: 3x10, 3/12, 4x8-10, 3x10+10.',
+def sem_zeros(valor):
+    """Decimal('100.00') -> Decimal('100'); Decimal('12.50') -> Decimal('12.5') (sem virar 1E+2)."""
+    valor = Decimal(valor)
+    return valor.quantize(Decimal(1)) if valor == valor.to_integral() else valor.normalize()
+
+
+def _segundos(texto, erro):
+    """'45' ou '45s' -> 45; '2min' -> 120; vazio -> None."""
+    texto = (texto or '').strip()
+    if not texto:
+        return None
+    segundos = ler_intervalo(texto + 's' if texto.isdigit() else texto)
+    if segundos is None:
+        raise forms.ValidationError(erro)
+    return segundos
+
+
+class CamposDeSeries(forms.Form):
+    """
+    Séries, repetições ou tempo, e intervalo, em campos separados.
+    Exercício por tempo (prancha, isometria, estabilidade) usa "Tempo" no lugar das repetições.
+    """
+    series = forms.IntegerField(
+        label='Séries', min_value=1, max_value=20, initial=3,
+        widget=forms.NumberInput(attrs={'min': 1, 'max': 20, 'inputmode': 'numeric'}),
+    )
+    medida = forms.ChoiceField(label='Por', choices=MEDIDAS, initial='repeticoes')
+    repeticoes = forms.IntegerField(
+        label='Repetições', min_value=1, max_value=200, required=False, initial=10,
+        widget=forms.NumberInput(attrs={'min': 1, 'max': 200, 'inputmode': 'numeric'}),
+    )
+    tempo = forms.CharField(
+        label='Tempo', max_length=20, required=False,
+        widget=forms.TextInput(attrs={'placeholder': '30s'}),
     )
     intervalo = forms.CharField(
         label='Intervalo', max_length=20, required=False,
         widget=forms.TextInput(attrs={'placeholder': '60s'}),
-        help_text='Em segundos (60s) ou minutos (2min, 1:30).',
     )
+
+    def clean_tempo(self):
+        return _segundos(self.cleaned_data.get('tempo'), 'Use segundos (30s) ou minutos (1min, 1:30).')
+
+    def clean_intervalo(self):
+        return _segundos(self.cleaned_data.get('intervalo'), 'Use segundos (60s) ou minutos (2min), até 30 minutos.')
+
+    def validar_series(self, dados):
+        """Repetições obrigatórias no exercício por repetições; tempo, no exercício por tempo."""
+        if dados.get('medida') == 'tempo':
+            if not dados.get('tempo') and 'tempo' not in self.errors:
+                self.add_error('tempo', 'Informe o tempo de cada série (ex.: 30s).')
+        elif not dados.get('repeticoes') and 'repeticoes' not in self.errors:
+            self.add_error('repeticoes', 'Informe as repetições.')
+
+
+class LinhaExercicioForm(CamposDeSeries):
+    """Uma linha da montagem "um por um" na nova série. Linha sem nome é ignorada."""
+    nome = forms.CharField(
+        label='Exercício', max_length=100, required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Ex.: Cadeira extensora'}),
+    )
+    carga = forms.DecimalField(
+        label='Carga (kg)', min_value=0, max_value=1000, decimal_places=2, required=False,
+        widget=forms.NumberInput(attrs={'step': '0.5', 'min': '0', 'placeholder': '0'}),
+    )
+    cada_lado = forms.BooleanField(label='Cada lado', required=False)
+
+    field_order = ['nome', 'series', 'medida', 'repeticoes', 'tempo', 'carga', 'intervalo', 'cada_lado']
+
+    def clean(self):
+        dados = super().clean()
+        dados['nome'] = ' '.join((dados.get('nome') or '').split())
+        if dados['nome']:
+            self.validar_series(dados)
+        return dados
+
+    def exercicio(self):
+        """A linha preenchida como ExercicioLido, o mesmo formato do texto colado."""
+        dados = self.cleaned_data
+        por_tempo = dados['medida'] == 'tempo'
+        return ExercicioLido(
+            nome=dados['nome'],
+            series=dados['series'],
+            repeticoes=10 if por_tempo else dados['repeticoes'],
+            tempo_segundos=dados['tempo'] if por_tempo else None,
+            carga_kg=dados.get('carga') or Decimal('0'),
+            intervalo_segundos=dados.get('intervalo'),
+            cada_lado=dados.get('cada_lado', False),
+        )
+
+
+class BaseLinhas(forms.BaseFormSet):
+    def exercicios(self):
+        return [f.exercicio() for f in self.forms if f.cleaned_data.get('nome')]
+
+
+LinhasFormSet = forms.formset_factory(
+    LinhaExercicioForm, formset=BaseLinhas, extra=LINHAS_INICIAIS,
+    max_num=LINHAS_MAXIMAS, absolute_max=LINHAS_MAXIMAS, validate_max=True,
+)
+
+
+class ExercicioForm(forms.ModelForm, CamposDeSeries):
+    """Um exercício completo: séries, repetições ou tempo, carga, intervalo, instruções, imagem e vídeo."""
     remover_imagem = forms.BooleanField(label='Remover a imagem', required=False)
 
     class Meta:
@@ -70,7 +165,7 @@ class ExercicioForm(forms.ModelForm):
         labels = {
             'nome_exercicio': 'Exercício',
             'carga_kg': 'Carga (kg)',
-            'cada_lado': 'Repetições em cada lado (unilateral)',
+            'cada_lado': 'Cada lado (exercício unilateral)',
             'instrucoes': 'Instruções',
             'combinado_com_anterior': 'Combinado com o exercício de cima (alternar, como bi-set)',
             'imagem': 'Imagem',
@@ -80,7 +175,6 @@ class ExercicioForm(forms.ModelForm):
             'nome_exercicio': forms.TextInput(attrs={'placeholder': 'Ex.: Cadeira extensora'}),
             'carga_kg': forms.NumberInput(attrs={'step': '0.5', 'min': '0'}),
             'instrucoes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ex.: última série até a falha'}),
-            'imagem': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
             'video_url': forms.URLInput(attrs={'placeholder': 'https://youtube.com/...'}),
         }
 
@@ -89,31 +183,22 @@ class ExercicioForm(forms.ModelForm):
         self.fields['imagem'].widget = forms.FileInput(attrs={'accept': 'image/*'})
         self.fields['nome_exercicio'].required = True
         exercicio = self.instance
-        if exercicio.pk:
-            self.fields['series'].initial = exercicio.series_texto or '%dx%d' % (
-                exercicio.series_planejadas, exercicio.repeticoes_planejadas)
-            if exercicio.intervalo_segundos:
-                self.fields['intervalo'].initial = '%ds' % exercicio.intervalo_segundos
+        if not exercicio._state.adding:  # o id (UUID) já existe antes de salvar
+            self.initial.update({
+                'series': exercicio.series_planejadas,
+                'medida': 'tempo' if exercicio.tempo_segundos else 'repeticoes',
+                'repeticoes': exercicio.repeticoes_planejadas,
+                'tempo': '%ds' % exercicio.tempo_segundos if exercicio.tempo_segundos else '',
+                'intervalo': '%ds' % exercicio.intervalo_segundos if exercicio.intervalo_segundos else '',
+                'carga_kg': sem_zeros(exercicio.carga_kg),
+            })
         else:
-            self.fields['series'].initial = '3x10'
-            self.fields['carga_kg'].initial = Decimal('0')
+            self.initial.setdefault('carga_kg', Decimal('0'))
 
-    def clean_series(self):
-        texto = ' '.join(self.cleaned_data['series'].split())
-        lido = ler_series(texto)
-        if not lido:
-            raise forms.ValidationError('Escreva séries x repetições, por exemplo 3x10 ou 3/12.')
-        self.series_lidas = lido
-        return texto
-
-    def clean_intervalo(self):
-        texto = self.cleaned_data['intervalo'].strip()
-        if not texto:
-            return None
-        segundos = ler_intervalo(texto)
-        if segundos is None:
-            raise forms.ValidationError('Use segundos (60s) ou minutos (2min), até 30 minutos.')
-        return segundos
+    def clean(self):
+        dados = super().clean()
+        self.validar_series(dados)
+        return dados
 
     def clean_imagem(self):
         imagem = self.cleaned_data.get('imagem')
@@ -127,17 +212,22 @@ class ExercicioForm(forms.ModelForm):
 
     def save(self, commit=True):
         exercicio = super().save(commit=False)
-        series, repeticoes, cada_lado = self.series_lidas
-        exercicio.series_planejadas = series
-        exercicio.repeticoes_planejadas = repeticoes
-        exercicio.series_texto = self.cleaned_data['series']
-        exercicio.cada_lado = self.cleaned_data['cada_lado'] or cada_lado
-        exercicio.intervalo_segundos = self.cleaned_data['intervalo']
+        dados = self.cleaned_data
+        exercicio.series_planejadas = dados['series']
+        if dados['medida'] == 'tempo':
+            exercicio.tempo_segundos = dados['tempo']
+        else:
+            exercicio.tempo_segundos = None
+            exercicio.repeticoes_planejadas = dados['repeticoes']
+        # O texto original da ficha (ex.: 3x10+10) só vale enquanto séries e repetições não mudam
+        if {'series', 'medida', 'repeticoes', 'tempo'} & set(self.changed_data):
+            exercicio.series_texto = ''
+        exercicio.intervalo_segundos = dados['intervalo']
         # Troca ou remoção da imagem: apaga o arquivo antigo (pelo nome, para não mexer no novo)
         antiga = self.initial.get('imagem')
         nome_antigo = antiga.name if antiga else ''
-        nova = 'imagem' in self.changed_data and self.cleaned_data.get('imagem')
-        if nome_antigo and (nova or self.cleaned_data.get('remover_imagem')):
+        nova = 'imagem' in self.changed_data and dados.get('imagem')
+        if nome_antigo and (nova or dados.get('remover_imagem')):
             exercicio.imagem.storage.delete(nome_antigo)
             if not nova:
                 exercicio.imagem = ''

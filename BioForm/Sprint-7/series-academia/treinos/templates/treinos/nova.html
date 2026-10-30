@@ -5,9 +5,9 @@
 {% block conteudo %}
     <p class="voltar"><a href="{% url 'treinos_lista' %}">← Séries</a></p>
     <h1>Nova série</h1>
-    <p class="subtitle">Dê um nome e, se quiser, cole os exercícios da ficha. Sem texto, você adiciona um por um depois.</p>
+    <p class="subtitle">Dê um nome e monte os exercícios um por um ou colando o texto da sua ficha.</p>
 
-    <form method="post" class="form-treino">
+    <form method="post" class="form-treino" id="form-nova">
       {% csrf_token %}
       {% include 'contas/_erros_gerais.html' %}
       <section class="block">
@@ -17,21 +17,62 @@
       </section>
 
       <section class="block">
-        {% include 'treinos/_campo.html' with campo=form.texto %}
-        <details class="formato">
-          <summary>Como escrever</summary>
-          <p>Um exercício por bloco, separados por uma linha em branco. A primeira linha é o nome; depois, se tiver:
-            <code>Séries: 3x10</code> (ou 3/10, "3/10 cada lado", 3x10+10), <code>Carga: 20kg</code>,
-            <code>Intervalo: 60s</code> e <code>Instruções:</code> com o texto nas linhas de baixo.</p>
-          <p>Exercícios combinados: escreva a letra (A, B...) na linha de baixo de cada nome. As séries escritas no último valem para o grupo.</p>
-        </details>
+        <h2 class="block-title">Como quer montar?</h2>
+        <div class="chips modos">
+          <label class="choice"><input type="radio" name="modo" value="linhas" id="modo-linhas"{% if modo != 'texto' %} checked{% endif %}><span class="choice-body">Um por um</span></label>
+          <label class="choice"><input type="radio" name="modo" value="texto" id="modo-texto"{% if modo == 'texto' %} checked{% endif %}><span class="choice-body">Colar o texto</span></label>
+        </div>
+
+        <!-- Um por um: uma linha por exercício -->
+        <div class="modo-linhas">
+          <p class="block-sub">Preencha uma linha para cada exercício. Para prancha e exercícios de estabilidade, troque "Por" para <b>Tempo</b>. Linhas sem nome são ignoradas; imagem, vídeo, instruções e combinados você coloca depois, editando o exercício.</p>
+          {{ linhas.management_form }}
+          {% if linhas.non_form_errors %}<div class="form-erros">{{ linhas.non_form_errors }}</div>{% endif %}
+          <ol class="linhas" id="linhas">
+            {% for linha in linhas %}{% include 'treinos/_linha.html' %}{% endfor %}
+          </ol>
+          <template id="linha-modelo">{% with linha=linhas.empty_form %}{% include 'treinos/_linha.html' %}{% endwith %}</template>
+          <button type="button" class="btn-mini" id="mais-linha">+ Adicionar exercício</button>
+        </div>
+
+        <!-- Colar o texto -->
+        <div class="modo-texto">
+          {% include 'treinos/_campo.html' with campo=form.texto %}
+          <details class="formato">
+            <summary>Como escrever</summary>
+            <p>Um exercício por bloco, separados por uma linha em branco. A primeira linha é o nome; depois, se tiver:
+              <code>Séries: 3x10</code> (ou 3/10, "3/10 cada lado", 3x10+10), <code>Carga: 20kg</code>,
+              <code>Intervalo: 60s</code> e <code>Instruções:</code> com o texto nas linhas de baixo.</p>
+            <p>Exercício por tempo: <code>Séries: 3x30s</code>, ou <code>Séries: 3</code> e <code>Tempo: 40s</code>.</p>
+            <p>Exercícios combinados: escreva a letra (A, B...) na linha de baixo de cada nome. As séries escritas no último valem para o grupo.</p>
+          </details>
+          <button type="submit" name="acao" value="previa" class="btn-mini">Ver prévia</button>
+        </div>
       </section>
 
       <div class="actions">
-        <button type="submit" name="acao" value="previa" class="btn btn-ghost">Ver prévia</button>
-        <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% if leitura %}Salvar série com {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% else %}Criar série{% endif %}</button>
+        <a href="{% url 'treinos_lista' %}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% if leitura and modo == 'texto' %}Salvar série com {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% else %}Criar série{% endif %}</button>
       </div>
     </form>
 
-    {% if leitura %}{% include 'treinos/_previa.html' %}{% endif %}
+    {% if leitura and modo == 'texto' %}{% include 'treinos/_previa.html' %}{% endif %}
+
+    <script>
+      // "+ Adicionar exercício": copia a linha modelo do formset e atualiza o total de linhas
+      (function () {
+        var botao = document.getElementById('mais-linha');
+        var lista = document.getElementById('linhas');
+        var modelo = document.getElementById('linha-modelo');
+        var total = document.getElementById('id_ex-TOTAL_FORMS');
+        var maximo = parseInt(document.getElementById('id_ex-MAX_NUM_FORMS').value, 10);
+        botao.addEventListener('click', function () {
+          var indice = parseInt(total.value, 10);
+          if (indice >= maximo) return;
+          lista.insertAdjacentHTML('beforeend', modelo.innerHTML.replace(/__prefix__/g, indice));
+          total.value = indice + 1;
+          lista.lastElementChild.querySelector('input[type="text"]').focus();
+        });
+      })();
+    </script>
 {% endblock %}

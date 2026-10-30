@@ -462,6 +462,9 @@ class ExercicioFicha(models.Model):
     ordem_execucao = models.IntegerField(validators=[MinValueValidator(1)])
     series_planejadas = models.IntegerField(default=3, validators=[MinValueValidator(1)])
     repeticoes_planejadas = models.IntegerField(default=10, validators=[MinValueValidator(1)])
+    # Exercício por tempo (prancha, isometria, estabilidade): segundos de cada série.
+    # Vazio = exercício por repetições.
+    tempo_segundos = models.PositiveIntegerField(null=True, blank=True)
     # Como o treino veio escrito, ex.: "3x10+10" ou "3/10 cada lado"
     series_texto = models.CharField(max_length=60, blank=True)
     cada_lado = models.BooleanField(default=False)  # exercício unilateral: as repetições valem para cada lado

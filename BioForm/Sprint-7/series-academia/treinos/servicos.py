@@ -77,6 +77,7 @@ def adicionar_lidos(ficha, exercicios_lidos):
             ordem_execucao=ordem + posicao,
             series_planejadas=lido.series,
             repeticoes_planejadas=lido.repeticoes,
+            tempo_segundos=lido.tempo_segundos,
             series_texto=lido.series_texto,
             cada_lado=lido.cada_lado,
             carga_kg=lido.carga_kg,

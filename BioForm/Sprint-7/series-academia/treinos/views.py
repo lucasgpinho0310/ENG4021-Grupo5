@@ -9,7 +9,7 @@ from contas.onboarding import perfil_obrigatorio, proximo_passo
 from saude.models import ExercicioFicha, FichaTreino, dias_da_lista
 
 from . import servicos
-from .forms import EditarFichaForm, ExercicioForm, FichaForm, TextoForm
+from .forms import EditarFichaForm, ExercicioForm, FichaForm, LinhasFormSet, TextoForm
 from .leitor import ler_texto
 
 
@@ -50,25 +50,34 @@ def lista(request, usuario):
 
 @treinos_view
 def nova(request, usuario):
+    """Nova série: montar um por um (uma linha por exercício) ou colar o texto da ficha."""
     form = FichaForm(request.POST or None)
+    linhas = LinhasFormSet(request.POST or None, prefix='ex')
+    modo = request.POST.get('modo', 'linhas')
     leitura = None
     if request.method == 'POST' and form.is_valid():
         dados = form.cleaned_data
-        leitura = ler_texto(dados['texto']) if dados['texto'].strip() else None
-        if leitura is not None and not leitura.exercicios:
-            form.add_error('texto', 'Não encontrei nenhum exercício no texto.')
-        elif request.POST.get('acao') != 'previa' or leitura is None:
-            ficha = servicos.criar_ficha(
-                usuario, dados['nome'], dados['dias'], dados['ativa'],
-                leitura.exercicios if leitura else (),
-            )
-            if leitura:
+        exercicios = None
+        if modo == 'texto':
+            leitura = ler_texto(dados['texto']) if dados['texto'].strip() else None
+            if leitura is not None and not leitura.exercicios:
+                form.add_error('texto', 'Não encontrei nenhum exercício no texto.')
+            elif request.POST.get('acao') != 'previa' or leitura is None:
+                exercicios = leitura.exercicios if leitura else []
+        elif linhas.is_valid():
+            exercicios = linhas.exercicios()
+        if exercicios is not None:
+            ficha = servicos.criar_ficha(usuario, dados['nome'], dados['dias'], dados['ativa'], exercicios)
+            total = len(exercicios)
+            if total:
                 messages.success(request, 'Série "%s" criada com %d exercício%s.' % (
-                    ficha.nome_ficha, len(leitura.exercicios), '' if len(leitura.exercicios) == 1 else 's'))
+                    ficha.nome_ficha, total, '' if total == 1 else 's'))
             else:
                 messages.success(request, 'Série "%s" criada. Agora adicione os exercícios.' % ficha.nome_ficha)
             return redirect('treinos_ficha', ficha_id=ficha.id)
-    return render(request, 'treinos/nova.html', _contexto(usuario, form=form, leitura=leitura))
+    return render(request, 'treinos/nova.html', _contexto(
+        usuario, form=form, linhas=linhas, modo=modo, leitura=leitura,
+    ))
 
 
 @treinos_view

@@ -177,6 +177,50 @@
 .form-treino .actions .btn-ghost + .btn-ghost { margin-left: 0; }
 .zona-perigo { margin-top: 28px; }
 
+/* Campos de séries: "Por" troca Repetições por Tempo */
+.field select {
+  width: 100%;
+  height: 50px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color-scheme: dark;
+}
+.field select:focus { border-color: var(--flame); outline: none; box-shadow: 0 0 0 4px var(--flame-soft); }
+.campo-tempo { display: none; }
+:is(.linha, .grade-series):has(select option[value="tempo"]:checked) .campo-tempo { display: grid; }
+:is(.linha, .grade-series):has(select option[value="tempo"]:checked) .campo-reps { display: none; }
+.grade-series { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: start; }
+
+/* Nova série: um por um ou colar o texto */
+.form-treino:has(#modo-texto:checked) .modo-linhas,
+.form-treino:not(:has(#modo-texto:checked)) .modo-texto { display: none; }
+.modo-linhas, .modo-texto { display: grid; gap: 14px; }
+.modo-linhas > .btn-mini, .modo-texto > .btn-mini { justify-self: start; }
+.linhas { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; counter-reset: linha; }
+.linha {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  counter-increment: linha;
+}
+.linha-erro { border-color: var(--danger); }
+.linha-num::before { content: counter(linha); }
+.linha-num { width: 22px; flex-shrink: 0; padding-top: 30px; font-size: 13px; font-weight: 700; color: var(--text-3); text-align: right; }
+.linha-campos { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.linha-campos .linha-nome { grid-column: 1 / -1; }
+.linha .field { gap: 6px; }
+.linha .field label { font-size: 12px; }
+.linha .field input, .linha .field select { height: 42px; font-size: 14px; background: var(--surface); }
+.linha-lado { grid-column: 1 / -1; font-size: 13px; }
+
 /* Prévia do texto colado */
 .previa { margin-top: 24px; border-color: var(--flame-line); }
 .avisos { margin: 12px 0 0; padding-left: 18px; font-size: 13px; color: #FBBF24; }
@@ -199,6 +243,10 @@
   .treinos-topo { flex-direction: column; }
   .semana-series { grid-template-columns: repeat(4, 1fr); }
   .grade-3 { grid-template-columns: 1fr; }
+  .grade-series, .linha-campos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .exercicio { flex-wrap: wrap; }
   .exercicio-acoes { width: 100%; justify-content: flex-end; }
 }
+
+/* Dicas soltas no formulário */
+.form-treino p.help { margin: -4px 0 0; font-size: 12px; color: var(--text-3); }

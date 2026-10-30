@@ -32,8 +32,13 @@ def carga(valor):
 
 @register.filter
 def series_de(exercicio):
-    """Como mostrar as séries: o texto da ficha (3x10+10) ou séries x repetições."""
-    texto = exercicio.series_texto or '%dx%d' % (exercicio.series_planejadas, exercicio.repeticoes_planejadas)
+    """Como mostrar as séries: o texto da ficha (3x10+10), séries x repetições ou séries x tempo (3x30s)."""
+    if exercicio.series_texto:
+        texto = exercicio.series_texto
+    elif exercicio.tempo_segundos:
+        texto = '%dx%s' % (exercicio.series_planejadas, intervalo(exercicio.tempo_segundos).replace(' ', ''))
+    else:
+        texto = '%dx%d' % (exercicio.series_planejadas, exercicio.repeticoes_planejadas)
     if exercicio.cada_lado and 'cada lado' not in texto.lower():
         texto += ' cada lado'
     return texto
