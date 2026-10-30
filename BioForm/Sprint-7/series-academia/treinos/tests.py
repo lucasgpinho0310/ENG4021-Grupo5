@@ -367,7 +367,7 @@ class AtivaInativaTest(TestCase):
         self.client.logout()
         resposta = self.client.get(reverse('treinos_lista'))
         self.assertEqual(resposta.status_code, 302)
-        self.assertIn(reverse('entrar'), resposta.url)
+        self.assertIn(reverse('login'), resposta.url)
 
 
 class OrdemEExclusaoTest(TestCase):

@@ -198,7 +198,7 @@ class TelasDoDiarioTest(TestCase):
     def test_diario_exige_login(self):
         self.client.logout()
         resposta = self.client.get(reverse('diario_hoje'))
-        self.assertTrue(resposta.url.startswith(reverse('entrar')))
+        self.assertTrue(resposta.url.startswith(reverse('login')))
 
     def test_diario_exige_perfil_completo(self):
         MetaNutricional.objects.all().delete()

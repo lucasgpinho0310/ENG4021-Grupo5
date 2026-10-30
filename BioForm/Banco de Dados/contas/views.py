@@ -62,7 +62,7 @@ def registrar_medida(usuario, peso=None, objetivo=None):
 
 def inicio(request):
     if not request.user.is_authenticated:
-        return redirect('entrar')
+        return redirect('login')
     usuario = Usuario.objects.filter(conta=request.user).first()
     if usuario is None:
         return redirect('usuarios' if request.user.is_staff else 'cadastro')
@@ -226,7 +226,7 @@ def excluir_conta(request, usuario):
         logout(request)
         conta.delete()  # apaga o perfil e todos os registros em cascata
         messages.success(request, 'Sua conta e todos os seus dados foram excluídos.')
-        return redirect('entrar')
+        return redirect('login')
     return render(request, 'contas/excluir_conta.html', {'form': form, 'usuario': usuario})
 
 
@@ -237,7 +237,7 @@ def excluir_conta(request, usuario):
 POR_PAGINA = 10
 
 
-@user_passes_test(lambda u: u.is_active and u.is_staff, login_url='entrar')
+@user_passes_test(lambda u: u.is_active and u.is_staff, login_url='login')
 def usuarios(request):
     busca = request.GET.get('q', '').strip()
     status = request.GET.get('status', '')

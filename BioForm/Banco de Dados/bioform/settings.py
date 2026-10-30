@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bioform',           # home-page (templates/home.html e static/css/home.css)
     'saude',
     'contas',            # login, cadastro e perfil
     'medidas_caseiras',  # Sprint-6/medidas-caseiras
@@ -79,7 +80,9 @@ ROOT_URLCONF = 'bioform.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Vem antes dos templates dos apps: as páginas de registration/ do BioForm
+        # substituem as do admin do Django
+        'DIRS': [BASE_DIR / 'bioform' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,9 +161,9 @@ AUTHENTICATION_BACKENDS = [
     'contas.backends.EmailOuCPFBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-LOGIN_URL = 'entrar'
-LOGIN_REDIRECT_URL = 'inicio'
-LOGOUT_REDIRECT_URL = 'entrar'
+LOGIN_URL = '/accounts/login/'          # URL de login (padrão do Django)
+LOGIN_REDIRECT_URL = 'inicio'           # depois do login: próximo passo do perfil ou metas
+LOGOUT_REDIRECT_URL = '/accounts/login/'  # para onde vai após logout
 
 # Em desenvolvimento os e-mails (ex.: link de nova senha) são impressos no terminal do runserver
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
