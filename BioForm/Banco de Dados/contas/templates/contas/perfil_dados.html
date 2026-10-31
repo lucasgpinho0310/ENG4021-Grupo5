@@ -49,7 +49,7 @@
             {{ form.altura_cm.errors }}
           </div>
         </div>
-        <div class="field" style="margin-top: 18px;">
+        <div class="field">
           <label for="{{ form.peso_meta_kg.id_for_label }}">{{ form.peso_meta_kg.label }}</label>
           <div class="suffix">{{ form.peso_meta_kg }}<em>kg</em></div>
           {{ form.peso_meta_kg.errors }}
@@ -57,7 +57,7 @@
       </section>
 
       <div class="actions">
-        {% if not onboarding %}<a href="{% url 'perfil_metas' %}" class="btn btn-ghost">Cancelar</a>{% endif %}
+        {% if not onboarding %}<a href="{% url 'metas:perfil_metas' %}" class="btn btn-ghost">Cancelar</a>{% endif %}
         <button type="submit" class="btn btn-primary">{% if onboarding %}Continuar{% else %}Salvar e recalcular metas{% endif %}</button>
       </div>
     </form>

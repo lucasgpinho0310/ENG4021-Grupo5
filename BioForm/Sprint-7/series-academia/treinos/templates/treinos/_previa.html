@@ -1,0 +1,23 @@
+{% load treinos_tags %}
+{% comment %}Prévia do texto colado: o que o sistema entendeu, antes de salvar.{% endcomment %}
+<section class="block previa" id="previa">
+  <h2 class="block-title">Entendi {{ leitura.exercicios|length }} exercício{{ leitura.exercicios|length|pluralize }}{% if leitura.combinados %}, com {{ leitura.combinados }} grupo{{ leitura.combinados|pluralize }} de combinados{% endif %}</h2>
+  <p class="block-sub">Confira. Se algo saiu errado, corrija o texto e veja a prévia de novo; depois de salvar, dá para editar cada exercício.</p>
+  {% if leitura.avisos %}
+  <ul class="avisos">
+    {% for aviso in leitura.avisos %}<li>{{ aviso }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  <ol class="previa-lista">
+    {% for e in leitura.exercicios %}
+    <li class="{% if e.letra %}combinado{% if not e.combinado_com_anterior %} combinado-inicio{% endif %}{% endif %}">
+      <span class="previa-num">{{ forloop.counter }}</span>
+      <div>
+        <b>{% if e.letra %}<span class="letra">{{ e.letra }}</span> {% endif %}{{ e.nome }}</b>
+        <small>{{ e|series_de }} · {{ e.carga_kg|carga }}{% if e.intervalo_segundos %} · intervalo {{ e.intervalo_segundos|intervalo }}{% endif %}</small>
+        {% if e.instrucoes %}<small class="instrucao">{{ e.instrucoes|linebreaksbr }}</small>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</section>

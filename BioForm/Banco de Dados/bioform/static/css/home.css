@@ -1,0 +1,20 @@
+/* =========================================================
+   BioForm — home-page (templates/home.html).
+   Carregado depois de acesso.css e complementos.css; usa as variáveis de cor deles.
+   ========================================================= */
+
+/* ---------- Botões para as páginas do site ---------- */
+.home-links { display: grid; gap: 10px; margin-top: 8px; }
+
+/* ---------- Sair: botão com cara de link ---------- */
+.home-sair { margin-top: 20px; text-align: center; }
+.home-sair button {
+  border: none;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.home-sair button:hover { color: var(--text); }

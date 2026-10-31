@@ -2,7 +2,7 @@
 {% block titulo %}Trocar senha{% endblock %}
 {% block corpo %}
   <main class="page">
-    {% url 'conta' as url_conta %}
+    {% url 'contas:conta' as url_conta %}
     {% include 'contas/_voltar.html' with destino=url_conta texto='Editar perfil' %}
 
     <header class="page-head">

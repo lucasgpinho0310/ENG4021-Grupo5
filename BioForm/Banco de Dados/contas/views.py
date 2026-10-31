@@ -10,6 +10,8 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 
 from metas.calculo import salvar_meta
+from rotina.campos import DIAS, DURACOES, TEM_DIAS_FIXOS
+from rotina.confirmacao import confirmar_rotina
 from saude.models import INTENSIDADES, EsporteUsuario, HistoricoMedida, MetaNutricional, Usuario
 
 from .forms import (
@@ -32,7 +34,7 @@ def depois_de_salvar(request, usuario, proximo):
         return redirect(proximo)
     salvar_meta(usuario)
     messages.success(request, 'Perfil atualizado. Suas metas foram recalculadas.')
-    return redirect('perfil_metas')
+    return redirect('metas:perfil_metas')
 
 
 def registrar_medida(usuario, peso=None, objetivo=None):
@@ -60,11 +62,11 @@ def registrar_medida(usuario, peso=None, objetivo=None):
 
 def inicio(request):
     if not request.user.is_authenticated:
-        return redirect('entrar')
+        return redirect('login')
     usuario = Usuario.objects.filter(conta=request.user).first()
     if usuario is None:
-        return redirect('usuarios' if request.user.is_staff else 'cadastro')
-    return redirect(proximo_passo(usuario) or 'perfil_metas')
+        return redirect('contas:usuarios' if request.user.is_staff else 'contas:cadastro')
+    return redirect(proximo_passo(usuario) or 'metas:perfil_metas')
 
 
 class EntrarView(auth_views.LoginView):
@@ -81,14 +83,14 @@ class EntrarView(auth_views.LoginView):
 
 def cadastro(request):
     if request.user.is_authenticated:
-        return redirect('inicio')
+        return redirect('contas:inicio')
     form = CadastroForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         conta = form.save()
         login(request, conta, backend='contas.backends.EmailOuCPFBackend')
         request.session[SESSAO_ONBOARDING] = True
         messages.success(request, 'Conta criada! Agora vamos montar seu perfil.')
-        return redirect('perfil_dados')
+        return redirect('contas:perfil_dados')
     return render(request, 'contas/cadastro.html', {'form': form})
 
 
@@ -110,7 +112,7 @@ def perfil_dados(request, usuario):
             else:
                 # O peso só vira histórico no passo 2, junto com o objetivo
                 request.session[SESSAO_PESO] = str(peso)
-        return depois_de_salvar(request, usuario, 'perfil_objetivo')
+        return depois_de_salvar(request, usuario, 'contas:perfil_objetivo')
     return render(request, 'contas/perfil_dados.html', {
         'form': form, 'usuario': usuario, 'passo': 1, 'onboarding': em_onboarding(request, usuario),
     })
@@ -118,12 +120,12 @@ def perfil_dados(request, usuario):
 
 @perfil_obrigatorio
 def perfil_objetivo(request, usuario):
-    if proximo_passo(usuario) == 'perfil_dados':
-        return redirect('perfil_dados')
+    if proximo_passo(usuario) == 'contas:perfil_dados':
+        return redirect('contas:perfil_dados')
     medida = usuario.medida_atual()
     if medida is None and SESSAO_PESO not in request.session:
         messages.error(request, 'Informe seu peso atual para continuar.')
-        return redirect('perfil_dados')
+        return redirect('contas:perfil_dados')
 
     form = ObjetivoForm(request.POST or None, instance=usuario,
                         initial={'objetivo': medida.objetivo_momento if medida else None})
@@ -139,7 +141,7 @@ def perfil_objetivo(request, usuario):
                     peso_kg=request.session[SESSAO_PESO], objetivo_momento=objetivo,
                 )
                 del request.session[SESSAO_PESO]
-        return depois_de_salvar(request, usuario, 'perfil_esportes')
+        return depois_de_salvar(request, usuario, 'contas:perfil_esportes')
     return render(request, 'contas/perfil_objetivo.html', {
         'form': form, 'usuario': usuario, 'passo': 2, 'onboarding': em_onboarding(request, usuario),
     })
@@ -148,7 +150,7 @@ def perfil_objetivo(request, usuario):
 @perfil_obrigatorio
 def perfil_esportes(request, usuario):
     passo = proximo_passo(usuario)
-    if passo in ('perfil_dados', 'perfil_objetivo'):
+    if passo in ('contas:perfil_dados', 'contas:perfil_objetivo'):
         return redirect(passo)
     onboarding = em_onboarding(request, usuario)
     form = EsportesForm(request.POST or None, usuario=usuario)
@@ -156,16 +158,21 @@ def perfil_esportes(request, usuario):
         with transaction.atomic():
             usuario.esportes.all().delete()
             EsporteUsuario.objects.bulk_create([
-                EsporteUsuario(usuario=usuario, esporte=esporte, frequencia_semanal=freq, intensidade=intensidade)
-                for esporte, freq, intensidade in form.escolhidos()
+                EsporteUsuario(
+                    usuario=usuario, esporte=esporte, frequencia_semanal=freq, intensidade=intensidade,
+                    duracao_minutos=minutos, dias_fixos=dias_fixos,
+                )
+                for esporte, freq, intensidade, minutos, dias_fixos in form.escolhidos()
             ])
             salvar_meta(usuario)
+            confirmar_rotina(usuario)
         if not onboarding:
             messages.success(request, 'Esportes atualizados. Suas metas foram recalculadas.')
-        return redirect('perfil_metas')
+        return redirect('metas:perfil_metas')
     return render(request, 'contas/perfil_esportes.html', {
         'form': form, 'usuario': usuario, 'passo': 3, 'onboarding': onboarding,
         'frequencias': FREQUENCIAS, 'intensidades': INTENSIDADES.items(),
+        'duracoes': DURACOES, 'dias': DIAS, 'tem_dias_fixos': TEM_DIAS_FIXOS,
     })
 
 
@@ -175,7 +182,7 @@ def perfil_concluir(request, usuario):
     if proximo_passo(usuario):
         return redirect(proximo_passo(usuario))
     messages.success(request, 'Tudo pronto! Suas metas ficam salvas aqui e mudam sempre que você atualizar o perfil.')
-    return redirect('perfil_metas')
+    return redirect('metas:perfil_metas')
 
 
 # =====================================================================
@@ -188,7 +195,7 @@ def conta(request, usuario):
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Dados da conta salvos.')
-        return redirect('conta')
+        return redirect('contas:conta')
     return render(request, 'contas/conta.html', {
         'form': form, 'usuario': usuario, 'medida': usuario.medida_atual(),
         'perfil_completo': proximo_passo(usuario) is None,
@@ -197,7 +204,7 @@ def conta(request, usuario):
 
 class TrocarSenhaView(auth_views.PasswordChangeView):
     template_name = 'contas/trocar_senha.html'
-    success_url = reverse_lazy('conta')
+    success_url = reverse_lazy('contas:conta')
 
     def form_valid(self, form):
         resposta = super().form_valid(form)
@@ -219,7 +226,7 @@ def excluir_conta(request, usuario):
         logout(request)
         conta.delete()  # apaga o perfil e todos os registros em cascata
         messages.success(request, 'Sua conta e todos os seus dados foram excluídos.')
-        return redirect('entrar')
+        return redirect('login')
     return render(request, 'contas/excluir_conta.html', {'form': form, 'usuario': usuario})
 
 
@@ -230,7 +237,7 @@ def excluir_conta(request, usuario):
 POR_PAGINA = 10
 
 
-@user_passes_test(lambda u: u.is_active and u.is_staff, login_url='entrar')
+@user_passes_test(lambda u: u.is_active and u.is_staff, login_url='login')
 def usuarios(request):
     busca = request.GET.get('q', '').strip()
     status = request.GET.get('status', '')

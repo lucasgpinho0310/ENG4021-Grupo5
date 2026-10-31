@@ -1,0 +1,41 @@
+{% comment %}Uma linha da montagem "um por um" (LinhaExercicioForm). "Por" troca Repetições por Tempo (CSS :has).{% endcomment %}
+<li class="linha{% if linha.errors %} linha-erro{% endif %}">
+  <span class="linha-num" aria-hidden="true"></span>
+  <div class="linha-campos">
+    <div class="field linha-nome">
+      <label for="{{ linha.nome.id_for_label }}">Exercício</label>
+      {{ linha.nome }}
+      {% if linha.nome.errors %}<span class="help erro">{{ linha.nome.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ linha.series.id_for_label }}">Séries</label>
+      {{ linha.series }}
+      {% if linha.series.errors %}<span class="help erro">{{ linha.series.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ linha.medida.id_for_label }}">Por</label>
+      {{ linha.medida }}
+    </div>
+    <div class="field campo-reps">
+      <label for="{{ linha.repeticoes.id_for_label }}">Repetições</label>
+      {{ linha.repeticoes }}
+      {% if linha.repeticoes.errors %}<span class="help erro">{{ linha.repeticoes.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <div class="field campo-tempo">
+      <label for="{{ linha.tempo.id_for_label }}">Tempo</label>
+      {{ linha.tempo }}
+      {% if linha.tempo.errors %}<span class="help erro">{{ linha.tempo.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ linha.carga.id_for_label }}">Carga (kg)</label>
+      {{ linha.carga }}
+      {% if linha.carga.errors %}<span class="help erro">{{ linha.carga.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ linha.intervalo.id_for_label }}">Intervalo</label>
+      {{ linha.intervalo }}
+      {% if linha.intervalo.errors %}<span class="help erro">{{ linha.intervalo.errors|join:' ' }}</span>{% endif %}
+    </div>
+    <label class="check linha-lado">{{ linha.cada_lado }} Cada lado</label>
+  </div>
+</li>

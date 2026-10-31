@@ -3,7 +3,7 @@
 {% block titulo %}Editar perfil{% endblock %}
 {% block corpo %}
   <main class="page">
-    {% url 'perfil_metas' as url_metas %}
+    {% url 'metas:perfil_metas' as url_metas %}
     {% include 'contas/_voltar.html' with destino=url_metas texto='Minhas metas' %}
 
     <header class="page-head">
@@ -47,9 +47,9 @@
         Ao salvar qualquer um destes, suas metas são recalculadas.
       </p>
       <div class="links-perfil">
-        <a href="{% url 'perfil_dados' %}" class="btn btn-secondary btn-sm">Dados e medidas</a>
-        <a href="{% url 'perfil_objetivo' %}" class="btn btn-secondary btn-sm">Biotipo e objetivo</a>
-        <a href="{% url 'perfil_esportes' %}" class="btn btn-secondary btn-sm">Esportes</a>
+        <a href="{% url 'contas:perfil_dados' %}" class="btn btn-secondary btn-sm">Dados e medidas</a>
+        <a href="{% url 'contas:perfil_objetivo' %}" class="btn btn-secondary btn-sm">Biotipo e objetivo</a>
+        <a href="{% url 'contas:perfil_esportes' %}" class="btn btn-secondary btn-sm">Esportes</a>
       </div>
     </section>
 
@@ -57,7 +57,7 @@
       <h2 class="section-title">Segurança</h2>
       <p class="section-hint">Troque sua senha sempre que achar necessário.</p>
       <div class="links-perfil">
-        <a href="{% url 'trocar_senha' %}" class="btn btn-secondary btn-sm">Trocar senha</a>
+        <a href="{% url 'password_change' %}" class="btn btn-secondary btn-sm">Trocar senha</a>
       </div>
     </section>
 
@@ -67,7 +67,7 @@
           <h2 class="section-title">Excluir conta</h2>
           <p>Apaga sua conta e todo o histórico (treinos, refeições, medidas e XP). Não dá para desfazer.</p>
         </div>
-        <a href="{% url 'excluir_conta' %}" class="btn btn-danger">Excluir conta</a>
+        <a href="{% url 'contas:excluir_conta' %}" class="btn btn-danger">Excluir conta</a>
       </div>
     </section>
   </main>
