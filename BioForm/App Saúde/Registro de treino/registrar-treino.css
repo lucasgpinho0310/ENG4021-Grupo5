@@ -1,0 +1,352 @@
+/* ==========================================================================
+   BioForm Health OS — formulário de registro de treino
+   Mesmos tokens das demais telas
+   ========================================================================== */
+
+:root {
+  --stage: #09090B;
+  --app-bg: #111113;
+  --surface: #1A1A1D;
+  --surface-2: #232327;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #8A8A93;
+
+  --flame: #FF5722;
+  --flame-hover: #FF7043;
+  --flame-soft: rgba(255, 87, 34, 0.12);
+  --flame-line: rgba(255, 87, 34, 0.4);
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--stage);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 24px 28px;
+  background: var(--app-bg);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 32px 70px -20px rgba(0, 0, 0, .85);
+}
+
+/* ---------- Caminho de volta ---------- */
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.crumb strong { color: var(--text); font-weight: 600; }
+.back {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  transition: border-color .15s;
+}
+.back:hover { border-color: var(--line-strong); }
+
+/* ---------- Título ---------- */
+.screen-title {
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.screen-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* ---------- Formulário ---------- */
+.workout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.field { min-width: 0; border: 0; }
+.field > label,
+.field > legend {
+  display: block;
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.input {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input > .i { color: var(--text-3); transition: color .15s; }
+.input input,
+.textarea {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* evita o zoom automático do iOS */
+}
+.input input { height: 100%; }
+.input input::placeholder,
+.textarea::placeholder { color: var(--text-3); }
+.input input[type="date"],
+.input input[type="time"] { color-scheme: dark; }
+.input:hover { border-color: var(--line-strong); }
+.input:focus-within {
+  border-color: var(--flame);
+  box-shadow: 0 0 0 3px var(--flame-soft);
+}
+.input:focus-within > .i { color: var(--flame); }
+.input .unit { font-size: 12px; color: var(--text-3); }
+
+.textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  resize: vertical;
+  line-height: 1.45;
+  transition: border-color .15s, box-shadow .15s;
+}
+.textarea:hover { border-color: var(--line-strong); }
+.textarea:focus {
+  border-color: var(--flame);
+  box-shadow: 0 0 0 3px var(--flame-soft);
+}
+
+/* ---------- Chips (tipo de treino) ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip input,
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span {
+  display: block;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.chip span:hover { border-color: var(--line-strong); }
+.chip input:checked + span {
+  background: var(--flame-soft);
+  border-color: var(--flame-line);
+  color: var(--flame);
+}
+.chip input:focus-visible + span,
+.seg input:focus-visible + span {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ---------- Intensidade (segmentado) ---------- */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.seg span {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.seg span:hover { color: var(--text); }
+.seg input:checked + span {
+  background: var(--flame);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Exercícios ---------- */
+.ex-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ex-head h2 { font-size: 14px; font-weight: 600; }
+.ex-list { display: flex; flex-direction: column; gap: 10px; }
+.exercise {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.ex-top { display: flex; align-items: center; gap: 8px; }
+.ex-top .input { flex: 1; min-width: 0; background: var(--app-bg); }
+.ex-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ex-nums .input { background: var(--app-bg); padding: 0 10px; gap: 6px; }
+.ex-nums label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.ex-nums input { text-align: left; }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.icon-btn:hover { border-color: var(--line-strong); color: var(--text); }
+
+.add-ex {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.add-ex:hover { border-color: var(--flame); color: var(--flame); }
+
+/* ---------- Botões ---------- */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.btn {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, opacity .15s, transform .1s;
+}
+.btn-primary { background: var(--flame); color: #fff; }
+.btn-primary:hover { background: var(--flame-hover); }
+.btn-primary:active { transform: scale(.985); }
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+.btn-secondary:hover { background: var(--surface-2); }
+
+/* ---------- Ícones ---------- */
+.i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Foco pelo teclado ---------- */
+.back:focus-visible,
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.add-ex:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 480px) {
+  body { align-items: stretch; padding: 0; background: var(--app-bg); }
+  .screen {
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px 20px 28px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de alimentos — BioForm Health OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="catalogo-alimentos.css">
+</head>
+<body>
+  <main class="screen">
+
+    <nav class="crumb" aria-label="Caminho">
+      <a class="back" href="index.html" aria-label="Voltar">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span>Nutrição / <strong>Catálogo</strong></span>
+    </nav>
+
+    <header>
+      <h1 class="screen-title">Catálogo de alimentos</h1>
+      <p class="screen-sub">Busque e adicione alimentos à sua refeição.</p>
+    </header>
+
+    <label class="search">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar alimento" autocomplete="off" aria-label="Buscar alimento">
+    </label>
+
+    <div class="chips" role="radiogroup" aria-label="Categoria">
+      <label class="chip"><input type="radio" name="cat" value="todos" checked><span>Todos</span></label>
+      <label class="chip"><input type="radio" name="cat" value="proteinas"><span>Proteínas</span></label>
+      <label class="chip"><input type="radio" name="cat" value="carboidratos"><span>Carboidratos</span></label>
+      <label class="chip"><input type="radio" name="cat" value="frutas"><span>Frutas</span></label>
+      <label class="chip"><input type="radio" name="cat" value="vegetais"><span>Vegetais</span></label>
+      <label class="chip"><input type="radio" name="cat" value="laticinios"><span>Laticínios</span></label>
+      <label class="chip"><input type="radio" name="cat" value="gorduras"><span>Gorduras</span></label>
+    </div>
+
+    <p class="result-count" id="contagem" aria-live="polite"></p>
+
+    <ul class="food-list" id="lista">
+      <li class="food" data-cat="proteinas" data-nome="Peito de frango grelhado">
+        <div class="food-info">
+          <p class="food-name">Peito de frango grelhado</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>31 g</b></span><span>C <b>0 g</b></span><span>G <b>3,6 g</b></span></p>
+        </div>
+        <p class="food-kcal">165<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Peito de frango grelhado" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="proteinas" data-nome="Ovo cozido">
+        <div class="food-info">
+          <p class="food-name">Ovo cozido</p>
+          <p class="food-portion">1 unidade (50 g)</p>
+          <p class="macros"><span>P <b>6 g</b></span><span>C <b>0,6 g</b></span><span>G <b>5 g</b></span></p>
+        </div>
+        <p class="food-kcal">78<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Ovo cozido" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="carboidratos" data-nome="Arroz branco cozido">
+        <div class="food-info">
+          <p class="food-name">Arroz branco cozido</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>2,7 g</b></span><span>C <b>28 g</b></span><span>G <b>0,3 g</b></span></p>
+        </div>
+        <p class="food-kcal">130<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Arroz branco cozido" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="carboidratos" data-nome="Feijão carioca cozido">
+        <div class="food-info">
+          <p class="food-name">Feijão carioca cozido</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>4,8 g</b></span><span>C <b>14 g</b></span><span>G <b>0,5 g</b></span></p>
+        </div>
+        <p class="food-kcal">76<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Feijão carioca cozido" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="carboidratos" data-nome="Batata-doce cozida">
+        <div class="food-info">
+          <p class="food-name">Batata-doce cozida</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>0,6 g</b></span><span>C <b>18 g</b></span><span>G <b>0,1 g</b></span></p>
+        </div>
+        <p class="food-kcal">77<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Batata-doce cozida" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="carboidratos" data-nome="Aveia em flocos">
+        <div class="food-info">
+          <p class="food-name">Aveia em flocos</p>
+          <p class="food-portion">30 g (3 colheres de sopa)</p>
+          <p class="macros"><span>P <b>4 g</b></span><span>C <b>20 g</b></span><span>G <b>2,5 g</b></span></p>
+        </div>
+        <p class="food-kcal">117<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Aveia em flocos" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="frutas" data-nome="Banana prata">
+        <div class="food-info">
+          <p class="food-name">Banana prata</p>
+          <p class="food-portion">1 unidade (90 g)</p>
+          <p class="macros"><span>P <b>1 g</b></span><span>C <b>21 g</b></span><span>G <b>0,2 g</b></span></p>
+        </div>
+        <p class="food-kcal">80<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Banana prata" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="vegetais" data-nome="Brócolis cozido">
+        <div class="food-info">
+          <p class="food-name">Brócolis cozido</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>2,4 g</b></span><span>C <b>7 g</b></span><span>G <b>0,4 g</b></span></p>
+        </div>
+        <p class="food-kcal">35<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Brócolis cozido" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="laticinios" data-nome="Iogurte natural">
+        <div class="food-info">
+          <p class="food-name">Iogurte natural</p>
+          <p class="food-portion">1 pote (170 g)</p>
+          <p class="macros"><span>P <b>6 g</b></span><span>C <b>8 g</b></span><span>G <b>5 g</b></span></p>
+        </div>
+        <p class="food-kcal">104<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Iogurte natural" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+
+      <li class="food" data-cat="gorduras" data-nome="Abacate">
+        <div class="food-info">
+          <p class="food-name">Abacate</p>
+          <p class="food-portion">100 g</p>
+          <p class="macros"><span>P <b>2 g</b></span><span>C <b>9 g</b></span><span>G <b>15 g</b></span></p>
+        </div>
+        <p class="food-kcal">160<small>kcal</small></p>
+        <button class="add" type="button" aria-label="Adicionar Abacate" aria-pressed="false">
+          <svg class="i i-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="i i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+        </button>
+      </li>
+    </ul>
+
+    <p class="empty" id="vazio" hidden>Nenhum alimento encontrado. Tente outro nome ou outra categoria.</p>
+
+    <p class="note">Valores aproximados. P = proteínas, C = carboidratos, G = gorduras.</p>
+
+    <div class="footer-bar">
+      <button class="btn" id="confirmar" type="button" disabled>Adicionar à refeição</button>
+    </div>
+
+  </main>
+
+  <script>
+    // Demonstração de busca, filtro e seleção. Troque pelos dados reais do seu backend.
+    (function () {
+      var busca = document.getElementById('busca');
+      var itens = Array.prototype.slice.call(document.querySelectorAll('.food'));
+      var vazio = document.getElementById('vazio');
+      var contagem = document.getElementById('contagem');
+      var botao = document.getElementById('confirmar');
+
+      function normaliza(t) {
+        return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      }
+
+      function filtrar() {
+        var cat = document.querySelector('input[name="cat"]:checked').value;
+        var termo = normaliza(busca.value.trim());
+        var visiveis = 0;
+        itens.forEach(function (li) {
+          var okCat = cat === 'todos' || li.dataset.cat === cat;
+          var okTxt = !termo || normaliza(li.dataset.nome).indexOf(termo) !== -1;
+          li.hidden = !(okCat && okTxt);
+          if (!li.hidden) visiveis++;
+        });
+        vazio.hidden = visiveis !== 0;
+        contagem.textContent = visiveis + (visiveis === 1 ? ' alimento' : ' alimentos');
+      }
+
+      function atualizarBotao() {
+        var n = document.querySelectorAll('.food.is-added').length;
+        botao.disabled = n === 0;
+        botao.textContent = n === 0
+          ? 'Adicionar à refeição'
+          : 'Adicionar ' + n + (n === 1 ? ' item' : ' itens');
+      }
+
+      busca.addEventListener('input', filtrar);
+      document.querySelectorAll('input[name="cat"]').forEach(function (r) {
+        r.addEventListener('change', filtrar);
+      });
+      itens.forEach(function (li) {
+        li.querySelector('.add').addEventListener('click', function (e) {
+          var ativo = li.classList.toggle('is-added');
+          e.currentTarget.setAttribute('aria-pressed', ativo);
+          atualizarBotao();
+        });
+      });
+
+      filtrar();
+    })();
+  </script>
+</body>
+</html>

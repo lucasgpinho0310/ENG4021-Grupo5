@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar treino — BioForm Health OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="registrar-treino.css">
+</head>
+<body>
+  <main class="screen">
+
+    <nav class="crumb" aria-label="Caminho">
+      <a class="back" href="index.html" aria-label="Voltar">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span>Treinos / <strong>Registrar</strong></span>
+    </nav>
+
+    <header>
+      <h1 class="screen-title">Registrar treino</h1>
+      <p class="screen-sub">Anote o que você fez para acompanhar sua evolução.</p>
+    </header>
+
+    <form class="workout-form" id="treino-form" action="/api/treinos" method="post">
+
+      <div class="field">
+        <label for="nome">Nome do treino</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>
+          <input id="nome" name="nome" type="text" placeholder="Ex.: Treino A — peito e tríceps" required>
+        </div>
+      </div>
+
+      <fieldset class="field">
+        <legend>Tipo</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="tipo" value="musculacao" checked><span>Musculação</span></label>
+          <label class="chip"><input type="radio" name="tipo" value="cardio"><span>Cardio</span></label>
+          <label class="chip"><input type="radio" name="tipo" value="funcional"><span>Funcional</span></label>
+          <label class="chip"><input type="radio" name="tipo" value="outro"><span>Outro</span></label>
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <div class="field">
+          <label for="data">Data</label>
+          <div class="input">
+            <input id="data" name="data" type="date" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="hora">Horário</label>
+          <div class="input">
+            <input id="hora" name="hora" type="time" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="duracao">Duração</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <input id="duracao" name="duracao" type="number" inputmode="numeric" min="1" max="600" placeholder="60" required>
+          <span class="unit">min</span>
+        </div>
+      </div>
+
+      <fieldset class="field">
+        <legend>Intensidade</legend>
+        <div class="segmented">
+          <label class="seg"><input type="radio" name="intensidade" value="leve"><span>Leve</span></label>
+          <label class="seg"><input type="radio" name="intensidade" value="moderada" checked><span>Moderada</span></label>
+          <label class="seg"><input type="radio" name="intensidade" value="intensa"><span>Intensa</span></label>
+        </div>
+      </fieldset>
+
+      <section aria-labelledby="ex-titulo">
+        <div class="ex-head">
+          <h2 id="ex-titulo">Exercícios</h2>
+        </div>
+        <div class="ex-list" id="ex-list">
+          <div class="exercise">
+            <div class="ex-top">
+              <div class="input">
+                <input name="exercicio[]" type="text" placeholder="Nome do exercício" aria-label="Nome do exercício">
+              </div>
+              <button class="icon-btn" type="button" data-remove aria-label="Remover exercício">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+              </button>
+            </div>
+            <div class="ex-nums">
+              <div><label>Séries</label><div class="input"><input name="series[]" type="number" inputmode="numeric" min="0" placeholder="4" aria-label="Séries"></div></div>
+              <div><label>Repetições</label><div class="input"><input name="reps[]" type="number" inputmode="numeric" min="0" placeholder="12" aria-label="Repetições"></div></div>
+              <div><label>Carga (kg)</label><div class="input"><input name="carga[]" type="number" inputmode="decimal" min="0" step="0.5" placeholder="40" aria-label="Carga em quilos"></div></div>
+            </div>
+          </div>
+        </div>
+        <button class="add-ex" id="add-ex" type="button" style="margin-top:10px;width:100%">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Adicionar exercício
+        </button>
+      </section>
+
+      <div class="field">
+        <label for="obs">Observações (opcional)</label>
+        <textarea class="textarea" id="obs" name="obs" placeholder="Como você se sentiu, ajustes de carga, dores..."></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Salvar treino</button>
+        <a class="btn btn-secondary" href="index.html">Cancelar</a>
+      </div>
+    </form>
+
+  </main>
+
+  <template id="ex-modelo">
+    <div class="exercise">
+      <div class="ex-top">
+        <div class="input">
+          <input name="exercicio[]" type="text" placeholder="Nome do exercício" aria-label="Nome do exercício">
+        </div>
+        <button class="icon-btn" type="button" data-remove aria-label="Remover exercício">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+      </div>
+      <div class="ex-nums">
+        <div><label>Séries</label><div class="input"><input name="series[]" type="number" inputmode="numeric" min="0" placeholder="4" aria-label="Séries"></div></div>
+        <div><label>Repetições</label><div class="input"><input name="reps[]" type="number" inputmode="numeric" min="0" placeholder="12" aria-label="Repetições"></div></div>
+        <div><label>Carga (kg)</label><div class="input"><input name="carga[]" type="number" inputmode="decimal" min="0" step="0.5" placeholder="40" aria-label="Carga em quilos"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function () {
+      var lista = document.getElementById('ex-list');
+      var modelo = document.getElementById('ex-modelo');
+
+      // Data e horário de hoje como padrão
+      var agora = new Date();
+      var pad = function (n) { return String(n).padStart(2, '0'); };
+      document.getElementById('data').value =
+        agora.getFullYear() + '-' + pad(agora.getMonth() + 1) + '-' + pad(agora.getDate());
+      document.getElementById('hora').value = pad(agora.getHours()) + ':' + pad(agora.getMinutes());
+
+      document.getElementById('add-ex').addEventListener('click', function () {
+        lista.appendChild(modelo.content.cloneNode(true));
+        var campos = lista.querySelectorAll('input[name="exercicio[]"]');
+        campos[campos.length - 1].focus();
+      });
+
+      lista.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-remove]');
+        if (!btn) return;
+        var cards = lista.querySelectorAll('.exercise');
+        if (cards.length > 1) btn.closest('.exercise').remove();
+      });
+
+      // Demonstração: remova quando ligar ao seu backend.
+      document.getElementById('treino-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        alert('Treino válido. Ligue o envio ao seu backend para salvar de verdade.');
+      });
+    })();
+  </script>
+</body>
+</html>
