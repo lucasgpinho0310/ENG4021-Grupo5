@@ -1,0 +1,329 @@
+/* ==========================================================================
+   BioForm Health OS — catálogo de alimentos
+   Mesmos tokens das demais telas
+   ========================================================================== */
+
+:root {
+  --stage: #09090B;
+  --app-bg: #111113;
+  --surface: #1A1A1D;
+  --surface-2: #232327;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #8A8A93;
+
+  --flame: #FF5722;
+  --flame-hover: #FF7043;
+  --flame-soft: rgba(255, 87, 34, 0.12);
+  --flame-line: rgba(255, 87, 34, 0.4);
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--stage);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 24px 0;
+  background: var(--app-bg);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 32px 70px -20px rgba(0, 0, 0, .85);
+}
+
+/* ---------- Caminho de volta ---------- */
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.crumb strong { color: var(--text); font-weight: 600; }
+.back {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  transition: border-color .15s;
+}
+.back:hover { border-color: var(--line-strong); }
+
+/* ---------- Título ---------- */
+.screen-title {
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.screen-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* ---------- Busca ---------- */
+.search {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color .15s, box-shadow .15s;
+}
+.search > .i { color: var(--text-3); transition: color .15s; }
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* evita o zoom automático do iOS */
+}
+.search input::placeholder { color: var(--text-3); }
+.search:hover { border-color: var(--line-strong); }
+.search:focus-within {
+  border-color: var(--flame);
+  box-shadow: 0 0 0 3px var(--flame-soft);
+}
+.search:focus-within > .i { color: var(--flame); }
+
+/* ---------- Filtros por categoria ---------- */
+.chips {
+  display: flex;
+  gap: 8px;
+  margin: 0 -24px;
+  padding: 0 24px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex-shrink: 0; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.chip span:hover { border-color: var(--line-strong); }
+.chip input:checked + span {
+  background: var(--flame-soft);
+  border-color: var(--flame-line);
+  color: var(--flame);
+}
+.chip input:focus-visible + span {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ---------- Lista ---------- */
+.result-count { font-size: 12px; color: var(--text-3); }
+
+.food-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.food {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  transition: border-color .15s, background .15s;
+}
+.food[hidden] { display: none; }
+.food:hover { border-color: var(--line-strong); }
+.food.is-added {
+  border-color: var(--flame-line);
+  background: var(--flame-soft);
+}
+.food-info { flex: 1; min-width: 0; }
+.food-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.food-portion { margin-top: 2px; font-size: 12px; color: var(--text-2); }
+.macros {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.macros b { color: var(--text-2); font-weight: 600; }
+
+.food-kcal {
+  text-align: right;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--flame);
+  line-height: 1;
+}
+.food-kcal small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-3);
+}
+
+.add {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.add:hover { border-color: var(--flame); color: var(--flame); }
+.add .i-check { display: none; }
+.food.is-added .add {
+  background: var(--flame);
+  border-color: var(--flame);
+  color: #fff;
+}
+.food.is-added .i-plus { display: none; }
+.food.is-added .i-check { display: block; }
+
+.empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+.empty[hidden] { display: none; }
+
+.note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+/* ---------- Barra de ação fixa ---------- */
+.footer-bar {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -24px;
+  padding: 14px 24px 24px;
+  background: linear-gradient(to bottom, rgba(17,17,19,0), var(--app-bg) 28%);
+  border-radius: 0 0 28px 28px;
+}
+.btn {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--flame);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, opacity .15s, transform .1s;
+}
+.btn:hover { background: var(--flame-hover); }
+.btn:active { transform: scale(.985); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--flame); }
+.btn:disabled:active { transform: none; }
+
+/* ---------- Ícones ---------- */
+.i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Foco pelo teclado ---------- */
+.back:focus-visible,
+.add:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 480px) {
+  body { align-items: stretch; padding: 0; background: var(--app-bg); }
+  .screen {
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px 20px 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .chips { margin: 0 -20px; padding: 0 20px 4px; }
+  .footer-bar { margin: 0 -20px; padding: 14px 20px 24px; border-radius: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
