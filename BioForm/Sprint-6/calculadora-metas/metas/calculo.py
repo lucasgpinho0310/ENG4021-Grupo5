@@ -6,8 +6,8 @@ Segue as fórmulas descritas no mockup "App Saúde/Mockup Login/perfil-4-resulta
 - TMB (Mifflin-St Jeor)  homens:   10 x peso + 6,25 x altura - 5 x idade + 5
                          mulheres: 10 x peso + 6,25 x altura - 5 x idade - 161
 - Gasto dos esportes     (MET x fator da intensidade - 1) x peso x horas, por semana, dividido por 7.
-                         Desconta 1 MET porque o repouso já está na TMB. Cada sessão conta como
-                         1 hora, porque o perfil ainda não guarda a duração dos treinos.
+                         Desconta 1 MET porque o repouso já está na TMB. As horas vêm da duração
+                         média de cada treino informada no perfil (1 hora se não houver).
 - Atividade diária       NEAT (15% da TMB) + efeito térmico dos alimentos (10% do gasto)
 - TDEE                   TMB + esportes + atividade diária
 - Meta de calorias       TDEE + ajuste do objetivo (-500 perder | 0 manter | +400 ganhar),
@@ -44,7 +44,7 @@ FATOR_INTENSIDADE = {
     'intensa': 1.2,
     'maxima': 1.4,
 }
-HORAS_POR_SESSAO = 1
+MINUTOS_POR_SESSAO = 60  # quando a duração do treino não é informada
 
 NEAT_DA_TMB = 0.15
 EFEITO_TERMICO = 0.10
@@ -102,13 +102,15 @@ def calcular_tmb(sexo, idade, peso_kg, altura_cm):
     return base + 5 if sexo == 'masculino' else base - 161
 
 
+def gasto_semanal_do_esporte(peso_kg, met, frequencia, intensidade, minutos=MINUTOS_POR_SESSAO):
+    """kcal gastas por semana num esporte (sem o repouso, que já está na TMB)."""
+    met_liquido = max(float(met) * FATOR_INTENSIDADE[intensidade] - 1, 0)
+    return met_liquido * float(peso_kg) * minutos / 60 * frequencia
+
+
 def calcular_gasto_esportes(peso_kg, esportes):
-    """esportes: lista de (met, vezes por semana, intensidade). Devolve kcal por dia."""
-    por_semana = 0
-    for met, frequencia, intensidade in esportes:
-        met_liquido = max(float(met) * FATOR_INTENSIDADE[intensidade] - 1, 0)
-        por_semana += met_liquido * peso_kg * HORAS_POR_SESSAO * frequencia
-    return por_semana / 7
+    """esportes: lista de (met, vezes por semana, intensidade[, minutos por treino]). Devolve kcal por dia."""
+    return sum(gasto_semanal_do_esporte(peso_kg, *esporte) for esporte in esportes) / 7
 
 
 def calcular_metas(sexo, idade, peso_kg, altura_cm, objetivo, esportes=()):
@@ -152,7 +154,7 @@ def metas_do_usuario(usuario, hoje=None):
     """Calcula as metas a partir do perfil salvo. Exige onboarding com dados, peso e objetivo."""
     medida = usuario.medida_atual()
     esportes = [
-        (e.esporte.met, e.frequencia_semanal, e.intensidade)
+        (e.esporte.met, e.frequencia_semanal, e.intensidade, e.duracao_minutos)
         for e in usuario.esportes.select_related('esporte')
     ]
     return calcular_metas(

@@ -39,6 +39,20 @@ DIAS_DA_SEMANA = {
     'dom': 'Domingo',
 }
 
+# Duração média de cada treino que o usuário informa no perfil (minutos)
+DURACOES_TREINO = [15, 30, 45, 60, 90, 120]
+
+
+def dias_da_lista(texto):
+    """'seg,qua' -> ['seg', 'qua'], na ordem da semana."""
+    marcados = set(filter(None, (texto or '').split(',')))
+    return [dia for dia in DIAS_DA_SEMANA if dia in marcados]
+
+
+def nomes_curtos_dos_dias(texto):
+    """'seg,qua' -> 'Seg, Qua'."""
+    return ', '.join(DIAS_DA_SEMANA[dia][:3] for dia in dias_da_lista(texto))
+
 
 # =====================================================================
 # 1. DOMÍNIO DE IDENTIDADE E PERFIL
@@ -95,6 +109,8 @@ class Usuario(models.Model):
     )
     avatar_url = models.URLField(max_length=2000, blank=True)
     data_cadastro = models.DateTimeField(auto_now_add=True)
+    # Última vez que a pessoa confirmou a rotina esportiva (o app pergunta de novo todo mês)
+    rotina_confirmada_em = models.DateField(null=True, blank=True)
 
     def idade(self, hoje=None):
         if not self.data_nascimento:
@@ -146,9 +162,22 @@ class EsporteUsuario(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(7)],
     )
     intensidade = models.CharField(max_length=10, choices=INTENSIDADES)
+    duracao_minutos = models.PositiveSmallIntegerField(  # média de cada treino
+        default=60,
+        choices=[(m, '%d min' % m) for m in DURACOES_TREINO],
+    )
+    # Dias fixos, ex.: "seg,qua". Os outros treinos da semana ficam livres (em qualquer dia).
+    dias_fixos = models.CharField(max_length=27, blank=True)
 
     def __str__(self):
         return '%s: %s %dx/semana' % (self.usuario, self.esporte, self.frequencia_semanal)
+
+    def lista_dias_fixos(self):
+        return dias_da_lista(self.dias_fixos)
+
+    @property
+    def treinos_livres(self):
+        return max(self.frequencia_semanal - len(self.lista_dias_fixos()), 0)
 
     class Meta:
         db_table = 'esportes_usuario'
@@ -406,10 +435,18 @@ class FichaTreino(models.Model):
     id = chave_uuid()
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     nome_ficha = models.CharField(max_length=100)  # ex.: "Treino A - Peito e Ombro"
-    dia_semana = models.CharField(max_length=3, choices=DIAS_DA_SEMANA, blank=True)  # planejamento semanal
+    dias_semana = models.CharField(max_length=27, blank=True)  # planejamento semanal, ex.: "seg,qui"
+    ativa = models.BooleanField(default=True)  # inativa: some da lista de treinos, mas não é apagada
+    criada_em = models.DateTimeField(default=timezone.now, editable=False)
 
     def __str__(self):
         return self.nome_ficha
+
+    def lista_dias(self):
+        return dias_da_lista(self.dias_semana)
+
+    def nomes_dos_dias(self):
+        return nomes_curtos_dos_dias(self.dias_semana)
 
     class Meta:
         db_table = 'fichas_treino'
@@ -425,6 +462,24 @@ class ExercicioFicha(models.Model):
     ordem_execucao = models.IntegerField(validators=[MinValueValidator(1)])
     series_planejadas = models.IntegerField(default=3, validators=[MinValueValidator(1)])
     repeticoes_planejadas = models.IntegerField(default=10, validators=[MinValueValidator(1)])
+    # Exercício por tempo (prancha, isometria, estabilidade): segundos de cada série.
+    # Vazio = exercício por repetições.
+    tempo_segundos = models.PositiveIntegerField(null=True, blank=True)
+    # Como o treino veio escrito, ex.: "3x10+10" ou "3/10 cada lado"
+    series_texto = models.CharField(max_length=60, blank=True)
+    cada_lado = models.BooleanField(default=False)  # exercício unilateral: as repetições valem para cada lado
+    carga_kg = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(Decimal('0'))],
+    )
+    intervalo_segundos = models.PositiveIntegerField(null=True, blank=True)
+    instrucoes = models.TextField(blank=True)
+    # Feito em sequência com o exercício anterior (bi-set): A, B, C... alternados
+    combinado_com_anterior = models.BooleanField(default=False)
+    imagem = models.ImageField(upload_to='exercicios/', blank=True)
+    video_url = models.URLField('link do vídeo', blank=True)
 
     def __str__(self):
         return '%d. %s' % (self.ordem_execucao, self.nome_exercicio)

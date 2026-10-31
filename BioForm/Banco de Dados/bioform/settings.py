@@ -16,10 +16,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Apps da Sprint 6: cada tarefa fica na sua pasta em BioForm/Sprint-6
+# Apps das sprints: cada tarefa fica na sua pasta em BioForm/Sprint-N
 SPRINT_6 = BASE_DIR.parent / 'Sprint-6'
 for pasta in ('diario-alimentar', 'medidas-caseiras', 'calculadora-metas'):
     sys.path.insert(0, str(SPRINT_6 / pasta))
+SPRINT_7 = BASE_DIR.parent / 'Sprint-7'
+for pasta in ('rotina-esportiva', 'series-academia'):
+    sys.path.insert(0, str(SPRINT_7 / pasta))
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,7 +34,16 @@ SECRET_KEY = 'django-insecure-!zoqqn2=!_a)2lw-kn0-do!hrpxz30hzzf88&tl)bqhj#cn$vj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Configuração recomendada pelo roteiro da disciplina (ENG4021, AI2-MeuProjeto: "CORS ou CSRF")
+ALLOWED_HOSTS = ['*']
+# O proxy do Codespace repassa o login com a origem https://localhost:8000
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+    'http://localhost:8000',
+    'https://*.app.github.dev',
+]
+# Pedido pelo roteiro; só passa a ter efeito se o pacote django-cors-headers for instalado
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
@@ -43,11 +55,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bioform',           # home-page (templates/home.html e static/css/home.css)
     'saude',
     'contas',            # login, cadastro e perfil
     'medidas_caseiras',  # Sprint-6/medidas-caseiras
     'metas',             # Sprint-6/calculadora-metas
     'diario',            # Sprint-6/diario-alimentar
+    'rotina',            # Sprint-7/rotina-esportiva
+    'treinos',           # Sprint-7/series-academia
 ]
 
 MIDDLEWARE = [
@@ -65,13 +80,16 @@ ROOT_URLCONF = 'bioform.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Vem antes dos templates dos apps: as páginas de registration/ do BioForm
+        # substituem as do admin do Django
+        'DIRS': [BASE_DIR / 'bioform' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'rotina.contexto.confirmacao_da_rotina',  # aviso mensal da rotina
             ],
         },
     },
@@ -127,6 +145,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Arquivos enviados pelos usuários (imagens dos exercícios)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -139,9 +161,9 @@ AUTHENTICATION_BACKENDS = [
     'contas.backends.EmailOuCPFBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-LOGIN_URL = 'entrar'
-LOGIN_REDIRECT_URL = 'inicio'
-LOGOUT_REDIRECT_URL = 'entrar'
+LOGIN_URL = '/accounts/login/'          # URL de login (padrão do Django)
+LOGIN_REDIRECT_URL = 'contas:inicio'           # depois do login: próximo passo do perfil ou metas
+LOGOUT_REDIRECT_URL = '/accounts/login/'  # para onde vai após logout
 
 # Em desenvolvimento os e-mails (ex.: link de nova senha) são impressos no terminal do runserver
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

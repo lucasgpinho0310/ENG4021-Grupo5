@@ -138,8 +138,8 @@ class ExercicioFichaInline(admin.TabularInline):
 
 
 class FichaTreinoAdmin(admin.ModelAdmin):
-    list_display = ['nome_ficha', 'usuario', 'dia_semana']
-    list_filter = ['usuario', 'dia_semana']
+    list_display = ['nome_ficha', 'usuario', 'dias_semana', 'ativa']
+    list_filter = ['usuario', 'ativa']
     inlines = [ExercicioFichaInline]
 
 admin.site.register(FichaTreino, FichaTreinoAdmin)

@@ -74,6 +74,12 @@
 /* ---------- Editar perfil: links para os passos do perfil ---------- */
 .links-perfil { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 
+/* ---------- Aviso que já aparece aberto (senha enviada / senha alterada) ---------- */
+.alert.visivel { display: flex; }
+
+/* ---------- Excluir conta: espaço acima dos botões ---------- */
+.danger-row.com-espaco { margin-top: 16px; }
+
 @media (max-width: 640px) {
   .onb-top-inner { flex-wrap: wrap; gap: 8px; }
 }

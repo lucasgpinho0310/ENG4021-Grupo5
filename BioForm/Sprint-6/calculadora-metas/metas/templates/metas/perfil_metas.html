@@ -1,6 +1,7 @@
 {% extends 'contas/base_perfil.html' %}
-{% load bioform %}
+{% load static bioform %}
 {% block titulo %}{% if onboarding %}Seu perfil (4/4){% else %}Minhas metas{% endif %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'metas/css/metas.css' %}">{% endblock %}
 {% block conteudo %}
     <h1>{% if onboarding %}Suas metas estão prontas!{% else %}Olá, {{ usuario }}! Estas são suas metas{% endif %}</h1>
     <p class="subtitle">Calculamos tudo a partir do seu perfil. Veja de onde vem cada número.</p>
@@ -15,12 +16,12 @@
         <span class="tag tag-violet">{{ usuario.get_biotipo_display }}</span>
         <span class="tag tag-flame">{{ objetivo }}</span>
         {% for e in esportes %}
-        <span class="tag tag-green">{{ e.esporte.nome }} {{ e.frequencia_semanal|vezes_por_semana }} · {{ e.get_intensidade_display }}</span>
+        <span class="tag tag-green">{{ e.esporte.nome }} {{ e.frequencia_semanal|vezes_por_semana }} · {{ e.duracao_minutos }} min · {{ e.get_intensidade_display }}</span>
         {% empty %}
         <span class="tag tag-green">Sem esportes marcados</span>
         {% endfor %}
       </div>
-      <p class="disclaimer"><a href="{% url 'perfil_dados' %}">Editar dados</a> · <a href="{% url 'perfil_objetivo' %}">Editar objetivo</a> · <a href="{% url 'perfil_esportes' %}">Editar esportes</a></p>
+      <p class="disclaimer"><a href="{% url 'contas:perfil_dados' %}">Editar dados</a> · <a href="{% url 'contas:perfil_objetivo' %}">Editar objetivo</a> · <a href="{% url 'contas:perfil_esportes' %}">Editar esportes</a>{% url 'rotina:rotina_semana' as url_semana %}{% if url_semana and esportes %} · <a href="{{ url_semana }}">Ver minha semana</a>{% endif %}</p>
     </section>
 
     <!-- Conta das calorias -->
@@ -32,7 +33,7 @@
           <b>{{ metas.tmb|milhar }} kcal</b>
         </div>
         <div class="calc-row">
-          <div><span>Gasto dos esportes</span><small>{% for e in esportes %}{{ e.frequencia_semanal|vezes_por_semana }} {{ e.esporte.nome|lower }} {{ e.get_intensidade_display|lower }}{% if not forloop.last %} + {% endif %}{% empty %}Nenhum esporte marcado{% endfor %}</small></div>
+          <div><span>Gasto dos esportes</span><small>{% for e in esportes %}{{ e.frequencia_semanal|vezes_por_semana }} {{ e.esporte.nome|lower }} de {{ e.duracao_minutos }} min, {{ e.get_intensidade_display|lower }}{% if not forloop.last %} + {% endif %}{% empty %}Nenhum esporte marcado{% endfor %}</small></div>
           <b class="plus">+{{ metas.gasto_esportes|milhar }} kcal</b>
         </div>
         <div class="calc-row">
@@ -107,8 +108,8 @@
 
     {% if onboarding %}
     <div class="actions">
-      <a href="{% url 'perfil_esportes' %}" class="btn btn-ghost">Voltar</a>
-      <a href="{% url 'perfil_concluir' %}" class="btn btn-primary">Começar a usar o BioForm</a>
+      <a href="{% url 'contas:perfil_esportes' %}" class="btn btn-ghost">Voltar</a>
+      <a href="{% url 'contas:perfil_concluir' %}" class="btn btn-primary">Começar a usar o BioForm</a>
     </div>
     {% endif %}
 {% endblock %}

@@ -1,0 +1,18 @@
+/* =========================================================
+   BioForm — página "Minhas metas" (metas/perfil_metas.html).
+   Carregado depois de acesso.css e complementos.css; usa as variáveis de cor deles.
+   ========================================================= */
+
+/* ---------- Cor de cada macronutriente ---------- */
+.m-prot b { color: var(--flame); }  .m-prot .bar span { background: var(--flame); }
+.m-carb b { color: var(--violet); } .m-carb .bar span { background: var(--violet); }
+.m-gord b { color: var(--green); }  .m-gord .bar span { background: var(--green); }
+
+/* ---------- "Na prática": exemplo em alimentos abaixo de cada macro ---------- */
+.pratica {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-strong);
+  font-size: 13px;
+  color: var(--text-2);
+}

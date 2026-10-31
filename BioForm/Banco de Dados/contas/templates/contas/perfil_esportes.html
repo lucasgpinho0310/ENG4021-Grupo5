@@ -1,13 +1,17 @@
 {% extends 'contas/base_perfil.html' %}
+{% load static %}
 {% block titulo %}Seu perfil (3/4){% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'rotina/css/rotina.css' %}">{% endblock %}
 {% block conteudo %}
     <h1>Sua rotina esportiva</h1>
-    <p class="subtitle">Marque o que você pratica. Para cada esporte, informe a frequência e a intensidade.</p>
+    <p class="subtitle">Marque o que você pratica. Para cada esporte, informe a frequência, a intensidade, quanto tempo dura cada treino e se tem dias fixos.</p>
 
     {% comment %}Marcar um esporte mostra a configuração dele logo abaixo (CSS :has, sem JavaScript).
     As regras são geradas aqui para valer para todos os esportes do catálogo.{% endcomment %}
     <style>
       {% for item in form.grupos %}.onb:has(#esp-{{ item.slug }}:checked) .cfg-{{ item.slug }}{% if not forloop.last %},{% endif %}
+      {% endfor %}{ display: block; }
+      {% for item in form.grupos %}.onb:has(#fixos-{{ item.slug }}:checked) .dias-{{ item.slug }}{% if not forloop.last %},{% endif %}
       {% endfor %}{ display: block; }
     </style>
 
@@ -45,11 +49,12 @@
           <label class="choice"><input type="radio" name="{{ item.int_nome }}" value="{{ valor }}"{% if item.int_valor == valor %} checked{% endif %}><span class="choice-body">{{ nome }}</span></label>
           {% endfor %}
         </div>
+        {% include 'rotina/_campos_esporte.html' %}
       </section>
       {% endfor %}
 
       <div class="actions">
-        <a href="{% if onboarding %}{% url 'perfil_objetivo' %}{% else %}{% url 'perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
+        <a href="{% if onboarding %}{% url 'contas:perfil_objetivo' %}{% else %}{% url 'metas:perfil_metas' %}{% endif %}" class="btn btn-ghost">{% if onboarding %}Voltar{% else %}Cancelar{% endif %}</a>
         <button type="submit" class="btn btn-primary">{% if onboarding %}Calcular minhas metas{% else %}Salvar e recalcular metas{% endif %}</button>
       </div>
     </form>

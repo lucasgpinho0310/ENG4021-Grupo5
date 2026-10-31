@@ -4,8 +4,9 @@ Tabelas criadas a partir de `App Saúde/modelagemDados.txt`, seguindo a aula
 *Atividade 03 — Modelagem de Dados*. Projeto Django `bioform`, app `saude`
 (as tabelas estão em `saude/models.py` e as telas do admin em `saude/admin.py`).
 
-O app `contas` (login, cadastro e perfil) também fica aqui. Os apps `diario`, `medidas_caseiras` e
-`metas` ficam nas pastas de `BioForm/Sprint-6` e são carregados por `bioform/settings.py`.
+O app `contas` (login, cadastro e perfil) também fica aqui. Os apps de cada sprint ficam nas suas
+pastas e são carregados por `bioform/settings.py`: `diario`, `medidas_caseiras` e `metas` em
+`BioForm/Sprint-6`; `rotina` e `treinos` em `BioForm/Sprint-7`.
 
 | Domínio | Tabelas |
 |---|---|
@@ -16,6 +17,24 @@ O app `contas` (login, cadastro e perfil) também fica aqui. Os apps `diario`, `
 | Gamificação social | `perfil_gamificacao`, `historico_xp`, `amizades`, `grupos`, `membros_grupo`, `desafios`, `participantes_desafio` |
 
 ## Como rodar
+
+### No GitHub Codespaces
+
+[![Abrir no GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lucasgpinho0310/ENG4021-Grupo5)
+
+No GitHub: **Code → Codespaces → Create codespace on main**. Ao abrir, o Codespace instala o
+Django, cria as tabelas e liga o servidor na porta 8000 sozinho (configuração em
+`.devcontainer/devcontainer.json`). O site abre numa aba de pré-visualização; para abrir no
+navegador, use a aba **Portas** → porta 8000 → ícone do globo.
+
+Para criar o administrador, rode num terminal novo:
+
+```bash
+cd "BioForm/Banco de Dados"
+python manage.py createsuperuser
+```
+
+### No computador
 
 ```bash
 cd "BioForm/Banco de Dados"
@@ -29,7 +48,9 @@ python manage.py runserver
 
 Site: http://127.0.0.1:8000/ · Admin: http://127.0.0.1:8000/admin/
 
-Testes: `python manage.py test saude contas diario medidas_caseiras metas`
+Testes: `python manage.py test saude contas diario medidas_caseiras metas rotina treinos`
+
+As imagens enviadas nos exercícios ficam em `media/` (fora do git).
 
 ## Dados que já vêm carregados
 

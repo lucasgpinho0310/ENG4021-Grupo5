@@ -1,0 +1,22 @@
+{% comment %}Duração e dias fixos de um esporte, dentro do passo 3 do perfil (contas/perfil_esportes.html).
+Responder "Sim" mostra os dias (regra :has gerada no template do passo 3).{% endcomment %}
+        <p class="cfg-label">Quanto tempo dura cada treino, em média?</p>
+        <div class="chips">
+          {% for valor, nome in duracoes %}
+          <label class="choice"><input type="radio" name="{{ item.dur_nome }}" value="{{ valor }}"{% if item.dur_valor == valor %} checked{% endif %}><span class="choice-body">{{ nome }}</span></label>
+          {% endfor %}
+        </div>
+        <p class="cfg-label">Tem dias fixos?</p>
+        <div class="chips">
+          {% for valor, nome in tem_dias_fixos %}
+          <label class="choice"><input type="radio"{% if valor == 'sim' %} id="fixos-{{ item.slug }}"{% endif %} name="{{ item.fixos_nome }}" value="{{ valor }}"{% if item.fixos_valor == valor %} checked{% endif %}><span class="choice-body">{{ nome }}</span></label>
+          {% endfor %}
+        </div>
+        <div class="dias-fixos dias-{{ item.slug }}">
+          <p class="cfg-hint">Marque só os dias que não mudam. Se treina 4x e marcar 2 dias, os outros 2 treinos ficam livres.</p>
+          <div class="chips">
+            {% for valor, nome in dias %}
+            <label class="choice"><input type="checkbox" name="{{ item.dias_nome }}" value="{{ valor }}"{% if valor in item.dias_valor %} checked{% endif %}><span class="choice-body">{{ nome }}</span></label>
+            {% endfor %}
+          </div>
+        </div>

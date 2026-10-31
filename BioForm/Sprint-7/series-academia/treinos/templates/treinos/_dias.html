@@ -1,0 +1,12 @@
+{% load bioform %}
+<div class="field">
+  <span class="label">Dias da semana <small>(opcional)</small></span>
+  <div class="chips">
+    {% for opcao in form.dias %}
+    <label class="choice">{{ opcao.tag }}<span class="choice-body">{{ opcao.choice_label }}</span></label>
+    {% endfor %}
+  </div>
+  {% if musculacao %}
+  <span class="help">No seu perfil: musculação {{ musculacao.frequencia_semanal|vezes_por_semana }}{% if musculacao.frequencia_semanal < 7 %} por semana{% endif %}{% if musculacao.dias_fixos %}, dias fixos {{ musculacao.dias_fixos|dias_curtos }}{% if musculacao.treinos_livres %} e {{ musculacao.treinos_livres }} livre{{ musculacao.treinos_livres|pluralize }}{% endif %}{% endif %}.</span>
+  {% endif %}
+</div>
