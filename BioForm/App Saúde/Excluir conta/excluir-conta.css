@@ -1,0 +1,325 @@
+/* ==========================================================================
+   BioForm Health OS — tela de exclusão de conta (remoção de usuário)
+   Tokens de cor, tipografia e componentes iguais aos do protótipo
+   ========================================================================== */
+
+:root {
+  --stage: #09090B;
+  --app-bg: #111113;
+  --surface: #1A1A1D;
+  --surface-2: #232327;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #8A8A93;
+
+  --flame: #FF5722;
+  --flame-soft: rgba(255, 87, 34, 0.12);
+
+  /* Vermelho reservado para ações destrutivas */
+  --danger: #EF4444;
+  --danger-hover: #F87171;
+  --danger-soft: rgba(239, 68, 68, 0.10);
+  --danger-line: rgba(239, 68, 68, 0.35);
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { min-height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--stage);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Contêiner da tela ---------- */
+.screen {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 24px 28px;
+  background: var(--app-bg);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 32px 70px -20px rgba(0, 0, 0, .85);
+}
+
+/* ---------- Caminho de volta ---------- */
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.crumb strong { color: var(--text); font-weight: 600; }
+.back {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  transition: border-color .15s;
+}
+.back:hover { border-color: var(--line-strong); }
+
+/* ---------- Título ---------- */
+.screen-title {
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.screen-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* ---------- Cartões ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+/* Conta que será excluída */
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--flame-soft);
+  color: var(--flame);
+  font-size: 13px;
+  font-weight: 700;
+}
+.account-text { min-width: 0; }
+.account-name { font-size: 14px; font-weight: 600; }
+.account-mail {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Aviso do que é apagado */
+.warning {
+  background: var(--danger-soft);
+  border-color: var(--danger-line);
+  padding: 14px;
+}
+.warning-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--danger-hover);
+}
+.loss-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.loss-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+.loss-list .i {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  color: var(--danger-hover);
+  stroke-width: 2.4;
+}
+
+/* ---------- Formulário de confirmação ---------- */
+.delete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+.field > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.input {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input > .i { color: var(--text-3); transition: color .15s; }
+.input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* evita o zoom automático do iOS ao focar */
+}
+.input input::placeholder { color: var(--text-3); }
+.input:hover { border-color: var(--line-strong); }
+.input:focus-within {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+.input:focus-within > .i { color: var(--danger-hover); }
+.input input:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 100px var(--surface) inset;
+  caret-color: var(--text);
+}
+
+/* Caixa "entendo que é definitivo" */
+.confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.confirm input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  accent-color: var(--danger);
+  cursor: pointer;
+}
+
+/* ---------- Botões ---------- */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.btn {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, opacity .15s, transform .1s;
+}
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-danger:active { transform: scale(.985); }
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+.btn-secondary:hover { background: var(--surface-2); }
+
+/* O botão de excluir fica apagado até a senha ser digitada e a caixa marcada.
+   Os atributos "required" no HTML garantem o bloqueio do envio mesmo assim. */
+.delete-form:has(input:invalid) .btn-danger {
+  opacity: .4;
+  cursor: not-allowed;
+}
+.delete-form:has(input:invalid) .btn-danger:hover { background: var(--danger); }
+.delete-form:has(input:invalid) .btn-danger:active { transform: none; }
+
+/* ---------- Ícones ---------- */
+.i {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Foco pelo teclado ---------- */
+.back:focus-visible,
+.btn:focus-visible,
+.confirm input:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+/* ---------- Celular: a tela ocupa o aparelho inteiro ---------- */
+@media (max-width: 480px) {
+  body {
+    align-items: stretch;
+    padding: 0;
+    background: var(--app-bg);
+  }
+  .screen {
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px 20px 28px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .actions { margin-top: auto; }
+  .delete-form { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

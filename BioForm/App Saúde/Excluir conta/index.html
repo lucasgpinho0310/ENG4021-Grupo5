@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Excluir conta — BioForm Health OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="excluir-conta.css">
+</head>
+<body>
+  <main class="screen">
+
+    <nav class="crumb" aria-label="Caminho">
+      <a class="back" href="configuracoes.html" aria-label="Voltar para configurações">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span>Configurações / <strong>Excluir conta</strong></span>
+    </nav>
+
+    <header>
+      <h1 class="screen-title">Excluir conta</h1>
+      <p class="screen-sub">Esta ação é permanente e não pode ser desfeita.</p>
+    </header>
+
+    <section class="card account" aria-label="Conta que será excluída">
+      <div class="avatar" aria-hidden="true">MS</div>
+      <div class="account-text">
+        <p class="account-name">Maria Souza</p>
+        <p class="account-mail">maria.souza@email.com</p>
+      </div>
+    </section>
+
+    <section class="card warning" aria-labelledby="warn-title">
+      <h2 class="warning-title" id="warn-title">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        O que será apagado
+      </h2>
+      <ul class="loss-list">
+        <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>Seu perfil e dados de saúde</li>
+        <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>Histórico de treinos e medições</li>
+        <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>Metas, conquistas e preferências</li>
+      </ul>
+    </section>
+
+    <form class="delete-form" id="delete-form" action="/api/conta" method="post">
+      <div class="field">
+        <label for="senha">Digite sua senha para confirmar</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="senha" name="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+        </div>
+      </div>
+
+      <label class="confirm">
+        <input type="checkbox" name="confirmo" required>
+        <span>Entendo que meus dados serão apagados de forma definitiva.</span>
+      </label>
+
+      <div class="actions">
+        <button class="btn btn-danger" type="submit">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+          Excluir minha conta
+        </button>
+        <a class="btn btn-secondary" href="configuracoes.html">Cancelar</a>
+      </div>
+    </form>
+
+  </main>
+
+  <script>
+    // Demonstração: remova este bloco quando ligar ao seu backend.
+    document.getElementById('delete-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      alert('Formulário válido. Ligue o envio ao seu backend para excluir de verdade.');
+    });
+  </script>
+</body>
+</html>
