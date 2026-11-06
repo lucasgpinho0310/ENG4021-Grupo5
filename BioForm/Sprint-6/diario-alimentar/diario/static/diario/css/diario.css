@@ -108,3 +108,18 @@
   .tabela-historico td::before { content: attr(data-label); display: block; font-size: 11px; color: var(--text-3); }
   .refeicao-head { flex-direction: column; }
 }
+
+/* ---------- Celular (RNF04): alvos de toque de 44 px ---------- */
+@media (max-width: 640px) {
+  .btn-mini { height: 44px; padding: 0 16px; font-size: 14px; }
+  /* Os botões de água dividem a linha em partes iguais, em vez de quebrar para baixo */
+  .agua-acoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+  .agua-acoes .btn-mini { width: 100%; padding: 0 8px; }
+  .btn-remover { width: 44px; height: 44px; margin-right: -6px; }
+  .salvar-combo summary { padding: 13px 0; margin: -4px 0; }
+  .dia-links a { display: inline-block; padding: 12px 4px; margin: -12px -4px; }
+  /* Histórico: o dia inteiro vira o link, em vez de só o texto */
+  .tabela-historico td[data-label="Dia"] a { display: flex; align-items: center; min-height: 44px; font-weight: 600; }
+  .tabela-historico td[data-label="Dia"]::before { display: none; }
+  .tabela-historico td[data-label="Dia"] { grid-column: 1 / -1; }
+}

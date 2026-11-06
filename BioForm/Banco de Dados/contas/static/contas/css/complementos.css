@@ -83,3 +83,53 @@
 @media (max-width: 640px) {
   .onb-top-inner { flex-wrap: wrap; gap: 8px; }
 }
+
+/* ==========================================================================
+   Celular (RNF04): alvos de toque de 44 px e campos com 16 px
+   (com menos de 16 px o iPhone dá zoom na tela ao tocar no campo)
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* Campos de texto, número, data e listas: 16 px em todas as telas.
+     Os :not() só aumentam a especificidade, para valer também sobre o CSS de cada tela
+     (ex.: .linha .field select), que é carregado depois deste arquivo. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select:not([multiple]):not([size]):not([hidden]),
+  textarea:not([readonly]):not([disabled]):not([hidden]) { font-size: 16px; }
+
+  /* Menu do topo: uma linha só que rola para o lado, com itens de 44 px.
+     O topo é fixo (sticky), então duas linhas de menu ocupariam espaço demais da tela. */
+  .onb-top:has(.top-nav) { padding: 12px 0 0; }
+  .onb-top-inner:has(.top-nav) { flex-direction: column; align-items: stretch; gap: 4px; margin-bottom: 4px; }
+  .onb-top-inner:has(.top-nav) > .brand { padding: 0 16px; }
+  .top-nav {
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 0 28px 0 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    /* esmaece a borda direita: mostra que dá para arrastar e ver Editar perfil e Sair */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .top-nav::-webkit-scrollbar { display: none; }
+  .top-nav form { display: flex; flex-shrink: 0; }
+  .top-nav a,
+  .top-nav button {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  /* Links de voltar e botões pequenos das telas de conta */
+  .back-link { min-height: 44px; }
+  .btn-sm { height: 44px; }
+
+  /* Links no meio do texto (Esqueci minha senha, Termos de Uso): área de toque maior sem mexer no layout */
+  .options a,
+  .check a { display: inline-block; padding: 12px 0; margin: -12px 0; }
+}

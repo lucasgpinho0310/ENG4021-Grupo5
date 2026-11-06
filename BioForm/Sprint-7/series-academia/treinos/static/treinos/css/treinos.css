@@ -460,3 +460,21 @@ fieldset.exercicio-treino { margin: 0; min-width: 0; }
 @media (max-width: 480px) {
   .registro .segmented { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ---------- Celular (RNF04): alvos de toque de 44 px ---------- */
+@media (max-width: 640px) {
+  .btn-mini { height: 44px; padding: 0 16px; font-size: 14px; }
+  .btn-icone { width: 44px; height: 44px; }
+  .exercicio-acoes { gap: 8px; }
+  .exercicio-acoes form { gap: 8px; }
+  .linha .field input, .linha .field select { height: 44px; }
+  .linha .field select { padding: 0 6px; }  /* cabe "Repetições" inteiro com a fonte de 16 px */
+  .voltar a { display: inline-block; padding: 12px 0; margin: -12px 0; }
+  .paginas .btn-mini { height: 44px; }
+
+  /* Registrar treino (protótipo): chips, intensidade e botões com 44 px */
+  .registro .chip span { padding: 13px 16px; font-size: 14px; }
+  .registro .seg span { height: 44px; font-size: 14px; }
+  .registro .back, .registro .icon-btn { width: 44px; height: 44px; }
+  .registro .crumb { font-size: 13px; }
+}
