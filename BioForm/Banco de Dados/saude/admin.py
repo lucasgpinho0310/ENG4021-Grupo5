@@ -160,7 +160,7 @@ admin.site.register(SessaoAtividade, SessaoAtividadeAdmin)
 
 
 class SerieExecutadaAdmin(admin.ModelAdmin):
-    list_display = ['exercicio', 'sessao', 'numero_serie', 'carga_kg', 'repeticoes']
+    list_display = ['exercicio', 'sessao', 'numero_serie', 'carga_kg', 'repeticoes', 'tempo_segundos']
     list_filter = ['exercicio__ficha']
 
 admin.site.register(SerieExecutada, SerieExecutadaAdmin)

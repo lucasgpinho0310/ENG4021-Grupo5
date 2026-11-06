@@ -11,7 +11,10 @@
           {% else %}Monte suas séries exercício por exercício ou colando o texto da ficha.{% endif %}
         </p>
       </div>
-      <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+      <div class="ficha-acoes">
+        <a href="{% url 'treinos:treinos_historico' %}" class="btn btn-ghost btn-topo">Histórico</a>
+        <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+      </div>
     </div>
 
     {% if ativas %}

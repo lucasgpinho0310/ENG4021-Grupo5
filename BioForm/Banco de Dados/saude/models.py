@@ -533,16 +533,25 @@ class SerieExecutada(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
     )
-    repeticoes = models.IntegerField(validators=[MinValueValidator(1)])
+    # Séries por repetições guardam as repetições; séries por tempo (prancha) guardam os segundos.
+    repeticoes = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    tempo_segundos = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
 
     def __str__(self):
-        return '%s: %s kg x %d' % (self.exercicio.nome_exercicio, self.carga_kg, self.repeticoes)
+        feito = '%ds' % self.tempo_segundos if self.tempo_segundos else '%s reps' % self.repeticoes
+        return '%s: %s kg x %s' % (self.exercicio.nome_exercicio, self.carga_kg, feito)
 
     class Meta:
         db_table = 'series_executadas_historico'
         verbose_name = 'série executada'
         verbose_name_plural = 'séries executadas'
         ordering = ['-sessao__inicio', 'exercicio', 'numero_serie']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(repeticoes__isnull=False) | models.Q(tempo_segundos__isnull=False),
+                name='serie_com_repeticoes_ou_tempo',
+            ),
+        ]
 
 
 # =====================================================================

@@ -250,3 +250,96 @@
 
 /* Dicas soltas no formulário */
 .form-treino p.help { margin: -4px 0 0; font-size: 12px; color: var(--text-3); }
+
+/* Treino feito: registrar cada série e ver o histórico (RF06 / RF07) */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.btn-treinar { color: #fff; background: var(--flame); border-color: var(--flame); }
+.btn-treinar:hover { background: var(--flame-hover); border-color: var(--flame-hover); }
+.subtitle a { color: var(--flame); }
+.ultima-vez { margin: 10px 0 0; font-size: 13px; color: var(--text-2); }
+.ultima-vez small { display: block; font-size: 11px; color: var(--text-3); }
+.planejado { margin: -2px 0 0; font-size: 13px; color: var(--text-3); }
+
+.form-treinar .exercicios { margin-top: 20px; }
+fieldset.exercicio-treino { margin: 0; min-width: 0; }
+.series-feitas { display: grid; gap: 6px; margin-top: 14px; max-width: 420px; }
+.serie-cab, .serie-linha {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+.serie-cab span { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .03em; }
+.serie-check { display: flex; align-items: center; gap: 10px; height: 44px; font-weight: 700; color: var(--text-2); cursor: pointer; }
+.serie-check input { width: 22px; height: 22px; accent-color: var(--flame); }
+.serie-campo input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  outline: none;
+}
+.serie-campo input:focus { border-color: var(--flame); box-shadow: 0 0 0 4px var(--flame-soft); }
+.serie-linha:has(.serie-check input:not(:checked)) .serie-campo { opacity: .35; }
+.serie-erro .serie-campo input { border-color: var(--danger); }
+.serie-linha .help.erro { grid-column: 2 / -1; font-size: 12px; color: var(--danger); }
+
+/* Histórico */
+.sessoes { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.sessao-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.sessao-card:hover { text-decoration: none; border-color: var(--flame-line); }
+.sessao-data {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  flex-shrink: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+.sessao-data b { font-size: 20px; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
+.sessao-info { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.sessao-info small { color: var(--text-3); font-size: 13px; }
+.sessao-numeros { display: flex; gap: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sessao-numeros small { display: block; font-size: 11px; font-weight: 500; color: var(--text-3); }
+.paginas { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; color: var(--text-2); }
+.resumo-sessao { margin: 0 0 20px; }
+.series-lista { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
+.series-lista li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+  border-radius: 9px;
+}
+.series-lista small { font-size: 11px; color: var(--text-3); }
+
+@media (max-width: 720px) {
+  .sessao-card { flex-wrap: wrap; }
+  .sessao-numeros { width: 100%; padding-left: 68px; }
+  .ficha-acoes { flex-wrap: wrap; }
+}

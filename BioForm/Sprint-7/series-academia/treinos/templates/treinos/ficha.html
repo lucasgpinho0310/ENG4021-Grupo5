@@ -7,9 +7,10 @@
     <div class="treinos-topo">
       <div>
         <h1>{{ ficha.nome_ficha }} {% if ficha.ativa %}<span class="tag tag-green">Ativa</span>{% else %}<span class="tag tag-neutra">Inativa</span>{% endif %}</h1>
-        <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</p>
+        <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}{% if ultimo_treino %} · último treino <a href="{% url 'treinos:treinos_sessao' ultimo_treino.id %}">{{ ultimo_treino.inicio|date:"d/m" }}</a>{% endif %}</p>
       </div>
       <div class="ficha-acoes">
+        {% if exercicios %}<a href="{% url 'treinos:treinos_treinar' ficha.id %}" class="btn-mini btn-treinar">▶ Treinar agora</a>{% endif %}
         <a href="{% url 'treinos:treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
         <form method="post" action="{% url 'treinos:treinos_alternar_ativa' ficha.id %}">
           {% csrf_token %}
@@ -41,6 +42,7 @@
               <span><small>Carga</small>{{ e.carga_kg|carga }}</span>
               {% if e.intervalo_segundos %}<span><small>Intervalo</small>{{ e.intervalo_segundos|intervalo }}</span>{% endif %}
             </p>
+            {% if e.ultima %}<p class="ultima-vez"><small>Última vez · {{ e.ultima.0.inicio|date:"d/m" }}</small>{{ e.ultima.1|series_feitas }}</p>{% endif %}
             {% if e.instrucoes %}<p class="instrucao">{{ e.instrucoes|linebreaksbr }}</p>{% endif %}
             {% if e.video_url %}
               {% with embed=e.video_url|video_embed %}

@@ -1,0 +1,71 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform treinos_tags %}
+{% block titulo %}Treinar: {{ ficha.nome_ficha }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos:treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <h1>Treinar: {{ ficha.nome_ficha }}</h1>
+    <p class="subtitle">Desmarque as séries que não fez e ajuste carga e repetições. Os números já vêm com o que você fez da última vez.</p>
+
+    <form method="post" class="form-treino form-treinar" novalidate>
+      {% csrf_token %}
+      {% include 'contas/_erros_gerais.html' %}
+
+      <section class="block">
+        <div class="grade-3">
+          {% include 'treinos/_campo.html' with campo=form.inicio %}
+          {% include 'treinos/_campo.html' with campo=form.duracao %}
+          {% include 'treinos/_campo.html' with campo=form.intensidade %}
+        </div>
+      </section>
+
+      <ol class="exercicios">
+        {% for bloco in form.blocos %}
+        <li class="bloco{% if bloco.combinado %} bloco-combinado{% endif %}">
+          {% if bloco.combinado %}<p class="bloco-titulo">Exercícios combinados · alterne {% for item in bloco.itens %}{{ item.exercicio.letra }}{% if not forloop.last %} e {% endif %}{% endfor %}</p>{% endif %}
+          {% for item in bloco.itens %}
+          {% with e=item.exercicio %}
+          <fieldset class="exercicio exercicio-treino">
+            <legend class="sr-only">{{ e.nome_exercicio }}</legend>
+            <div class="exercicio-info">
+              <h2>{% if e.letra %}<span class="letra">{{ e.letra }}</span>{% else %}<span class="ordem">{{ e.ordem_execucao }}</span>{% endif %} {{ e.nome_exercicio }}</h2>
+              <p class="planejado">Planejado: {{ e|series_de }}{% if e.carga_kg %} · {{ e.carga_kg|carga }}{% endif %}{% if e.intervalo_segundos %} · intervalo {{ e.intervalo_segundos|intervalo }}{% endif %}</p>
+              {% if item.ultima_sessao %}
+              <p class="ultima-vez"><small>Última vez · {{ item.ultima_sessao.inicio|date:"d/m" }}</small>{{ item.ultimas_series|series_feitas }}</p>
+              {% endif %}
+
+              <div class="series-feitas" role="group" aria-label="Séries de {{ e.nome_exercicio }}">
+                <div class="serie-cab" aria-hidden="true">
+                  <span>Série</span><span>Carga (kg)</span><span>{% if e.tempo_segundos %}Tempo{% else %}Reps{% if e.cada_lado %} (cada lado){% endif %}{% endif %}</span>
+                </div>
+                {% for s in item.series %}
+                <div class="serie-linha{% if s.carga.errors or s.valor.errors %} serie-erro{% endif %}">
+                  <label class="serie-check" for="{{ s.feita.id_for_label }}">
+                    {{ s.feita }}<span>{{ s.numero }}</span><span class="sr-only"> feita</span>
+                  </label>
+                  <div class="serie-campo">
+                    <label class="sr-only" for="{{ s.carga.id_for_label }}">Carga da série {{ s.numero }} (kg)</label>
+                    {{ s.carga }}
+                  </div>
+                  <div class="serie-campo">
+                    <label class="sr-only" for="{{ s.valor.id_for_label }}">{% if e.tempo_segundos %}Tempo{% else %}Repetições{% endif %} da série {{ s.numero }}</label>
+                    {{ s.valor }}
+                  </div>
+                  {% if s.carga.errors or s.valor.errors %}<span class="help erro">{{ s.carga.errors|join:' ' }} {{ s.valor.errors|join:' ' }}</span>{% endif %}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </fieldset>
+          {% endwith %}
+          {% endfor %}
+        </li>
+        {% endfor %}
+      </ol>
+
+      <div class="actions">
+        <a href="{% url 'treinos:treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Salvar treino</button>
+      </div>
+    </form>
+{% endblock %}

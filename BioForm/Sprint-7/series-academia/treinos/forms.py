@@ -1,10 +1,14 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django import forms
+from django.utils import timezone
 
-from saude.models import DIAS_DA_SEMANA, ExercicioFicha
+from saude.models import DIAS_DA_SEMANA, INTENSIDADES, ExercicioFicha
 
 from .leitor import ExercicioLido, ler_intervalo
+from .servicos import blocos_da_ficha
+from .sessoes import SERIES_MAXIMAS, SerieFeita
 
 DIAS = [(dia, nome[:3]) for dia, nome in DIAS_DA_SEMANA.items()]
 IMAGEM_MAXIMA_MB = 5
@@ -234,3 +238,133 @@ class ExercicioForm(forms.ModelForm, CamposDeSeries):
         if commit:
             exercicio.save()
         return exercicio
+
+
+# =====================================================================
+# Treino feito: o que foi feito de verdade em cada série (sessoes.py)
+# =====================================================================
+
+FORMATO_INICIO = '%Y-%m-%dT%H:%M'  # o que o <input type="datetime-local"> envia
+CARGA_MAXIMA = 1000
+REPETICOES_MAXIMAS = 200
+TOLERANCIA_FUTURO = timedelta(minutes=5)  # relógio do celular um pouco adiantado
+
+
+class TreinoFeitoForm(forms.Form):
+    """
+    Uma linha por série planejada de cada exercício da ficha: feita?, carga e repetições (ou tempo).
+    Os campos de cada série se chamam feita-<exercício>-<n>, carga-<exercício>-<n> e
+    reps-<exercício>-<n> (ou tempo-<exercício>-<n>), e já vêm com o que foi feito da última vez.
+    """
+    inicio = forms.DateTimeField(
+        label='Começou em', input_formats=[FORMATO_INICIO],
+        widget=forms.DateTimeInput(format=FORMATO_INICIO, attrs={'type': 'datetime-local'}),
+    )
+    duracao = forms.IntegerField(
+        label='Duração (min)', min_value=1, max_value=600,
+        widget=forms.NumberInput(attrs={'min': 1, 'max': 600, 'inputmode': 'numeric'}),
+    )
+    intensidade = forms.ChoiceField(label='Intensidade', choices=INTENSIDADES.items())
+
+    def __init__(self, exercicios, ultimas, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exercicios = exercicios
+        self.ultimas = ultimas
+        self.fields['inicio'].widget.attrs['max'] = timezone.localtime().strftime(FORMATO_INICIO)
+        for exercicio in exercicios:
+            anteriores = {s.numero_serie: s for s in ultimas.get(exercicio.id, (None, []))[1]}
+            for numero in self.numeros(exercicio):
+                anterior = anteriores.get(numero)
+                chave = self.chave(exercicio, numero)
+                self.fields['feita-' + chave] = forms.BooleanField(required=False, initial=True)
+                self.fields['carga-' + chave] = forms.DecimalField(
+                    min_value=0, max_value=CARGA_MAXIMA, decimal_places=2, required=False,
+                    initial=sem_zeros(anterior.carga_kg if anterior else exercicio.carga_kg),
+                    widget=forms.NumberInput(attrs={'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+                )
+                if exercicio.tempo_segundos:
+                    segundos = anterior.tempo_segundos if anterior and anterior.tempo_segundos else exercicio.tempo_segundos
+                    self.fields['tempo-' + chave] = forms.CharField(
+                        max_length=20, required=False, initial='%ds' % segundos,
+                        widget=forms.TextInput(attrs={'placeholder': '30s'}),
+                    )
+                else:
+                    repeticoes = anterior.repeticoes if anterior and anterior.repeticoes else exercicio.repeticoes_planejadas
+                    self.fields['reps-' + chave] = forms.IntegerField(
+                        min_value=1, max_value=REPETICOES_MAXIMAS, required=False, initial=repeticoes,
+                        widget=forms.NumberInput(attrs={'min': 1, 'max': REPETICOES_MAXIMAS, 'inputmode': 'numeric'}),
+                    )
+
+    @staticmethod
+    def chave(exercicio, numero):
+        return '%s-%d' % (exercicio.id.hex, numero)
+
+    @staticmethod
+    def numeros(exercicio):
+        return range(1, min(exercicio.series_planejadas, SERIES_MAXIMAS) + 1)
+
+    def clean_inicio(self):
+        inicio = self.cleaned_data['inicio']
+        if inicio > timezone.now() + TOLERANCIA_FUTURO:
+            raise forms.ValidationError('O treino não pode começar no futuro.')
+        return inicio
+
+    def clean(self):
+        dados = super().clean()
+        self.feitos = []
+        for exercicio in self.exercicios:
+            series = []
+            for numero in self.numeros(exercicio):
+                chave = self.chave(exercicio, numero)
+                if not dados.get('feita-' + chave):
+                    continue
+                carga = dados.get('carga-' + chave)
+                serie = SerieFeita(numero=numero, carga_kg=Decimal('0') if carga is None else carga)
+                if exercicio.tempo_segundos:
+                    campo = 'tempo-' + chave
+                    if campo in self.errors:
+                        continue
+                    try:
+                        serie.tempo_segundos = _segundos(dados.get(campo), 'Use segundos (30s) ou minutos (1min, 1:30).')
+                    except forms.ValidationError as erro:
+                        self.add_error(campo, erro)
+                        continue
+                    if not serie.tempo_segundos:
+                        self.add_error(campo, 'Informe o tempo.')
+                        continue
+                else:
+                    campo = 'reps-' + chave
+                    serie.repeticoes = dados.get(campo)
+                    if not serie.repeticoes:
+                        if campo not in self.errors:
+                            self.add_error(campo, 'Informe as repetições.')
+                        continue
+                series.append(serie)
+            if series:
+                self.feitos.append((exercicio, series))
+        if not self.errors and not self.feitos:
+            raise forms.ValidationError('Marque pelo menos uma série feita.')
+        return dados
+
+    def blocos(self):
+        """Exercícios na ordem da ficha, juntando os combinados, com os campos de cada série."""
+        for bloco in blocos_da_ficha(self.exercicios):
+            itens = []
+            for exercicio in bloco.exercicios:
+                ultima = self.ultimas.get(exercicio.id)
+                itens.append({
+                    'exercicio': exercicio,
+                    'ultima_sessao': ultima[0] if ultima else None,
+                    'ultimas_series': ultima[1] if ultima else [],
+                    'series': [
+                        {
+                            'numero': numero,
+                            'feita': self['feita-' + chave],
+                            'carga': self['carga-' + chave],
+                            'valor': self[('tempo-' if exercicio.tempo_segundos else 'reps-') + chave],
+                        }
+                        for numero in self.numeros(exercicio)
+                        for chave in [self.chave(exercicio, numero)]
+                    ],
+                })
+            yield {'combinado': bloco.combinado, 'itens': itens}
