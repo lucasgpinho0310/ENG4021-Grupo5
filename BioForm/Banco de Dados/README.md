@@ -48,7 +48,7 @@ python manage.py runserver
 
 Site: http://127.0.0.1:8000/ · Admin: http://127.0.0.1:8000/admin/
 
-Testes: `python manage.py test saude contas diario medidas_caseiras metas rotina treinos`
+Testes: `python manage.py test saude contas diario medidas_caseiras metas rotina treinos execucao historico evolucao`
 
 As imagens enviadas nos exercícios ficam em `media/` (fora do git).
 

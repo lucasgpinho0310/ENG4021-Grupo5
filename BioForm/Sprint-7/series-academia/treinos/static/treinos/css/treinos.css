@@ -26,6 +26,10 @@
 }
 .btn-mini:hover { border-color: var(--flame-line); text-decoration: none; }
 .btn-mini.perigo, .btn-icone.perigo { color: var(--danger); }
+/* "Começar treino" (app execucao, Sprint 8) */
+.btn-mini-destaque { color: #fff; background: var(--flame); border-color: var(--flame); }
+.btn-mini-destaque:hover { border-color: var(--flame); filter: brightness(1.08); }
+.link-historico { margin: 6px 0 0; font-size: 14px; font-weight: 600; }
 .btn-icone {
   display: inline-grid;
   place-items: center;
