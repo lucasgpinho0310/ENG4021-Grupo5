@@ -1,0 +1,152 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% comment %}
+Registrar treino (treino livre). Tela do protótipo App Saúde/Registro de treino/registrar-treino.html,
+agora salvando no banco: o tipo vem do catálogo de esportes e os exercícios viram séries no histórico.
+{% endcomment %}
+{% block titulo %}Registrar treino{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
+{% block conteudo %}
+<div class="registro">
+  <nav class="crumb" aria-label="Caminho">
+    <a class="back" href="{% url 'treinos:treinos_lista' %}" aria-label="Voltar">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <span>Treinos / <strong>Registrar</strong></span>
+  </nav>
+
+  <header>
+    <h1 class="screen-title">Registrar treino</h1>
+    <p class="screen-sub">Anote o que você fez para acompanhar sua evolução.</p>
+  </header>
+
+  <form class="workout-form" method="post" novalidate>
+    {% csrf_token %}
+    {% include 'contas/_erros_gerais.html' %}
+
+    <div class="rg-field{% if form.nome.errors %} rg-erro{% endif %}">
+      <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+      <div class="rg-input">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>
+        {{ form.nome }}
+      </div>
+      {% if form.nome.errors %}<span class="rg-msg">{{ form.nome.errors|join:' ' }}</span>{% endif %}
+    </div>
+
+    <fieldset class="rg-field{% if form.esporte.errors %} rg-erro{% endif %}">
+      <legend>{{ form.esporte.label }}</legend>
+      <div class="chips">
+        {% for opcao in form.esporte %}<label class="chip">{{ opcao.tag }}<span>{{ opcao.choice_label }}</span></label>{% endfor %}
+      </div>
+      {% if form.esporte.errors %}<span class="rg-msg">{{ form.esporte.errors|join:' ' }}</span>{% endif %}
+    </fieldset>
+
+    <div class="rg-row">
+      <div class="rg-field{% if form.data.errors %} rg-erro{% endif %}">
+        <label for="{{ form.data.id_for_label }}">{{ form.data.label }}</label>
+        <div class="rg-input">{{ form.data }}</div>
+        {% if form.data.errors %}<span class="rg-msg">{{ form.data.errors|join:' ' }}</span>{% endif %}
+      </div>
+      <div class="rg-field{% if form.hora.errors %} rg-erro{% endif %}">
+        <label for="{{ form.hora.id_for_label }}">{{ form.hora.label }}</label>
+        <div class="rg-input">{{ form.hora }}</div>
+        {% if form.hora.errors %}<span class="rg-msg">{{ form.hora.errors|join:' ' }}</span>{% endif %}
+      </div>
+    </div>
+
+    <div class="rg-row">
+      <div class="rg-field{% if form.duracao.errors %} rg-erro{% endif %}">
+        <label for="{{ form.duracao.id_for_label }}">{{ form.duracao.label }}</label>
+        <div class="rg-input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          {{ form.duracao }}
+          <span class="unit">min</span>
+        </div>
+        {% if form.duracao.errors %}<span class="rg-msg">{{ form.duracao.errors|join:' ' }}</span>{% endif %}
+      </div>
+      <div class="rg-field{% if form.distancia.errors %} rg-erro{% endif %}">
+        <label for="{{ form.distancia.id_for_label }}">{{ form.distancia.label }}</label>
+        <div class="rg-input">{{ form.distancia }}<span class="unit">km</span></div>
+        {% if form.distancia.errors %}<span class="rg-msg">{{ form.distancia.errors|join:' ' }}</span>{% endif %}
+      </div>
+    </div>
+
+    <fieldset class="rg-field{% if form.intensidade.errors %} rg-erro{% endif %}">
+      <legend>{{ form.intensidade.label }}</legend>
+      <div class="segmented">
+        {% for opcao in form.intensidade %}<label class="seg">{{ opcao.tag }}<span>{{ opcao.choice_label }}</span></label>{% endfor %}
+      </div>
+      {% if form.intensidade.errors %}<span class="rg-msg">{{ form.intensidade.errors|join:' ' }}</span>{% endif %}
+    </fieldset>
+
+    <section aria-labelledby="ex-titulo">
+      <div class="ex-head">
+        <h2 id="ex-titulo">Exercícios</h2>
+        <span class="ex-dica">opcional</span>
+      </div>
+      {{ exercicios.management_form }}
+      {% if exercicios.non_form_errors %}<p class="rg-msg">{{ exercicios.non_form_errors|join:' ' }}</p>{% endif %}
+      <div class="ex-list" id="ex-list">
+        {% for ex in exercicios %}
+          {% include 'treinos/_exercicio_livre.html' with ex=ex %}
+        {% endfor %}
+      </div>
+      <button class="add-ex" id="add-ex" type="button">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar exercício
+      </button>
+    </section>
+
+    <div class="rg-field{% if form.observacoes.errors %} rg-erro{% endif %}">
+      <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+      {{ form.observacoes }}
+      {% if form.observacoes.errors %}<span class="rg-msg">{{ form.observacoes.errors|join:' ' }}</span>{% endif %}
+    </div>
+
+    <div class="rg-actions">
+      <button class="btn btn-primary" type="submit">Salvar treino</button>
+      <a class="btn btn-ghost" href="{% url 'treinos:treinos_lista' %}">Cancelar</a>
+    </div>
+  </form>
+
+  <template id="ex-modelo">
+    {% include 'treinos/_exercicio_livre.html' with ex=exercicios.empty_form %}
+  </template>
+</div>
+
+<script>
+(function () {
+  var lista = document.getElementById('ex-list');
+  var modelo = document.getElementById('ex-modelo');
+  var total = document.getElementById('id_ex-TOTAL_FORMS');
+  var maximo = parseInt(document.getElementById('id_ex-MAX_NUM_FORMS').value, 10);
+  var botao = document.getElementById('add-ex');
+
+  // Cada exercício novo recebe o próximo número do formset (ex-0, ex-1...). O número só cresce:
+  // linhas removidas viram linhas vazias para o Django, que as ignora.
+  botao.addEventListener('click', function () {
+    var n = parseInt(total.value, 10);
+    if (n >= maximo) return;
+    var html = modelo.innerHTML.replace(/__prefix__/g, n);
+    lista.insertAdjacentHTML('beforeend', html);
+    total.value = n + 1;
+    if (n + 1 >= maximo) botao.disabled = true;
+    var campos = lista.querySelectorAll('.exercise input[name$="-nome"]');
+    campos[campos.length - 1].focus();
+  });
+
+  // Remover: se for o único exercício, só limpa os campos
+  lista.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    var card = btn.closest('.exercise');
+    if (lista.querySelectorAll('.exercise').length > 1) {
+      card.remove();
+    } else {
+      card.querySelectorAll('input').forEach(function (campo) { campo.value = ''; });
+      card.querySelectorAll('.rg-msg').forEach(function (msg) { msg.remove(); });
+    }
+  });
+})();
+</script>
+{% endblock %}

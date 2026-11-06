@@ -1,9 +1,11 @@
 """
 Treino feito (RF06 Registro de exercícios / RF07 Histórico de treinos).
 
-A ficha diz o que fazer; a sessão guarda o que foi feito de verdade: cada série com a carga e
-as repetições (ou o tempo, em exercícios como a prancha). Na próxima vez, o formulário já vem
-com o que a pessoa fez da última vez.
+Dois jeitos de registrar, que vão para as mesmas tabelas e o mesmo histórico:
+- "Registrar treino" (treino livre): qualquer esporte, com nome, observações e, se quiser, uma lista
+  de exercícios com séries, repetições e carga. Tela vinda do protótipo App Saúde/Registro de treino.
+- "Treinar agora" (a partir de uma série de academia): uma linha por série planejada, já preenchida
+  com o que a pessoa fez da última vez.
 """
 from dataclasses import dataclass
 from decimal import Decimal
@@ -31,10 +33,28 @@ class SerieFeita:
     tempo_segundos: int = None
 
 
+@dataclass
+class ExercicioLivre:
+    """Uma linha da lista de exercícios do treino livre: vira `series` séries iguais."""
+    nome: str
+    series: int
+    repeticoes: int
+    carga_kg: Decimal = Decimal('0')
+
+
 def esporte_musculacao():
     """O esporte das sessões de academia (vem da migração 0003; criado aqui só se alguém apagou)."""
     esporte = Esporte.objects.filter(nome__iexact=ESPORTE).first()
     return esporte or Esporte.objects.create(nome=ESPORTE, met=MET_MUSCULACAO)
+
+
+def esportes_para_escolher(usuario):
+    """Esportes do catálogo, com os que a pessoa pratica (perfil, passo 3) primeiro."""
+    do_perfil = list(
+        Esporte.objects.filter(esporteusuario__usuario=usuario).order_by('nome')
+    )
+    outros = Esporte.objects.exclude(id__in=[e.id for e in do_perfil]).order_by('nome')
+    return do_perfil + list(outros)
 
 
 def padroes_do_perfil(usuario):
@@ -84,30 +104,61 @@ def registrar_treino(usuario, ficha, inicio, duracao_minutos, intensidade, feito
         SerieExecutada(
             sessao=sessao,
             exercicio=exercicio,
+            nome_exercicio=exercicio.nome_exercicio,
+            ordem=posicao,
             numero_serie=serie.numero,
             carga_kg=serie.carga_kg,
             repeticoes=serie.repeticoes,
             tempo_segundos=serie.tempo_segundos,
         )
-        for exercicio, series in feitos
+        for posicao, (exercicio, series) in enumerate(feitos, start=1)
         for serie in series
     ])
     return sessao
 
 
+@transaction.atomic
+def registrar_treino_livre(usuario, esporte, inicio, duracao_minutos, intensidade,
+                           nome='', observacoes='', distancia_km=None, exercicios=()):
+    """Grava um treino livre ("Registrar treino"). exercicios: lista de ExercicioLivre (pode ser vazia)."""
+    sessao = SessaoAtividade.objects.create(
+        usuario=usuario,
+        esporte=esporte,
+        inicio=inicio,
+        duracao_minutos=duracao_minutos,
+        intensidade=intensidade,
+        nome=nome,
+        observacoes=observacoes,
+        distancia_km=distancia_km,
+    )
+    SerieExecutada.objects.bulk_create([
+        SerieExecutada(
+            sessao=sessao,
+            nome_exercicio=exercicio.nome,
+            ordem=posicao,
+            numero_serie=numero,
+            carga_kg=exercicio.carga_kg,
+            repeticoes=exercicio.repeticoes,
+        )
+        for posicao, exercicio in enumerate(exercicios, start=1)
+        for numero in range(1, exercicio.series + 1)
+    ])
+    return sessao
+
+
 def sessoes_do_usuario(usuario):
-    """Treinos de academia da pessoa, do mais novo para o mais antigo, com os totais de cada um."""
+    """Todos os treinos da pessoa (livres e de série), do mais novo para o mais antigo, com os totais."""
     volume = ExpressionWrapper(
         F('series__carga_kg') * F('series__repeticoes'),
         output_field=DecimalField(max_digits=12, decimal_places=2),
     )
     return (
         SessaoAtividade.objects
-        .filter(usuario=usuario, esporte__nome__iexact=ESPORTE)
-        .select_related('ficha')
+        .filter(usuario=usuario)
+        .select_related('ficha', 'esporte')
         .annotate(
             total_series=Count('series'),
-            total_exercicios=Count('series__exercicio', distinct=True),
+            total_exercicios=Count('series__ordem', distinct=True),
             volume_kg=Sum(volume),  # carga x repetições; séries por tempo não entram
         )
         .order_by('-inicio')
@@ -115,11 +166,12 @@ def sessoes_do_usuario(usuario):
 
 
 def exercicios_da_sessao(sessao):
-    """[(exercício, [séries])] na ordem da ficha."""
-    series = sessao.series.select_related('exercicio').order_by(
-        'exercicio__ordem_execucao', 'exercicio_id', 'numero_serie',
-    )
-    return [(exercicio, list(grupo)) for exercicio, grupo in groupby(series, key=lambda s: s.exercicio)]
+    """[(nome do exercício, [séries])] na ordem em que foram feitos."""
+    series = sessao.series.order_by('ordem', 'numero_serie')
+    return [
+        (grupo[0].nome_exercicio, grupo)
+        for grupo in (list(g) for _, g in groupby(series, key=lambda s: s.ordem))
+    ]
 
 
 def volume(series):

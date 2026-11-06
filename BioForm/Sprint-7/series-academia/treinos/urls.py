@@ -7,6 +7,7 @@ app_name = 'treinos'  # links: {% url 'treinos:...' %}
 urlpatterns = [
     path('', views.lista, name='treinos_lista'),
     path('nova/', views.nova, name='treinos_nova'),
+    path('registrar/', views.registrar, name='treinos_registrar'),
     path('historico/', views.historico, name='treinos_historico'),
     path('sessao/<uuid:sessao_id>/', views.sessao, name='treinos_sessao'),
     path('sessao/<uuid:sessao_id>/excluir/', views.excluir_sessao, name='treinos_excluir_sessao'),

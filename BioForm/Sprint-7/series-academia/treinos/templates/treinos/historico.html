@@ -4,7 +4,10 @@
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}">{% endblock %}
 {% block conteudo %}
     <p class="voltar"><a href="{% url 'treinos:treinos_lista' %}">← Séries</a></p>
-    <h1>Histórico de treinos</h1>
+    <div class="treinos-topo">
+      <h1>Histórico de treinos</h1>
+      <a href="{% url 'treinos:treinos_registrar' %}" class="btn btn-primary btn-topo">+ Registrar treino</a>
+    </div>
     <p class="subtitle">Cada treino registrado, do mais recente para o mais antigo. Volume é a soma de carga × repetições.</p>
 
     {% if pagina.object_list %}
@@ -14,12 +17,16 @@
         <a href="{% url 'treinos:treinos_sessao' s.id %}" class="sessao-card">
           <span class="sessao-data"><b>{{ s.inicio|date:"d" }}</b>{{ s.inicio|date:"M"|lower }}</span>
           <span class="sessao-info">
-            <b>{% if s.ficha %}{{ s.ficha.nome_ficha }}{% else %}Série excluída{% endif %}</b>
-            <small>{{ s.inicio|date:"l, H:i" }} · {{ s.duracao_minutos }} min · {{ s.get_intensidade_display|lower }}</small>
+            <b>{{ s.titulo }}</b>
+            <small>{{ s.esporte.nome }} · {{ s.inicio|date:"l, H:i" }} · {{ s.duracao_minutos }} min · {{ s.get_intensidade_display|lower }}</small>
           </span>
           <span class="sessao-numeros">
+            {% if s.total_series %}
             <span><small>Séries</small>{{ s.total_series }}</span>
             <span><small>Volume</small>{{ s.volume_kg|toneladas }}</span>
+            {% elif s.distancia_km %}
+            <span><small>Distância</small>{{ s.distancia_km|decimal_br }} km</span>
+            {% endif %}
           </span>
         </a>
       </li>
@@ -37,8 +44,11 @@
     {% else %}
     <section class="block">
       <h2 class="block-title">Nenhum treino registrado ainda</h2>
-      <p class="block-sub">Abra uma das suas séries e toque em "Treinar agora" para registrar o que fez em cada série.</p>
-      <div class="actions"><a href="{% url 'treinos:treinos_lista' %}" class="btn btn-primary">Ver minhas séries</a></div>
+      <p class="block-sub">Use "Registrar treino" para anotar qualquer treino, ou abra uma das suas séries e toque em "Treinar agora".</p>
+      <div class="actions">
+        <a href="{% url 'treinos:treinos_lista' %}" class="btn btn-ghost">Ver minhas séries</a>
+        <a href="{% url 'treinos:treinos_registrar' %}" class="btn btn-primary">Registrar treino</a>
+      </div>
     </section>
     {% endif %}
 {% endblock %}

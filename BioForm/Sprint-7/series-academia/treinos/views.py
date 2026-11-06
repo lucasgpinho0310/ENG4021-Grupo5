@@ -12,7 +12,16 @@ from contas.onboarding import perfil_obrigatorio, proximo_passo
 from saude.models import ExercicioFicha, FichaTreino, SessaoAtividade, dias_da_lista
 
 from . import servicos, sessoes
-from .forms import EditarFichaForm, ExercicioForm, FichaForm, LinhasFormSet, TextoForm, TreinoFeitoForm
+from .forms import (
+    EditarFichaForm,
+    ExercicioForm,
+    ExerciciosLivresFormSet,
+    FichaForm,
+    LinhasFormSet,
+    RegistrarTreinoForm,
+    TextoForm,
+    TreinoFeitoForm,
+)
 from .leitor import ler_texto
 
 
@@ -235,6 +244,32 @@ def treinar(request, usuario, ficha_id):
             series, '' if series == 1 else 's', len(form.feitos), '' if len(form.feitos) == 1 else 's'))
         return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
     return render(request, 'treinos/treinar.html', _contexto(usuario, ficha=ficha, form=form))
+
+
+@treinos_view
+def registrar(request, usuario):
+    """Registrar treino livre: qualquer esporte, com ou sem lista de exercícios."""
+    esportes = sessoes.esportes_para_escolher(usuario)
+    duracao, intensidade = sessoes.padroes_do_perfil(usuario)
+    agora = timezone.localtime()
+    padrao = next((e for e in esportes if e.nome.lower() == sessoes.ESPORTE.lower()), esportes[0] if esportes else None)
+    form = RegistrarTreinoForm(esportes, request.POST or None, initial={
+        'esporte': padrao.id if padrao else None, 'data': agora.date(), 'hora': agora.strftime('%H:%M'),
+        'duracao': duracao, 'intensidade': intensidade,
+    })
+    exercicios = ExerciciosLivresFormSet(request.POST or None, prefix='ex')
+    if request.method == 'POST':
+        form_ok, exercicios_ok = form.is_valid(), exercicios.is_valid()  # os dois, para mostrar todos os erros
+        if form_ok and exercicios_ok:
+            dados = form.cleaned_data
+            sessao = sessoes.registrar_treino_livre(
+                usuario, dados['esporte'], dados['inicio'], dados['duracao'], dados['intensidade'],
+                nome=dados['nome'], observacoes=dados['observacoes'].strip(), distancia_km=dados['distancia'],
+                exercicios=exercicios.exercicios(),
+            )
+            messages.success(request, 'Treino "%s" salvo.' % sessao.nome)
+            return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
+    return render(request, 'treinos/registrar.html', _contexto(usuario, form=form, exercicios=exercicios))
 
 
 @treinos_view

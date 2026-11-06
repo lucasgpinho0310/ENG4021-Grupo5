@@ -1,0 +1,18 @@
+{% comment %}Um exercício do treino livre (ExercicioLivreForm). Também é o modelo do botão "Adicionar exercício".{% endcomment %}
+<div class="exercise{% if ex.errors %} rg-erro{% endif %}">
+  <div class="ex-top">
+    <div class="rg-input">
+      <label class="sr-only" for="{{ ex.nome.id_for_label }}">{{ ex.nome.label }}</label>
+      {{ ex.nome }}
+    </div>
+    <button class="icon-btn" type="button" data-remove aria-label="Remover exercício">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+    </button>
+  </div>
+  <div class="ex-nums">
+    <div><label for="{{ ex.series.id_for_label }}">{{ ex.series.label }}</label><div class="rg-input">{{ ex.series }}</div></div>
+    <div><label for="{{ ex.repeticoes.id_for_label }}">{{ ex.repeticoes.label }}</label><div class="rg-input">{{ ex.repeticoes }}</div></div>
+    <div><label for="{{ ex.carga.id_for_label }}">{{ ex.carga.label }}</label><div class="rg-input">{{ ex.carga }}</div></div>
+  </div>
+  {% if ex.errors %}<span class="rg-msg">{% for campo, erros in ex.errors.items %}{{ erros|join:' ' }} {% endfor %}</span>{% endif %}
+</div>

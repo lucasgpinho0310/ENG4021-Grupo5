@@ -1,14 +1,14 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django import forms
 from django.utils import timezone
 
-from saude.models import DIAS_DA_SEMANA, INTENSIDADES, ExercicioFicha
+from saude.models import DIAS_DA_SEMANA, INTENSIDADES, Esporte, ExercicioFicha
 
 from .leitor import ExercicioLido, ler_intervalo
 from .servicos import blocos_da_ficha
-from .sessoes import SERIES_MAXIMAS, SerieFeita
+from .sessoes import SERIES_MAXIMAS, ExercicioLivre, SerieFeita
 
 DIAS = [(dia, nome[:3]) for dia, nome in DIAS_DA_SEMANA.items()]
 IMAGEM_MAXIMA_MB = 5
@@ -368,3 +368,115 @@ class TreinoFeitoForm(forms.Form):
                     ],
                 })
             yield {'combinado': bloco.combinado, 'itens': itens}
+
+
+
+# =====================================================================
+# Registrar treino (treino livre): tela do protótipo App Saúde/Registro de treino
+# =====================================================================
+
+EXERCICIOS_LIVRES_MAXIMOS = 30
+
+
+class RegistrarTreinoForm(forms.Form):
+    nome = forms.CharField(
+        label='Nome do treino', max_length=100,
+        error_messages={'required': 'Dê um nome para o treino.'},
+        widget=forms.TextInput(attrs={'placeholder': 'Ex.: Treino A — peito e tríceps'}),
+    )
+    esporte = forms.ModelChoiceField(
+        label='Tipo', queryset=None, widget=forms.RadioSelect, empty_label=None,
+        error_messages={'required': 'Escolha o tipo do treino.'},
+    )
+    data = forms.DateField(label='Data', widget=forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}))
+    hora = forms.TimeField(label='Horário', widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time'}))
+    duracao = forms.IntegerField(
+        label='Duração', min_value=1, max_value=600,
+        widget=forms.NumberInput(attrs={'placeholder': '60', 'min': 1, 'max': 600, 'inputmode': 'numeric'}),
+    )
+    intensidade = forms.ChoiceField(label='Intensidade', choices=INTENSIDADES.items(), widget=forms.RadioSelect)
+    distancia = forms.DecimalField(
+        label='Distância (opcional)', min_value=Decimal('0.01'), max_value=999, decimal_places=2, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '5', 'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+    )
+    observacoes = forms.CharField(
+        label='Observações (opcional)', max_length=2000, required=False,
+        widget=forms.Textarea(attrs={'placeholder': 'Como você se sentiu, ajustes de carga, dores...', 'rows': 3}),
+    )
+
+    def __init__(self, esportes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['esporte'].queryset = Esporte.objects.filter(id__in=[e.id for e in esportes])
+        # mantém a ordem "do perfil primeiro" nos chips
+        self.fields['esporte'].choices = [(e.id, e.nome) for e in esportes]
+        self.fields['data'].widget.attrs['max'] = timezone.localdate().isoformat()
+
+    def clean_nome(self):
+        nome = ' '.join(self.cleaned_data['nome'].split())
+        if not nome:
+            raise forms.ValidationError('Dê um nome para o treino.')
+        return nome
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get('data') and dados.get('hora'):
+            inicio = timezone.make_aware(datetime.combine(dados['data'], dados['hora']))
+            if inicio > timezone.now() + TOLERANCIA_FUTURO:
+                self.add_error('hora' if dados['data'] == timezone.localdate() else 'data',
+                               'O treino não pode ser no futuro.')
+            dados['inicio'] = inicio
+        return dados
+
+
+class ExercicioLivreForm(forms.Form):
+    """Um exercício do treino livre: nome, séries, repetições e carga. Linha vazia é ignorada."""
+    nome = forms.CharField(
+        label='Nome do exercício', max_length=100, required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Nome do exercício'}),
+    )
+    series = forms.IntegerField(
+        label='Séries', min_value=1, max_value=20, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '4', 'min': 1, 'max': 20, 'inputmode': 'numeric'}),
+    )
+    repeticoes = forms.IntegerField(
+        label='Repetições', min_value=1, max_value=REPETICOES_MAXIMAS, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '12', 'min': 1, 'max': REPETICOES_MAXIMAS, 'inputmode': 'numeric'}),
+    )
+    carga = forms.DecimalField(
+        label='Carga (kg)', min_value=0, max_value=CARGA_MAXIMA, decimal_places=2, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '40', 'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+    )
+
+    def clean(self):
+        dados = super().clean()
+        dados['nome'] = ' '.join((dados.get('nome') or '').split())
+        numeros = [dados.get(c) for c in ('series', 'repeticoes', 'carga')]
+        if not dados['nome']:
+            if any(n is not None for n in numeros):
+                self.add_error('nome', 'Dê um nome ao exercício.')
+            return dados
+        if not dados.get('series') and 'series' not in self.errors:
+            self.add_error('series', 'Quantas séries?')
+        if not dados.get('repeticoes') and 'repeticoes' not in self.errors:
+            self.add_error('repeticoes', 'Quantas repetições?')
+        return dados
+
+
+class BaseExerciciosLivres(forms.BaseFormSet):
+    def exercicios(self):
+        return [
+            ExercicioLivre(
+                nome=f.cleaned_data['nome'],
+                series=f.cleaned_data['series'],
+                repeticoes=f.cleaned_data['repeticoes'],
+                carga_kg=f.cleaned_data.get('carga') or Decimal('0'),
+            )
+            for f in self.forms
+            if f.cleaned_data.get('nome')
+        ]
+
+
+ExerciciosLivresFormSet = forms.formset_factory(
+    ExercicioLivreForm, formset=BaseExerciciosLivres, extra=1,
+    max_num=EXERCICIOS_LIVRES_MAXIMOS, absolute_max=EXERCICIOS_LIVRES_MAXIMOS, validate_max=True,
+)
