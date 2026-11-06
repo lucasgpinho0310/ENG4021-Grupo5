@@ -1,0 +1,466 @@
+/* ==========================================================================
+   BioForm Health OS — gamificação: XP, ofensiva e níveis
+   Mesmos tokens das demais telas (paleta: App Saúde/EstudoDeCores.txt)
+   ========================================================================== */
+
+:root {
+  --stage: #09090B;
+  --app-bg: #111113;
+  --surface: #1A1A1D;
+  --surface-2: #232327;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #FAFAFA;
+  --text-2: #A1A1AA;
+  --text-3: #8A8A93;
+
+  /* Ação e ofensiva */
+  --flame: #FF5722;
+  --flame-hover: #FF7043;
+  --flame-soft: rgba(255, 87, 34, 0.12);
+  --flame-line: rgba(255, 87, 34, 0.4);
+
+  /* Sucesso e conquista */
+  --green: #10B981;
+  --green-soft: rgba(16, 185, 129, 0.12);
+  --violet: #8B5CF6;
+  --violet-soft: rgba(139, 92, 246, 0.14);
+  --violet-line: rgba(139, 92, 246, 0.45);
+
+  /* Selos dos níveis */
+  --semente: #4ADE80;
+  --bronze: #D08A4E;
+  --prata: #C9D1DB;
+  --ouro: #F5C451;
+  --diamante: #7DD3FC;
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--stage);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+ol, ul { list-style: none; }
+
+.i {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.muted { color: var(--text-3); font-size: 12px; }
+.hint  { color: var(--text-3); font-size: 12px; }
+.hint strong { color: var(--text); font-weight: 600; }
+
+/* ---------- Moldura do celular ---------- */
+.screen {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 20px 12px;
+  background: var(--app-bg);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 32px 70px -20px rgba(0, 0, 0, .85);
+}
+
+/* ---------- Caminho e título ---------- */
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.crumb strong { color: var(--text); font-weight: 600; }
+.back {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.back:hover { border-color: var(--line-strong); }
+
+.screen-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+.screen-sub   { margin-top: 4px; color: var(--text-2); font-size: 13px; }
+
+/* ---------- Cartões ---------- */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-head h2 { font-size: 15px; font-weight: 700; }
+
+/* ==========================================================================
+   Nível
+   ========================================================================== */
+.level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 16px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--violet-line);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(139, 92, 246, .32), transparent 60%),
+    linear-gradient(160deg, #1E1A2B 0%, var(--surface) 70%);
+}
+.level-top { display: flex; align-items: center; gap: 14px; }
+
+.avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px var(--app-bg), 0 0 0 5px var(--violet);
+}
+.avatar-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--app-bg);
+  font-size: 11px;
+  font-weight: 800;
+  color: #111;
+}
+
+.level-who h2 { margin-top: 6px; font-size: 16px; font-weight: 700; }
+.xp-total { margin-top: 2px; color: var(--text-2); font-size: 13px; }
+.xp-total strong {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #111;
+}
+.tier-chip .i { width: 13px; height: 13px; stroke-width: 2.4; }
+
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  overflow: hidden;
+}
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--violet), #B79BFF);
+  box-shadow: 0 0 12px rgba(139, 92, 246, .6);
+}
+.progress-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -6px;
+  font-size: 11px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.progress-next { color: var(--text-2); }
+.progress-next strong { color: var(--text); }
+
+/* Cores dos selos (fundo) */
+.tier-semente  { background: var(--semente); }
+.tier-bronze   { background: var(--bronze); }
+.tier-prata    { background: var(--prata); }
+.tier-ouro     { background: var(--ouro); }
+.tier-diamante { background: var(--diamante); }
+
+/* ==========================================================================
+   Ofensiva
+   ========================================================================== */
+.streak { border-color: var(--flame-line); background: linear-gradient(180deg, rgba(255, 87, 34, .08), var(--surface) 55%); }
+.streak-head { display: flex; align-items: center; gap: 12px; }
+
+.flame-badge {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--flame-soft);
+}
+.flame-badge svg { width: 28px; height: 28px; fill: var(--flame); }
+
+.streak-num {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.streak-num span { font-size: 14px; font-weight: 600; color: var(--text-2); letter-spacing: 0; }
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.day .dot {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px dashed var(--line-strong);
+}
+.day .dot svg { width: 18px; height: 18px; fill: #fff; }
+.day .lbl { font-size: 11px; color: var(--text-3); }
+.day.done .dot { background: var(--flame); border: 0; }
+.day.today .dot { box-shadow: 0 0 0 2px var(--app-bg), 0 0 0 4px var(--flame); }
+.day.today .lbl { color: var(--text); font-weight: 600; }
+
+.shield {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--app-bg);
+  border: 1px solid var(--line);
+}
+.shield-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, .12);
+  color: #38BDF8;
+}
+.shield-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.shield-text p:first-child { font-size: 13px; color: var(--text-2); }
+.shield-text strong { color: var(--text); }
+.mini-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  overflow: hidden;
+}
+.mini-progress span { display: block; height: 100%; background: #38BDF8; border-radius: inherit; }
+
+/* ==========================================================================
+   XP de hoje
+   ========================================================================== */
+.xp-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--violet-soft);
+  color: #B79BFF;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-list { display: flex; flex-direction: column; }
+.xp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.xp-item:first-child { border-top: 0; padding-top: 2px; }
+
+.check {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px dashed var(--line-strong);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.check .i { width: 15px; height: 15px; stroke-width: 2.6; }
+
+.xp-what { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.xp-what strong { font-size: 13px; font-weight: 600; }
+.xp-what span { font-size: 12px; color: var(--text-3); }
+
+.xp-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-item.done .check { background: var(--green); border: 0; color: #fff; }
+.xp-item.done .xp-val { color: var(--green); }
+
+.xp-item.partial .check { border: 1.5px solid var(--green); color: var(--green); background: var(--green-soft); }
+.xp-item.partial .xp-val { color: var(--green); }
+
+.xp-item.combo .check { border-color: var(--flame-line); color: var(--flame); }
+
+/* ==========================================================================
+   Semana / ranking
+   ========================================================================== */
+.week-rank {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color .15s;
+}
+.week-rank:hover { border-color: var(--line-strong); }
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.week-xp { margin: 2px 0; font-size: 14px; color: var(--text-2); }
+.week-xp strong { color: var(--text); font-weight: 700; }
+.chev { color: var(--text-3); }
+
+/* ==========================================================================
+   Níveis
+   ========================================================================== */
+.tiers { display: flex; flex-direction: column; gap: 6px; }
+.tier {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+.medal {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 800;
+  color: #111;
+}
+.tier-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tier-name strong { font-size: 13px; font-weight: 600; }
+.tier-name span { font-size: 12px; color: var(--text-3); }
+.tier .state { color: var(--text-3); }
+
+.tier.passed .state { color: var(--green); }
+.tier.current {
+  background: var(--violet-soft);
+  border-color: var(--violet-line);
+}
+.tier.locked .medal { opacity: .35; filter: grayscale(.4); }
+.tier.locked .tier-name strong { color: var(--text-2); }
+
+.you {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--violet);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Barra de navegação
+   ========================================================================== */
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 4px -20px -12px;
+  padding: 10px 8px 14px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 28px 28px;
+  background: rgba(17, 17, 19, .94);
+  backdrop-filter: blur(10px);
+}
+.tabbar a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.tabbar a:hover { color: var(--text-2); }
+.tabbar a.active { color: var(--flame); font-weight: 600; }
+
+@media (max-width: 440px) {
+  body { padding: 0; }
+  .screen { max-width: none; min-height: 100dvh; border: 0; border-radius: 0; }
+  .tabbar { border-radius: 0; }
+  .day .dot { width: 30px; height: 30px; }
+}

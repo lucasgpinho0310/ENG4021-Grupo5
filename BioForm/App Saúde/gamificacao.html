@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seu progresso — BioForm Health OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="gamificacao.css">
+</head>
+<body>
+  <!--
+    Tela de gamificação: XP, ofensiva (sequência) e níveis.
+    Regras: "DOCUMENTO DE ESPECIFICAÇÃO DE REGRAS DE NEGÓCIO.pdf", seções 2 a 5,
+    e tabelas perfil_gamificacao / historico_xp em modelagemDados.txt.
+    Dados de exemplo do usuário Edson Arantes (quinta-feira, 05/11).
+  -->
+  <main class="screen">
+
+    <nav class="crumb" aria-label="Caminho">
+      <a class="back" href="#" aria-label="Voltar">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span>Perfil / <strong>Progresso</strong></span>
+    </nav>
+
+    <header>
+      <h1 class="screen-title">Seu progresso</h1>
+      <p class="screen-sub">Cada treino e cada dia de dieta viram XP. O XP total nunca zera.</p>
+    </header>
+
+    <!-- ===================== NÍVEL ===================== -->
+    <section class="level-card" aria-labelledby="nivel-titulo">
+      <div class="level-top">
+        <div class="avatar" aria-hidden="true">
+          EA
+          <span class="avatar-badge tier-prata">3</span>
+        </div>
+        <div class="level-who">
+          <span class="tier-chip tier-prata">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.2-3 7.7-7 9-4-1.3-7-4.8-7-9V7l7-4z"/></svg>
+            Selo Prata
+          </span>
+          <h2 id="nivel-titulo">Nível 3 · Amador Dedicado</h2>
+          <p class="xp-total"><strong>2.340</strong> XP no total</p>
+        </div>
+      </div>
+
+      <div class="progress" role="progressbar" aria-label="Progresso até o nível 4" aria-valuemin="1500" aria-valuemax="4000" aria-valuenow="2340">
+        <span class="progress-fill" style="width: 33.6%"></span>
+      </div>
+      <div class="progress-legend">
+        <span>1.500</span>
+        <span class="progress-next">Faltam <strong>1.660 XP</strong> para o Ouro</span>
+        <span>4.000</span>
+      </div>
+    </section>
+
+    <!-- ===================== OFENSIVA ===================== -->
+    <section class="card streak" aria-labelledby="ofensiva-titulo">
+      <div class="streak-head">
+        <div class="flame-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2c.6 3.2-1 5-2.4 6.6C8.2 10.2 7 11.7 7 14a5 5 0 0010 0c0-1.6-.6-3-1.6-4.2.1 1.4-.4 2.4-1.4 2.9.3-2.9-.6-6.6-2-10.7z"/></svg>
+        </div>
+        <div>
+          <h2 id="ofensiva-titulo" class="streak-num">18 <span>dias seguidos</span></h2>
+          <p class="muted">Ofensiva mantida hoje com o treino das 07:10</p>
+        </div>
+      </div>
+
+      <ol class="week" aria-label="Ofensiva nesta semana">
+        <li class="day done"><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 3.2-1 5-2.4 6.6C8.2 10.2 7 11.7 7 14a5 5 0 0010 0c0-1.6-.6-3-1.6-4.2.1 1.4-.4 2.4-1.4 2.9.3-2.9-.6-6.6-2-10.7z"/></svg></span><span class="lbl">Seg</span></li>
+        <li class="day done"><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 3.2-1 5-2.4 6.6C8.2 10.2 7 11.7 7 14a5 5 0 0010 0c0-1.6-.6-3-1.6-4.2.1 1.4-.4 2.4-1.4 2.9.3-2.9-.6-6.6-2-10.7z"/></svg></span><span class="lbl">Ter</span></li>
+        <li class="day done"><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 3.2-1 5-2.4 6.6C8.2 10.2 7 11.7 7 14a5 5 0 0010 0c0-1.6-.6-3-1.6-4.2.1 1.4-.4 2.4-1.4 2.9.3-2.9-.6-6.6-2-10.7z"/></svg></span><span class="lbl">Qua</span></li>
+        <li class="day done today" aria-current="date"><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 3.2-1 5-2.4 6.6C8.2 10.2 7 11.7 7 14a5 5 0 0010 0c0-1.6-.6-3-1.6-4.2.1 1.4-.4 2.4-1.4 2.9.3-2.9-.6-6.6-2-10.7z"/></svg></span><span class="lbl">Hoje</span></li>
+        <li class="day"><span class="dot"></span><span class="lbl">Sex</span></li>
+        <li class="day"><span class="dot"></span><span class="lbl">Sáb</span></li>
+        <li class="day"><span class="dot"></span><span class="lbl">Dom</span></li>
+      </ol>
+
+      <div class="shield">
+        <div class="shield-icon" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.2-3 7.7-7 9-4-1.3-7-4.8-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="shield-text">
+          <p><strong>1 escudo de descanso</strong> guardado</p>
+          <div class="mini-progress" aria-hidden="true"><span style="width: 20%"></span></div>
+          <p class="muted">Próximo escudo com 30 dias · faltam 12</p>
+        </div>
+      </div>
+      <p class="hint">Se você esquecer um dia, o escudo é usado sozinho à meia-noite e a ofensiva não zera.</p>
+    </section>
+
+    <!-- ===================== XP DE HOJE ===================== -->
+    <section class="card" aria-labelledby="hoje-titulo">
+      <div class="card-head">
+        <h2 id="hoje-titulo">XP de hoje</h2>
+        <span class="xp-pill">+100 XP</span>
+      </div>
+
+      <ul class="xp-list">
+        <li class="xp-item done">
+          <span class="check" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <div class="xp-what">
+            <strong>Treino registrado</strong>
+            <span>Hipertrofia Peitoral · 62 min</span>
+          </div>
+          <span class="xp-val">+50</span>
+        </li>
+        <li class="xp-item done">
+          <span class="check" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <div class="xp-what">
+            <strong>Recorde pessoal</strong>
+            <span>Supino reto · 82,5 kg</span>
+          </div>
+          <span class="xp-val">+30</span>
+        </li>
+        <li class="xp-item partial">
+          <span class="check" aria-hidden="true">2/4</span>
+          <div class="xp-what">
+            <strong>Check-in de refeição</strong>
+            <span>Café da manhã e almoço · +10 cada</span>
+          </div>
+          <span class="xp-val">+20</span>
+        </li>
+        <li class="xp-item">
+          <span class="check" aria-hidden="true"></span>
+          <div class="xp-what">
+            <strong>Meta de água</strong>
+            <span>2,1 de 3 L</span>
+          </div>
+          <span class="xp-val">+15</span>
+        </li>
+        <li class="xp-item">
+          <span class="check" aria-hidden="true"></span>
+          <div class="xp-what">
+            <strong>Dieta perfeita</strong>
+            <span>Feche o dia dentro de kcal e macros</span>
+          </div>
+          <span class="xp-val">+40</span>
+        </li>
+        <li class="xp-item combo">
+          <span class="check" aria-hidden="true">
+            <svg class="i" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>
+          </span>
+          <div class="xp-what">
+            <strong>Combo saúde</strong>
+            <span>Treino + dieta perfeita no mesmo dia</span>
+          </div>
+          <span class="xp-val">+30</span>
+        </li>
+      </ul>
+
+      <p class="hint">Ainda dá para ganhar <strong>+105 XP</strong> hoje. Check-in de ontem vale metade.</p>
+    </section>
+
+    <!-- ===================== SEMANA ===================== -->
+    <a class="card week-rank" href="#">
+      <div>
+        <span class="eyebrow">Esta semana</span>
+        <p class="week-xp"><strong>485 XP</strong> · 2º no Squad Monstros SP</p>
+        <p class="muted">O ranking zera domingo às 23:59</p>
+      </div>
+      <svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </a>
+
+    <!-- ===================== NÍVEIS ===================== -->
+    <section class="card" aria-labelledby="niveis-titulo">
+      <div class="card-head">
+        <h2 id="niveis-titulo">Níveis</h2>
+        <span class="muted">3 de 5</span>
+      </div>
+
+      <ol class="tiers">
+        <li class="tier passed">
+          <span class="medal tier-semente">1</span>
+          <div class="tier-name"><strong>Iniciante</strong><span>Semente · 0 a 499 XP</span></div>
+          <svg class="i state" viewBox="0 0 24 24" aria-label="Concluído"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </li>
+        <li class="tier passed">
+          <span class="medal tier-bronze">2</span>
+          <div class="tier-name"><strong>Praticante</strong><span>Bronze · 500 a 1.499 XP</span></div>
+          <svg class="i state" viewBox="0 0 24 24" aria-label="Concluído"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </li>
+        <li class="tier current" aria-current="step">
+          <span class="medal tier-prata">3</span>
+          <div class="tier-name"><strong>Amador Dedicado</strong><span>Prata · 1.500 a 3.999 XP</span></div>
+          <span class="you">Você</span>
+        </li>
+        <li class="tier locked">
+          <span class="medal tier-ouro">4</span>
+          <div class="tier-name"><strong>Atleta</strong><span>Ouro · 4.000 a 9.999 XP</span></div>
+          <svg class="i state" viewBox="0 0 24 24" aria-label="Bloqueado"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+        </li>
+        <li class="tier locked">
+          <span class="medal tier-diamante">5</span>
+          <div class="tier-name"><strong>Lenda</strong><span>Diamante · 10.000+ XP</span></div>
+          <svg class="i state" viewBox="0 0 24 24" aria-label="Bloqueado"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===================== NAVEGAÇÃO ===================== -->
+    <nav class="tabbar" aria-label="Navegação principal">
+      <a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-5v-6h-4v6H5a1 1 0 01-1-1z"/></svg>Início</a>
+      <a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>Treinos</a>
+      <a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>Diário</a>
+      <a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l5-6 4 3 7-9"/></svg>Evolução</a>
+      <a href="#" class="active" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.5a3 3 0 010 5M21 20c0-2.6-1.6-4.8-4-5.6"/></svg>Grupos</a>
+    </nav>
+
+  </main>
+</body>
+</html>
