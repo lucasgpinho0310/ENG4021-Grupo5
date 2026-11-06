@@ -533,10 +533,17 @@ class SerieExecutada(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
     )
-    repeticoes = models.IntegerField(validators=[MinValueValidator(1)])
+    # Exercício por repetições guarda as repetições; exercício por tempo (prancha) guarda os segundos
+    repeticoes = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    tempo_segundos = models.PositiveIntegerField(null=True, blank=True)
+
+    def volume_kg(self):
+        """Carga x repetições (o "volume" da série); zero para exercício por tempo."""
+        return self.carga_kg * (self.repeticoes or 0)
 
     def __str__(self):
-        return '%s: %s kg x %d' % (self.exercicio.nome_exercicio, self.carga_kg, self.repeticoes)
+        feito = '%d reps' % self.repeticoes if self.repeticoes else '%ds' % (self.tempo_segundos or 0)
+        return '%s: %s kg x %s' % (self.exercicio.nome_exercicio, self.carga_kg, feito)
 
     class Meta:
         db_table = 'series_executadas_historico'

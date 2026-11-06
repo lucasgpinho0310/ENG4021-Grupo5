@@ -1,0 +1,97 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform l10n %}
+{% block titulo %}Evolução do peso{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'evolucao/css/evolucao.css' %}">{% endblock %}
+{% block conteudo %}
+    <h1>Evolução do peso</h1>
+    <p class="subtitle">Registre suas pesagens e acompanhe o caminho até o peso que você quer.</p>
+
+    {% if resumo %}
+    <div class="resumo-peso">
+      <div><small>Peso atual</small><strong>{{ resumo.atual|decimal_br }} <span>kg</span></strong></div>
+      <div>
+        <small>Desde o início</small>
+        <strong class="{% if resumo.variacao < 0 %}desceu{% elif resumo.variacao > 0 %}subiu{% endif %}">{% if resumo.variacao > 0 %}+{% elif resumo.variacao < 0 %}−{% endif %}{{ resumo.variacao|absoluto|decimal_br|default:'0' }} <span>kg</span></strong>
+      </div>
+      <div>
+        <small>Peso desejado</small>
+        {% if resumo.meta %}
+        <strong>{{ resumo.meta|decimal_br }} <span>kg</span></strong>
+        <em>{% if resumo.falta > 0 %}faltam {{ resumo.falta|decimal_br }} kg para perder{% elif resumo.falta < 0 %}faltam {{ resumo.falta|absoluto|decimal_br }} kg para ganhar{% else %}meta alcançada! 🎉{% endif %}</em>
+        {% else %}
+        <strong>—</strong><em><a href="{% url 'contas:perfil_dados' %}">definir no perfil</a></em>
+        {% endif %}
+      </div>
+      {% if resumo.imc %}<div><small>IMC</small><strong>{{ resumo.imc.0|decimal_br }}</strong><em>{{ resumo.imc.1 }}</em></div>{% endif %}
+    </div>
+    {% endif %}
+
+    <section class="block">
+      <h2 class="block-title">Gráfico</h2>
+      {% if grafico and grafico.pontos|length > 1 %}
+      {% localize off %}{# coordenadas do SVG com ponto decimal, não vírgula #}
+      <svg class="grafico-peso" viewBox="0 0 {{ grafico.largura }} {{ grafico.altura }}" role="img" aria-label="Gráfico da evolução do peso">
+        {% for y, rotulo in grafico.marcas_y %}
+        <line x1="{{ grafico.esquerda }}" x2="{{ grafico.direita }}" y1="{{ y }}" y2="{{ y }}" class="grade"/>
+        <text x="{{ grafico.esquerda|add:'-8' }}" y="{{ y }}" class="rotulo-y">{{ rotulo }}</text>
+        {% endfor %}
+        {% if grafico.meta_y is not None %}
+        <line x1="{{ grafico.esquerda }}" x2="{{ grafico.direita }}" y1="{{ grafico.meta_y }}" y2="{{ grafico.meta_y }}" class="linha-meta"/>
+        <text x="{{ grafico.direita }}" y="{{ grafico.meta_y }}" dy="-6" class="rotulo-meta">meta</text>
+        {% endif %}
+        <polyline points="{{ grafico.linha }}" class="linha-peso"/>
+        {% for p in grafico.pontos %}
+        <circle cx="{{ p.x }}" cy="{{ p.y }}" r="4" class="ponto"><title>{{ p.medida.data_registro|date:'d/m/Y' }}: {{ p.medida.peso_kg|decimal_br }} kg</title></circle>
+        {% endfor %}
+        <text x="{{ grafico.esquerda }}" y="{{ grafico.altura }}" dy="-8" class="rotulo-x">{{ grafico.primeiro.data_registro|date:'d/m/Y' }}</text>
+        <text x="{{ grafico.direita }}" y="{{ grafico.altura }}" dy="-8" class="rotulo-x fim">{{ grafico.ultimo.data_registro|date:'d/m/Y' }}</text>
+      </svg>
+      {% endlocalize %}
+      {% else %}
+      <p class="block-sub">O gráfico aparece a partir da segunda pesagem. Registre seu peso de novo daqui a alguns dias.</p>
+      {% endif %}
+    </section>
+
+    <section class="block">
+      <h2 class="block-title">Registrar pesagem</h2>
+      <p class="block-sub">Se já houver uma pesagem no mesmo dia, ela é corrigida. Uma pesagem nova de hoje recalcula as suas metas.</p>
+      <form method="post" class="form-pesagem">
+        {% csrf_token %}
+        <div class="field{% if form.peso.errors %} field-error{% endif %}">
+          <label for="{{ form.peso.id_for_label }}">{{ form.peso.label }}</label>
+          {{ form.peso }}
+          {{ form.peso.errors }}
+        </div>
+        <div class="field{% if form.data.errors %} field-error{% endif %}">
+          <label for="{{ form.data.id_for_label }}">{{ form.data.label }}</label>
+          {{ form.data }}
+          {{ form.data.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Registrar</button>
+      </form>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title">Pesagens</h2>
+      <table class="tabela-pesagens">
+        <thead><tr><th>Data</th><th>Peso</th><th>Variação</th><th><span class="sr-only">Excluir</span></th></tr></thead>
+        <tbody>
+          {% for m, diferenca in linhas %}
+          <tr>
+            <td>{{ m.data_registro|date:'d/m/Y' }}</td>
+            <td>{{ m.peso_kg|decimal_br }} kg</td>
+            <td class="{% if diferenca < 0 %}desceu{% elif diferenca > 0 %}subiu{% endif %}">{% if diferenca is None %}primeira{% elif diferenca > 0 %}+{{ diferenca|decimal_br }} kg{% elif diferenca < 0 %}−{{ diferenca|absoluto|decimal_br }} kg{% else %}igual{% endif %}</td>
+            <td>
+              {% if linhas|length > 1 %}
+              <form method="post" action="{% url 'evolucao:excluir' m.id %}" onsubmit="return confirm('Excluir a pesagem de {{ m.data_registro|date:'d/m/Y' }}?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-excluir" aria-label="Excluir pesagem de {{ m.data_registro|date:'d/m/Y' }}">×</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+{% endblock %}

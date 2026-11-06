@@ -10,6 +10,7 @@
           {% if musculacao %}Musculação no perfil: {{ musculacao.frequencia_semanal|vezes_por_semana }}{% if musculacao.frequencia_semanal < 7 %} por semana{% endif %}{% if musculacao.dias_fixos %}, fixos {{ musculacao.dias_fixos|dias_curtos }}{% if musculacao.treinos_livres %} + {{ musculacao.treinos_livres }} livre{{ musculacao.treinos_livres|pluralize }}{% endif %}{% endif %} · {{ musculacao.duracao_minutos }} min.
           {% else %}Monte suas séries exercício por exercício ou colando o texto da ficha.{% endif %}
         </p>
+        {% url 'historico:lista' as url_historico %}{% if url_historico %}<p class="link-historico"><a href="{{ url_historico }}">Ver histórico de treinos →</a></p>{% endif %}
       </div>
       <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
     </div>

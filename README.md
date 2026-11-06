@@ -119,6 +119,32 @@ Uma vez por mês ele pede para confirmar se a rotina continua a mesma.
 
 ![Semana de treinos](img/semana.png)
 
+### 7. Fazer o treino do dia
+
+Na página de uma série, toque em **▶ Começar treino**. Cada série já vem preenchida com o que você fez
+da última vez (na primeira vez, com o planejado), e o site mostra o seu recorde em cada exercício.
+Ajuste a carga e as repetições, marque as séries feitas e salve. Quando o exercício tem intervalo,
+o cronômetro de descanso começa sozinho ao marcar a série.
+
+![Treino do dia](img/treino-do-dia.png)
+
+### 8. Ver o histórico de treinos
+
+Em **Treinos → Ver histórico de treinos**, os treinos feitos aparecem agrupados por semana, com o tempo,
+as calorias gastas e o volume (carga × repetições). Ao abrir um treino, aparecem as séries feitas e os
+recordes batidos.
+
+![Histórico de treinos](img/historico-treinos.png)
+
+![Treino feito](img/treino-feito.png)
+
+### 9. Acompanhar a evolução do peso
+
+Em **Peso**, registre uma pesagem (hoje ou num dia anterior) e veja o gráfico, quanto mudou desde o início,
+quanto falta para o peso desejado e o IMC. Uma pesagem nova de hoje recalcula as metas.
+
+![Evolução do peso](img/evolucao-peso.png)
+
 ## Organização do repositório
 
 | Pasta | O que tem |
@@ -126,6 +152,7 @@ Uma vez por mês ele pede para confirmar se a rotina continua a mesma.
 | [`BioForm/Banco de Dados`](BioForm/Banco%20de%20Dados) | projeto Django `bioform` (`manage.py`, `settings.py`, `urls.py`, `views.py` e a home-page em `templates/home.html`), app `saude` (modelos do banco) e app `contas` (login, cadastro e perfil) |
 | [`BioForm/Sprint-6`](BioForm/Sprint-6) | apps entregues na Sprint 6: `diario`, `medidas_caseiras` e `metas` |
 | [`BioForm/Sprint-7`](BioForm/Sprint-7) | apps entregues na Sprint 7: `rotina` e `treinos` |
+| [`BioForm/Sprint-8`](BioForm/Sprint-8) | apps entregues na Sprint 8: `execucao` (treino do dia), `historico` (histórico de treinos) e `evolucao` (evolução do peso) |
 | [`BioForm/App Saúde`](BioForm/App%20Sa%C3%BAde) | pesquisa, requisitos, modelagem de dados e protótipos das primeiras sprints |
 | [`BioForm/Escopo Técnico`](BioForm/Escopo%20T%C3%A9cnico), [`BioForm/Sprint-Usuarios`](BioForm/Sprint-Usuarios), [`BioForm/usuários`](BioForm/usu%C3%A1rios) | documentos e protótipos HTML das primeiras sprints |
 | [`Calculadora`](Calculadora) | tarefa da Sprint 1 (Git e Codespace) |
@@ -134,7 +161,7 @@ Cada app tem o seu `urls.py` com `app_name` e entra no `urls.py` principal com o
 (`path('diario/', include('diario.urls'))`). Nos templates, os links usam o nome do app,
 por exemplo `{% url 'diario:diario_hoje' %}`.
 
-Os apps das Sprints 6 e 7 ficam na pasta da sprint em que foram entregues, para que os links das entregas
+Os apps das Sprints 6, 7 e 8 ficam na pasta da sprint em que foram entregues, para que os links das entregas
 continuem valendo. O `settings.py` acrescenta essas pastas ao caminho do Python, então o Django os carrega
 como se estivessem ao lado do `manage.py`.
 

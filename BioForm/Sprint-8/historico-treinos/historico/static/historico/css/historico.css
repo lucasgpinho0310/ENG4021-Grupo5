@@ -1,0 +1,52 @@
+/* =========================================================
+   BioForm — histórico de treinos (historico/lista.html e historico/sessao.html).
+   Usa as variáveis de cor de acesso.css.
+   ========================================================= */
+
+.voltar { margin-bottom: 12px; font-size: 14px; }
+.btn-auto { width: auto; padding: 0 22px; }
+
+/* ---------- Semana: título e totais ---------- */
+.semana-topo { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 12px; }
+.semana-totais { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; font-size: 13px; color: var(--text-2); }
+.semana-totais b { color: var(--text); }
+
+/* ---------- Treinos da semana ---------- */
+.treinos-feitos { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+.treino-feito {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+.treino-feito:hover { border-color: var(--line-strong); }
+.treino-emoji { font-size: 22px; }
+.treino-info { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.treino-info small { font-size: 13px; color: var(--text-3); }
+.treino-kcal { font-weight: 700; color: var(--green); white-space: nowrap; }
+
+/* ---------- Detalhe do treino ---------- */
+.resumo-treino { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.resumo-treino div { padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.resumo-treino small { display: block; font-size: 12px; color: var(--text-3); }
+.resumo-treino strong { font-size: 20px; }
+
+.exercicio-feito-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.series-feitas { width: 100%; border-collapse: collapse; font-size: 14px; }
+.series-feitas th { padding: 6px 0; font-size: 12px; font-weight: 600; color: var(--text-3); text-align: left; }
+.series-feitas td { padding: 8px 0; border-top: 1px solid var(--line); }
+
+.excluir-treino { margin-top: 24px; text-align: center; }
+.excluir-treino button {
+  border: none;
+  background: none;
+  color: var(--danger);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

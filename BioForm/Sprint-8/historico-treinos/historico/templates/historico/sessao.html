@@ -1,0 +1,46 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform treinos_tags %}
+{% block titulo %}{{ treino.titulo }} · {{ sessao.inicio|date:'d/m' }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'historico/css/historico.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'historico:lista' %}">← Histórico de treinos</a></p>
+    <h1>{{ treino.emoji }} {{ treino.titulo }}</h1>
+    <p class="subtitle">{{ sessao.inicio|date:'l, d/m/Y' }} · {{ sessao.esporte.nome }}</p>
+
+    <div class="resumo-treino">
+      <div><small>Duração</small><strong>{{ sessao.duracao_minutos }} min</strong></div>
+      <div><small>Intensidade</small><strong>{{ sessao.get_intensidade_display }}</strong></div>
+      <div><small>Gasto estimado</small><strong>{% if treino.kcal is not None %}{{ treino.kcal|milhar }} kcal{% else %}—{% endif %}</strong></div>
+      {% if treino.volume_kg %}<div><small>Volume</small><strong>{{ treino.volume_kg|milhar }} kg</strong></div>{% endif %}
+      {% if sessao.distancia_km %}<div><small>Distância</small><strong>{{ sessao.distancia_km|decimal_br }} km</strong></div>{% endif %}
+    </div>
+
+    {% for item in exercicios %}
+    <section class="block exercicio-feito">
+      <div class="exercicio-feito-topo">
+        <h2 class="block-title">{{ item.exercicio.nome_exercicio }}</h2>
+        {% if item.recorde %}<span class="tag tag-green">🏆 Novo recorde</span>{% endif %}
+      </div>
+      <table class="series-feitas">
+        <thead><tr><th>Série</th><th>Carga</th><th>{% if item.exercicio.tempo_segundos %}Tempo{% else %}Repetições{% endif %}</th>{% if not item.exercicio.tempo_segundos %}<th>Volume</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for s in item.series %}
+          <tr>
+            <td>{{ s.numero_serie }}</td>
+            <td>{{ s.carga_kg|carga }}</td>
+            <td>{% if s.tempo_segundos %}{{ s.tempo_segundos|intervalo }}{% else %}{{ s.repeticoes }}{% endif %}</td>
+            {% if not item.exercicio.tempo_segundos %}<td>{{ s.volume_kg|milhar }} kg</td>{% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endfor %}
+
+    <p class="disclaimer">O gasto é uma estimativa pelo MET do esporte, a duração, a intensidade e o seu peso na data do treino.</p>
+
+    <form method="post" action="{% url 'historico:excluir' sessao.id %}" class="excluir-treino" onsubmit="return confirm('Excluir este treino do histórico?');">
+      {% csrf_token %}
+      <button type="submit">Excluir treino</button>
+    </form>
+{% endblock %}

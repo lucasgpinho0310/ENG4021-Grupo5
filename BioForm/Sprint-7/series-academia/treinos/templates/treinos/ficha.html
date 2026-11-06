@@ -10,6 +10,7 @@
         <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}</p>
       </div>
       <div class="ficha-acoes">
+        {% url 'execucao:fazer' ficha.id as url_fazer %}{% if url_fazer and exercicios %}<a href="{{ url_fazer }}" class="btn-mini btn-mini-destaque">▶ Começar treino</a>{% endif %}
         <a href="{% url 'treinos:treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
         <form method="post" action="{% url 'treinos:treinos_alternar_ativa' ficha.id %}">
           {% csrf_token %}
