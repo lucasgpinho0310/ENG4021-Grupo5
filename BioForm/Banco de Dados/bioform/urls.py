@@ -38,7 +38,10 @@ urlpatterns = [
     path('perfil/metas/', include('metas.urls')),  # Sprint-6/calculadora-metas
     path('diario/', include('diario.urls')),       # Sprint-6/diario-alimentar
     path('rotina/', include('rotina.urls')),       # Sprint-7/rotina-esportiva
+    path('treinos/historico/', include('historico.urls')),  # Sprint-8/historico-treinos
     path('treinos/', include('treinos.urls')),     # Sprint-7/series-academia
+    path('treino/', include('execucao.urls')),     # Sprint-8/treino-do-dia
+    path('evolucao/', include('evolucao.urls')),   # Sprint-8/evolucao-peso
 ]
 
 # Em desenvolvimento, o próprio Django entrega as imagens enviadas

@@ -1,0 +1,51 @@
+/* =========================================================
+   BioForm — evolução do peso (evolucao/peso.html).
+   Usa as variáveis de cor de acesso.css.
+   ========================================================= */
+
+/* ---------- Números do topo ---------- */
+.resumo-peso { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.resumo-peso div { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.resumo-peso small { font-size: 12px; color: var(--text-3); }
+.resumo-peso strong { font-size: 24px; font-weight: 800; }
+.resumo-peso strong span { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.resumo-peso em { font-style: normal; font-size: 13px; color: var(--text-2); }
+.desceu { color: var(--green); }
+.subiu { color: var(--flame); }
+
+/* ---------- Gráfico (SVG desenhado pelo servidor) ---------- */
+.grafico-peso { display: block; width: 100%; height: auto; }
+.grafico-peso .grade { stroke: var(--line); stroke-width: 1; }
+.grafico-peso .linha-meta { stroke: var(--green); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.grafico-peso .linha-peso { fill: none; stroke: var(--flame); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.grafico-peso .ponto { fill: var(--surface); stroke: var(--flame); stroke-width: 2.5; }
+.grafico-peso text { font-size: 12px; fill: var(--text-3); }
+.grafico-peso .rotulo-y { text-anchor: end; dominant-baseline: middle; }
+.grafico-peso .rotulo-meta { text-anchor: end; fill: var(--green); }
+.grafico-peso .rotulo-x.fim { text-anchor: end; }
+
+/* ---------- Formulário de pesagem ---------- */
+/* .onb-main na frente: vence o "form { display: block }" das telas de perfil */
+.onb-main .form-pesagem { display: grid; grid-template-columns: 1fr 1fr auto; gap: 14px; align-items: end; }
+.form-pesagem .btn { width: auto; padding: 0 24px; }
+.form-pesagem .errorlist { margin: 4px 0 0; padding: 0; }
+
+/* ---------- Tabela de pesagens ---------- */
+.tabela-pesagens { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabela-pesagens th { padding: 6px 0; font-size: 12px; font-weight: 600; color: var(--text-3); text-align: left; }
+.tabela-pesagens td { padding: 10px 0; border-top: 1px solid var(--line); }
+.tabela-pesagens td:last-child { width: 40px; text-align: right; }
+.btn-excluir {
+  width: 30px; height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: none;
+  color: var(--danger);
+  font-size: 16px;
+  cursor: pointer;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .onb-main .form-pesagem { grid-template-columns: 1fr; }
+}

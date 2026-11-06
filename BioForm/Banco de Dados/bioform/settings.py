@@ -23,6 +23,9 @@ for pasta in ('diario-alimentar', 'medidas-caseiras', 'calculadora-metas'):
 SPRINT_7 = BASE_DIR.parent / 'Sprint-7'
 for pasta in ('rotina-esportiva', 'series-academia'):
     sys.path.insert(0, str(SPRINT_7 / pasta))
+SPRINT_8 = BASE_DIR.parent / 'Sprint-8'
+for pasta in ('treino-do-dia', 'historico-treinos', 'evolucao-peso'):
+    sys.path.insert(0, str(SPRINT_8 / pasta))
 
 
 # Quick-start development settings - unsuitable for production
@@ -63,6 +66,9 @@ INSTALLED_APPS = [
     'diario',            # Sprint-6/diario-alimentar
     'rotina',            # Sprint-7/rotina-esportiva
     'treinos',           # Sprint-7/series-academia
+    'execucao',          # Sprint-8/treino-do-dia
+    'historico',         # Sprint-8/historico-treinos
+    'evolucao',          # Sprint-8/evolucao-peso
 ]
 
 MIDDLEWARE = [

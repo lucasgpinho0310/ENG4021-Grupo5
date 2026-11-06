@@ -1,0 +1,83 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static treinos_tags execucao_tags %}
+{% block titulo %}Treino · {{ ficha.nome_ficha }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'treinos/css/treinos.css' %}"><link rel="stylesheet" href="{% static 'execucao/css/execucao.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos:treinos_ficha' ficha.id %}">← {{ ficha.nome_ficha }}</a></p>
+    <h1>Treino: {{ ficha.nome_ficha }}</h1>
+    <p class="subtitle">As séries já vêm preenchidas com o que você fez da última vez. Ajuste o que mudou e marque cada série feita.</p>
+
+    <form method="post" class="form-treino">
+      {% csrf_token %}
+      {% if erro_series %}<div class="form-erros">{{ erro_series }}</div>{% endif %}
+
+      <ol class="exercicios">
+        {% for bloco in blocos %}
+        <li class="bloco{% if bloco|length > 1 %} bloco-combinado{% endif %}">
+          {% if bloco|length > 1 %}<p class="bloco-titulo">Exercícios combinados · alterne {% for item in bloco %}{{ item.exercicio.letra }}{% if not forloop.last %} e {% endif %}{% endfor %}</p>{% endif %}
+          {% for item in bloco %}
+          {% with e=item.exercicio %}
+          <article class="exercicio exercicio-treino">
+            <div class="exercicio-info">
+              <h2>{% if e.letra %}<span class="letra">{{ e.letra }}</span>{% else %}<span class="ordem">{{ e.ordem_execucao }}</span>{% endif %} {{ e.nome_exercicio }}</h2>
+              <p class="exercicio-dados">
+                <span><small>Planejado</small>{{ e|series_de }} · {{ e.carga_kg|carga }}</span>
+                {% if item.ultima_vez %}<span><small>Da última vez</small>{% for s in item.ultima_vez %}{% if item.por_tempo %}{{ s.tempo_segundos|intervalo }}{% else %}{{ s.repeticoes }}{% endif %}{% if not forloop.last %}/{% endif %}{% endfor %} · {{ item.ultima_vez.0.carga_kg|carga }}</span>{% endif %}
+                {% if item.recorde %}<span class="recorde"><small>Recorde</small>{% if item.por_tempo %}{{ item.recorde|intervalo }}{% else %}{{ item.recorde|carga }}{% endif %}</span>{% endif %}
+              </p>
+              {% if e.instrucoes %}<p class="instrucao">{{ e.instrucoes|linebreaksbr }}</p>{% endif %}
+
+              <table class="series-treino">
+                <thead>
+                  <tr><th>Série</th><th>Carga (kg)</th><th>{% if item.por_tempo %}Tempo (s){% else %}Repetições{% endif %}</th><th>Feita</th></tr>
+                </thead>
+                <tbody>
+                  {% for linha in item.linhas %}
+                  <tr{% if linha.erro %} class="serie-erro"{% endif %}>
+                    <td class="serie-num">{{ linha.numero }}</td>
+                    <td><input type="text" inputmode="decimal" name="carga-{{ e.id }}-{{ linha.numero }}" value="{{ linha.carga_kg|valor_carga }}" class="input-serie" aria-label="Carga da série {{ linha.numero }} de {{ e.nome_exercicio }}"></td>
+                    <td>
+                      {% if item.por_tempo %}
+                      <input type="number" min="1" max="3600" name="tempo-{{ e.id }}-{{ linha.numero }}" value="{{ linha.tempo_segundos|default_if_none:'' }}" class="input-serie" aria-label="Segundos da série {{ linha.numero }} de {{ e.nome_exercicio }}">
+                      {% else %}
+                      <input type="number" min="1" max="999" name="reps-{{ e.id }}-{{ linha.numero }}" value="{{ linha.repeticoes|default_if_none:'' }}" class="input-serie" aria-label="Repetições da série {{ linha.numero }} de {{ e.nome_exercicio }}">
+                      {% endif %}
+                    </td>
+                    <td><input type="checkbox" name="feita-{{ e.id }}-{{ linha.numero }}" class="check-serie"{% if linha.feita %} checked{% endif %}{% if e.intervalo_segundos %} data-descanso="{{ e.intervalo_segundos }}"{% endif %} aria-label="Série {{ linha.numero }} de {{ e.nome_exercicio }} feita"></td>
+                  </tr>
+                  {% if linha.erro %}<tr class="serie-erro-msg"><td colspan="4">{{ linha.erro }}</td></tr>{% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% if e.intervalo_segundos %}<p class="help">Descanso de {{ e.intervalo_segundos|intervalo }}: o cronômetro começa sozinho quando você marca a série.</p>{% endif %}
+            </div>
+          </article>
+          {% endwith %}
+          {% endfor %}
+        </li>
+        {% endfor %}
+      </ol>
+
+      <section class="block">
+        <h2 class="block-title">Fechar o treino</h2>
+        <div class="grade-fechar">
+          {% include 'treinos/_campo.html' with campo=form.data %}
+          {% include 'treinos/_campo.html' with campo=form.duracao %}
+          {% include 'treinos/_campo.html' with campo=form.intensidade %}
+        </div>
+      </section>
+
+      <div class="actions">
+        <a href="{% url 'treinos:treinos_ficha' ficha.id %}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Salvar treino</button>
+      </div>
+    </form>
+
+    <!-- Cronômetro de descanso (aparece quando uma série com intervalo é marcada) -->
+    <div class="descanso" id="descanso" hidden>
+      <span>Descanso</span>
+      <strong id="descanso-tempo">0:00</strong>
+      <button type="button" id="descanso-pular">Pular</button>
+    </div>
+    <script src="{% static 'execucao/js/descanso.js' %}"></script>
+{% endblock %}
