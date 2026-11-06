@@ -1,10 +1,14 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django import forms
+from django.utils import timezone
 
-from saude.models import DIAS_DA_SEMANA, ExercicioFicha
+from saude.models import DIAS_DA_SEMANA, INTENSIDADES, Esporte, ExercicioFicha
 
 from .leitor import ExercicioLido, ler_intervalo
+from .servicos import blocos_da_ficha
+from .sessoes import SERIES_MAXIMAS, ExercicioLivre, SerieFeita
 
 DIAS = [(dia, nome[:3]) for dia, nome in DIAS_DA_SEMANA.items()]
 IMAGEM_MAXIMA_MB = 5
@@ -234,3 +238,245 @@ class ExercicioForm(forms.ModelForm, CamposDeSeries):
         if commit:
             exercicio.save()
         return exercicio
+
+
+# =====================================================================
+# Treino feito: o que foi feito de verdade em cada série (sessoes.py)
+# =====================================================================
+
+FORMATO_INICIO = '%Y-%m-%dT%H:%M'  # o que o <input type="datetime-local"> envia
+CARGA_MAXIMA = 1000
+REPETICOES_MAXIMAS = 200
+TOLERANCIA_FUTURO = timedelta(minutes=5)  # relógio do celular um pouco adiantado
+
+
+class TreinoFeitoForm(forms.Form):
+    """
+    Uma linha por série planejada de cada exercício da ficha: feita?, carga e repetições (ou tempo).
+    Os campos de cada série se chamam feita-<exercício>-<n>, carga-<exercício>-<n> e
+    reps-<exercício>-<n> (ou tempo-<exercício>-<n>), e já vêm com o que foi feito da última vez.
+    """
+    inicio = forms.DateTimeField(
+        label='Começou em', input_formats=[FORMATO_INICIO],
+        widget=forms.DateTimeInput(format=FORMATO_INICIO, attrs={'type': 'datetime-local'}),
+    )
+    duracao = forms.IntegerField(
+        label='Duração (min)', min_value=1, max_value=600,
+        widget=forms.NumberInput(attrs={'min': 1, 'max': 600, 'inputmode': 'numeric'}),
+    )
+    intensidade = forms.ChoiceField(label='Intensidade', choices=INTENSIDADES.items())
+
+    def __init__(self, exercicios, ultimas, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exercicios = exercicios
+        self.ultimas = ultimas
+        self.fields['inicio'].widget.attrs['max'] = timezone.localtime().strftime(FORMATO_INICIO)
+        for exercicio in exercicios:
+            anteriores = {s.numero_serie: s for s in ultimas.get(exercicio.id, (None, []))[1]}
+            for numero in self.numeros(exercicio):
+                anterior = anteriores.get(numero)
+                chave = self.chave(exercicio, numero)
+                self.fields['feita-' + chave] = forms.BooleanField(required=False, initial=True)
+                self.fields['carga-' + chave] = forms.DecimalField(
+                    min_value=0, max_value=CARGA_MAXIMA, decimal_places=2, required=False,
+                    initial=sem_zeros(anterior.carga_kg if anterior else exercicio.carga_kg),
+                    widget=forms.NumberInput(attrs={'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+                )
+                if exercicio.tempo_segundos:
+                    segundos = anterior.tempo_segundos if anterior and anterior.tempo_segundos else exercicio.tempo_segundos
+                    self.fields['tempo-' + chave] = forms.CharField(
+                        max_length=20, required=False, initial='%ds' % segundos,
+                        widget=forms.TextInput(attrs={'placeholder': '30s'}),
+                    )
+                else:
+                    repeticoes = anterior.repeticoes if anterior and anterior.repeticoes else exercicio.repeticoes_planejadas
+                    self.fields['reps-' + chave] = forms.IntegerField(
+                        min_value=1, max_value=REPETICOES_MAXIMAS, required=False, initial=repeticoes,
+                        widget=forms.NumberInput(attrs={'min': 1, 'max': REPETICOES_MAXIMAS, 'inputmode': 'numeric'}),
+                    )
+
+    @staticmethod
+    def chave(exercicio, numero):
+        return '%s-%d' % (exercicio.id.hex, numero)
+
+    @staticmethod
+    def numeros(exercicio):
+        return range(1, min(exercicio.series_planejadas, SERIES_MAXIMAS) + 1)
+
+    def clean_inicio(self):
+        inicio = self.cleaned_data['inicio']
+        if inicio > timezone.now() + TOLERANCIA_FUTURO:
+            raise forms.ValidationError('O treino não pode começar no futuro.')
+        return inicio
+
+    def clean(self):
+        dados = super().clean()
+        self.feitos = []
+        for exercicio in self.exercicios:
+            series = []
+            for numero in self.numeros(exercicio):
+                chave = self.chave(exercicio, numero)
+                if not dados.get('feita-' + chave):
+                    continue
+                carga = dados.get('carga-' + chave)
+                serie = SerieFeita(numero=numero, carga_kg=Decimal('0') if carga is None else carga)
+                if exercicio.tempo_segundos:
+                    campo = 'tempo-' + chave
+                    if campo in self.errors:
+                        continue
+                    try:
+                        serie.tempo_segundos = _segundos(dados.get(campo), 'Use segundos (30s) ou minutos (1min, 1:30).')
+                    except forms.ValidationError as erro:
+                        self.add_error(campo, erro)
+                        continue
+                    if not serie.tempo_segundos:
+                        self.add_error(campo, 'Informe o tempo.')
+                        continue
+                else:
+                    campo = 'reps-' + chave
+                    serie.repeticoes = dados.get(campo)
+                    if not serie.repeticoes:
+                        if campo not in self.errors:
+                            self.add_error(campo, 'Informe as repetições.')
+                        continue
+                series.append(serie)
+            if series:
+                self.feitos.append((exercicio, series))
+        if not self.errors and not self.feitos:
+            raise forms.ValidationError('Marque pelo menos uma série feita.')
+        return dados
+
+    def blocos(self):
+        """Exercícios na ordem da ficha, juntando os combinados, com os campos de cada série."""
+        for bloco in blocos_da_ficha(self.exercicios):
+            itens = []
+            for exercicio in bloco.exercicios:
+                ultima = self.ultimas.get(exercicio.id)
+                itens.append({
+                    'exercicio': exercicio,
+                    'ultima_sessao': ultima[0] if ultima else None,
+                    'ultimas_series': ultima[1] if ultima else [],
+                    'series': [
+                        {
+                            'numero': numero,
+                            'feita': self['feita-' + chave],
+                            'carga': self['carga-' + chave],
+                            'valor': self[('tempo-' if exercicio.tempo_segundos else 'reps-') + chave],
+                        }
+                        for numero in self.numeros(exercicio)
+                        for chave in [self.chave(exercicio, numero)]
+                    ],
+                })
+            yield {'combinado': bloco.combinado, 'itens': itens}
+
+
+
+# =====================================================================
+# Registrar treino (treino livre): tela do protótipo App Saúde/Registro de treino
+# =====================================================================
+
+EXERCICIOS_LIVRES_MAXIMOS = 30
+
+
+class RegistrarTreinoForm(forms.Form):
+    nome = forms.CharField(
+        label='Nome do treino', max_length=100,
+        error_messages={'required': 'Dê um nome para o treino.'},
+        widget=forms.TextInput(attrs={'placeholder': 'Ex.: Treino A — peito e tríceps'}),
+    )
+    esporte = forms.ModelChoiceField(
+        label='Tipo', queryset=None, widget=forms.RadioSelect, empty_label=None,
+        error_messages={'required': 'Escolha o tipo do treino.'},
+    )
+    data = forms.DateField(label='Data', widget=forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}))
+    hora = forms.TimeField(label='Horário', widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time'}))
+    duracao = forms.IntegerField(
+        label='Duração', min_value=1, max_value=600,
+        widget=forms.NumberInput(attrs={'placeholder': '60', 'min': 1, 'max': 600, 'inputmode': 'numeric'}),
+    )
+    intensidade = forms.ChoiceField(label='Intensidade', choices=INTENSIDADES.items(), widget=forms.RadioSelect)
+    distancia = forms.DecimalField(
+        label='Distância (opcional)', min_value=Decimal('0.01'), max_value=999, decimal_places=2, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '5', 'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+    )
+    observacoes = forms.CharField(
+        label='Observações (opcional)', max_length=2000, required=False,
+        widget=forms.Textarea(attrs={'placeholder': 'Como você se sentiu, ajustes de carga, dores...', 'rows': 3}),
+    )
+
+    def __init__(self, esportes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['esporte'].queryset = Esporte.objects.filter(id__in=[e.id for e in esportes])
+        # mantém a ordem "do perfil primeiro" nos chips
+        self.fields['esporte'].choices = [(e.id, e.nome) for e in esportes]
+        self.fields['data'].widget.attrs['max'] = timezone.localdate().isoformat()
+
+    def clean_nome(self):
+        nome = ' '.join(self.cleaned_data['nome'].split())
+        if not nome:
+            raise forms.ValidationError('Dê um nome para o treino.')
+        return nome
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get('data') and dados.get('hora'):
+            inicio = timezone.make_aware(datetime.combine(dados['data'], dados['hora']))
+            if inicio > timezone.now() + TOLERANCIA_FUTURO:
+                self.add_error('hora' if dados['data'] == timezone.localdate() else 'data',
+                               'O treino não pode ser no futuro.')
+            dados['inicio'] = inicio
+        return dados
+
+
+class ExercicioLivreForm(forms.Form):
+    """Um exercício do treino livre: nome, séries, repetições e carga. Linha vazia é ignorada."""
+    nome = forms.CharField(
+        label='Nome do exercício', max_length=100, required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Nome do exercício'}),
+    )
+    series = forms.IntegerField(
+        label='Séries', min_value=1, max_value=20, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '4', 'min': 1, 'max': 20, 'inputmode': 'numeric'}),
+    )
+    repeticoes = forms.IntegerField(
+        label='Repetições', min_value=1, max_value=REPETICOES_MAXIMAS, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '12', 'min': 1, 'max': REPETICOES_MAXIMAS, 'inputmode': 'numeric'}),
+    )
+    carga = forms.DecimalField(
+        label='Carga (kg)', min_value=0, max_value=CARGA_MAXIMA, decimal_places=2, required=False,
+        widget=forms.NumberInput(attrs={'placeholder': '40', 'step': 'any', 'min': 0, 'inputmode': 'decimal'}),
+    )
+
+    def clean(self):
+        dados = super().clean()
+        dados['nome'] = ' '.join((dados.get('nome') or '').split())
+        numeros = [dados.get(c) for c in ('series', 'repeticoes', 'carga')]
+        if not dados['nome']:
+            if any(n is not None for n in numeros):
+                self.add_error('nome', 'Dê um nome ao exercício.')
+            return dados
+        if not dados.get('series') and 'series' not in self.errors:
+            self.add_error('series', 'Quantas séries?')
+        if not dados.get('repeticoes') and 'repeticoes' not in self.errors:
+            self.add_error('repeticoes', 'Quantas repetições?')
+        return dados
+
+
+class BaseExerciciosLivres(forms.BaseFormSet):
+    def exercicios(self):
+        return [
+            ExercicioLivre(
+                nome=f.cleaned_data['nome'],
+                series=f.cleaned_data['series'],
+                repeticoes=f.cleaned_data['repeticoes'],
+                carga_kg=f.cleaned_data.get('carga') or Decimal('0'),
+            )
+            for f in self.forms
+            if f.cleaned_data.get('nome')
+        ]
+
+
+ExerciciosLivresFormSet = forms.formset_factory(
+    ExercicioLivreForm, formset=BaseExerciciosLivres, extra=1,
+    max_num=EXERCICIOS_LIVRES_MAXIMOS, absolute_max=EXERCICIOS_LIVRES_MAXIMOS, validate_max=True,
+)

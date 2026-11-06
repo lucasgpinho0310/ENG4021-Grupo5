@@ -12,7 +12,11 @@
         </p>
         {% url 'historico:lista' as url_historico %}{% if url_historico %}<p class="link-historico"><a href="{{ url_historico }}">Ver histórico de treinos →</a></p>{% endif %}
       </div>
-      <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+      <div class="ficha-acoes">
+        <a href="{% url 'treinos:treinos_historico' %}" class="btn btn-ghost btn-topo">Histórico</a>
+        <a href="{% url 'treinos:treinos_registrar' %}" class="btn btn-ghost btn-topo">Registrar treino</a>
+        <a href="{% url 'treinos:treinos_nova' %}" class="btn btn-primary btn-topo">+ Nova série</a>
+      </div>
     </div>
 
     {% if ativas %}

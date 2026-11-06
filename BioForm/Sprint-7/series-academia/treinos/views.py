@@ -1,15 +1,27 @@
+from datetime import timedelta
 from functools import wraps
 
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from contas.onboarding import perfil_obrigatorio, proximo_passo
-from saude.models import ExercicioFicha, FichaTreino, dias_da_lista
+from saude.models import ExercicioFicha, FichaTreino, SessaoAtividade, dias_da_lista
 
-from . import servicos
-from .forms import EditarFichaForm, ExercicioForm, FichaForm, LinhasFormSet, TextoForm
+from . import servicos, sessoes
+from .forms import (
+    EditarFichaForm,
+    ExercicioForm,
+    ExerciciosLivresFormSet,
+    FichaForm,
+    LinhasFormSet,
+    RegistrarTreinoForm,
+    TextoForm,
+    TreinoFeitoForm,
+)
 from .leitor import ler_texto
 
 
@@ -84,8 +96,12 @@ def nova(request, usuario):
 def ficha(request, usuario, ficha_id):
     ficha = _ficha(usuario, ficha_id)
     exercicios = list(ficha.exercicios.order_by('ordem_execucao'))
+    ultimas = sessoes.ultimas_series(usuario, exercicios)
+    for exercicio in exercicios:
+        exercicio.ultima = ultimas.get(exercicio.id)  # (sessão, séries) da última vez, para "Última vez"
     return render(request, 'treinos/ficha.html', _contexto(
         usuario, ficha=ficha, exercicios=exercicios, blocos=servicos.blocos_da_ficha(exercicios),
+        ultimo_treino=sessoes.sessoes_do_usuario(usuario).filter(ficha=ficha).first(),
     ))
 
 
@@ -190,3 +206,92 @@ def mover_exercicio(request, usuario, exercicio_id):
     exercicio = _exercicio(usuario, exercicio_id)
     servicos.mover(exercicio, para_cima=request.POST.get('direcao') == 'cima')
     return redirect('%s#ex-%s' % (reverse('treinos:treinos_ficha', args=[exercicio.ficha_id]), exercicio.id))
+
+
+# =====================================================================
+# Treino feito e histórico (RF06 / RF07)
+# =====================================================================
+
+POR_PAGINA = 20
+
+
+def _sessao(usuario, sessao_id):
+    return get_object_or_404(SessaoAtividade.objects.select_related('ficha'), id=sessao_id, usuario=usuario)
+
+
+@treinos_view
+def treinar(request, usuario, ficha_id):
+    """Registrar o treino feito: cada série com a carga e as repetições de verdade."""
+    ficha = _ficha(usuario, ficha_id)
+    exercicios = list(ficha.exercicios.order_by('ordem_execucao'))
+    if not exercicios:
+        messages.error(request, 'Adicione os exercícios da série antes de registrar um treino.')
+        return redirect('treinos:treinos_ficha', ficha_id=ficha.id)
+
+    duracao, intensidade = sessoes.padroes_do_perfil(usuario)
+    agora = timezone.localtime().replace(second=0, microsecond=0)
+    form = TreinoFeitoForm(
+        exercicios, sessoes.ultimas_series(usuario, exercicios), request.POST or None,
+        initial={'inicio': agora - timedelta(minutes=duracao), 'duracao': duracao, 'intensidade': intensidade},
+    )
+    if request.method == 'POST' and form.is_valid():
+        dados = form.cleaned_data
+        sessao = sessoes.registrar_treino(
+            usuario, ficha, dados['inicio'], dados['duracao'], dados['intensidade'], form.feitos,
+        )
+        series = sum(len(s) for _, s in form.feitos)
+        messages.success(request, 'Treino salvo: %d série%s de %d exercício%s.' % (
+            series, '' if series == 1 else 's', len(form.feitos), '' if len(form.feitos) == 1 else 's'))
+        return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
+    return render(request, 'treinos/treinar.html', _contexto(usuario, ficha=ficha, form=form))
+
+
+@treinos_view
+def registrar(request, usuario):
+    """Registrar treino livre: qualquer esporte, com ou sem lista de exercícios."""
+    esportes = sessoes.esportes_para_escolher(usuario)
+    duracao, intensidade = sessoes.padroes_do_perfil(usuario)
+    agora = timezone.localtime()
+    padrao = next((e for e in esportes if e.nome.lower() == sessoes.ESPORTE.lower()), esportes[0] if esportes else None)
+    form = RegistrarTreinoForm(esportes, request.POST or None, initial={
+        'esporte': padrao.id if padrao else None, 'data': agora.date(), 'hora': agora.strftime('%H:%M'),
+        'duracao': duracao, 'intensidade': intensidade,
+    })
+    exercicios = ExerciciosLivresFormSet(request.POST or None, prefix='ex')
+    if request.method == 'POST':
+        form_ok, exercicios_ok = form.is_valid(), exercicios.is_valid()  # os dois, para mostrar todos os erros
+        if form_ok and exercicios_ok:
+            dados = form.cleaned_data
+            sessao = sessoes.registrar_treino_livre(
+                usuario, dados['esporte'], dados['inicio'], dados['duracao'], dados['intensidade'],
+                nome=dados['nome'], observacoes=dados['observacoes'].strip(), distancia_km=dados['distancia'],
+                exercicios=exercicios.exercicios(),
+            )
+            messages.success(request, 'Treino "%s" salvo.' % sessao.nome)
+            return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
+    return render(request, 'treinos/registrar.html', _contexto(usuario, form=form, exercicios=exercicios))
+
+
+@treinos_view
+def historico(request, usuario):
+    pagina = Paginator(sessoes.sessoes_do_usuario(usuario), POR_PAGINA).get_page(request.GET.get('pagina'))
+    return render(request, 'treinos/historico.html', _contexto(usuario, pagina=pagina))
+
+
+@treinos_view
+def sessao(request, usuario, sessao_id):
+    sessao = _sessao(usuario, sessao_id)
+    feitos = sessoes.exercicios_da_sessao(sessao)
+    todas = [serie for _, series in feitos for serie in series]
+    return render(request, 'treinos/sessao.html', _contexto(
+        usuario, sessao=sessao, feitos=feitos, total_series=len(todas), volume=sessoes.volume(todas),
+    ))
+
+
+@require_POST
+@treinos_view
+def excluir_sessao(request, usuario, sessao_id):
+    sessao = _sessao(usuario, sessao_id)
+    sessao.delete()  # as séries vão junto (CASCADE)
+    messages.success(request, 'Treino excluído do histórico.')
+    return redirect('treinos:treinos_historico')

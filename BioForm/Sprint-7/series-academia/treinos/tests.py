@@ -1,22 +1,32 @@
 import io
 import shutil
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
 
 from metas.calculo import salvar_meta
-from saude.models import ExercicioFicha, FichaTreino, HistoricoMedida, Usuario
+from saude.models import (
+    Esporte,
+    EsporteUsuario,
+    ExercicioFicha,
+    FichaTreino,
+    HistoricoMedida,
+    SerieExecutada,
+    SessaoAtividade,
+    Usuario,
+)
 
-from . import servicos
+from . import servicos, sessoes
 from .leitor import ler_intervalo, ler_series, ler_series_por_tempo, ler_texto
-from .templatetags.treinos_tags import carga, intervalo, series_de, video_embed
+from .templatetags.treinos_tags import carga, intervalo, serie_feita, series_de, toneladas, video_embed
 
 User = get_user_model()
 SENHA = 'treino-forte-2026'
@@ -480,3 +490,343 @@ class ImagemEVideoTest(TestCase):
         self.assertEqual(exercicio.imagem.name, nome)
         self.assertEqual((exercicio.nome_exercicio, exercicio.repeticoes_planejadas, exercicio.intervalo_segundos),
                          ('Leg press 45°', 10, 120))
+
+
+# =====================================================================
+# Treino feito e histórico (RF06 / RF07)
+# =====================================================================
+
+TREINO_A = """Supino reto
+Séries: 3x10
+Carga: 40kg
+Intervalo: 90s
+
+Prancha
+Séries: 2x30s
+Carga: 0kg
+"""
+
+
+class TreinoFeitoTest(TestCase):
+    def setUp(self):
+        self.usuario = criar_usuario()
+        self.client.login(username='caio@email.com', password=SENHA)
+        self.ficha = servicos.criar_ficha(self.usuario, 'Treino A', ['seg'], True, ler_texto(TREINO_A).exercicios)
+        self.supino, self.prancha = self.ficha.exercicios.order_by('ordem_execucao')
+        self.url = reverse('treinos:treinos_treinar', args=[self.ficha.id])
+
+    def dados(self, **mudancas):
+        """POST com tudo marcado como na ficha: supino 3x10 com 40 kg, prancha 2x30s."""
+        inicio = timezone.localtime() - timedelta(hours=1)
+        dados = {'inicio': inicio.strftime('%Y-%m-%dT%H:%M'), 'duracao': '60', 'intensidade': 'intensa'}
+        for n in (1, 2, 3):
+            chave = '%s-%d' % (self.supino.id.hex, n)
+            dados.update({'feita-' + chave: 'on', 'carga-' + chave: '40', 'reps-' + chave: '10'})
+        for n in (1, 2):
+            chave = '%s-%d' % (self.prancha.id.hex, n)
+            dados.update({'feita-' + chave: 'on', 'carga-' + chave: '0', 'tempo-' + chave: '30s'})
+        dados.update(mudancas)
+        return {k: v for k, v in dados.items() if v is not None}
+
+    def chave(self, exercicio, n):
+        return '%s-%d' % (exercicio.id.hex, n)
+
+    def test_tela_mostra_uma_linha_por_serie_planejada(self):
+        resposta = self.client.get(self.url)
+        self.assertContains(resposta, 'Treinar: Treino A')
+        self.assertContains(resposta, 'name="reps-%s"' % self.chave(self.supino, 3))
+        self.assertContains(resposta, 'name="tempo-%s"' % self.chave(self.prancha, 2))
+        self.assertNotContains(resposta, 'name="reps-%s"' % self.chave(self.prancha, 1))
+        self.assertNotContains(resposta, 'Última vez')
+
+    def test_salva_sessao_e_series(self):
+        dados = self.dados(**{'carga-' + self.chave(self.supino, 3): '42.5', 'reps-' + self.chave(self.supino, 3): '8'})
+        resposta = self.client.post(self.url, dados)
+        sessao = SessaoAtividade.objects.get()
+        self.assertRedirects(resposta, reverse('treinos:treinos_sessao', args=[sessao.id]))
+        self.assertEqual((sessao.usuario, sessao.ficha, sessao.esporte.nome), (self.usuario, self.ficha, 'Musculação'))
+        self.assertEqual((sessao.duracao_minutos, sessao.intensidade), (60, 'intensa'))
+        series = list(SerieExecutada.objects.filter(exercicio=self.supino).order_by('numero_serie'))
+        self.assertEqual([(s.carga_kg, s.repeticoes) for s in series],
+                         [(Decimal('40'), 10), (Decimal('40'), 10), (Decimal('42.5'), 8)])
+        prancha = list(SerieExecutada.objects.filter(exercicio=self.prancha))
+        self.assertEqual([(s.tempo_segundos, s.repeticoes) for s in prancha], [(30, None), (30, None)])
+
+    def test_serie_desmarcada_nao_e_salva(self):
+        dados = self.dados(**{'feita-' + self.chave(self.supino, 3): None,
+                              'feita-' + self.chave(self.prancha, 1): None,
+                              'feita-' + self.chave(self.prancha, 2): None})
+        self.client.post(self.url, dados)
+        self.assertEqual(SerieExecutada.objects.filter(exercicio=self.supino).count(), 2)
+        self.assertFalse(SerieExecutada.objects.filter(exercicio=self.prancha).exists())
+
+    def test_serie_desmarcada_ignora_campo_vazio(self):
+        dados = self.dados(**{'feita-' + self.chave(self.supino, 3): None, 'reps-' + self.chave(self.supino, 3): ''})
+        resposta = self.client.post(self.url, dados)
+        self.assertEqual(resposta.status_code, 302)
+
+    def test_carga_vazia_vira_zero(self):
+        self.client.post(self.url, self.dados(**{'carga-' + self.chave(self.supino, 1): ''}))
+        self.assertEqual(SerieExecutada.objects.get(exercicio=self.supino, numero_serie=1).carga_kg, Decimal('0'))
+
+    def test_nenhuma_serie_marcada_nao_salva(self):
+        dados = {k: v for k, v in self.dados().items() if not k.startswith('feita-')}
+        resposta = self.client.post(self.url, dados)
+        self.assertContains(resposta, 'Marque pelo menos uma série feita.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_serie_marcada_sem_repeticoes_da_erro(self):
+        resposta = self.client.post(self.url, self.dados(**{'reps-' + self.chave(self.supino, 2): ''}))
+        self.assertContains(resposta, 'Informe as repetições.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_tempo_invalido_da_erro(self):
+        resposta = self.client.post(self.url, self.dados(**{'tempo-' + self.chave(self.prancha, 1): 'muito'}))
+        self.assertContains(resposta, 'Use segundos')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_tempo_aceita_minutos(self):
+        self.client.post(self.url, self.dados(**{'tempo-' + self.chave(self.prancha, 1): '1:30'}))
+        self.assertEqual(SerieExecutada.objects.get(exercicio=self.prancha, numero_serie=1).tempo_segundos, 90)
+
+    def test_inicio_no_futuro_da_erro(self):
+        amanha = (timezone.localtime() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M')
+        resposta = self.client.post(self.url, self.dados(inicio=amanha))
+        self.assertContains(resposta, 'O treino não pode começar no futuro.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_proximo_treino_vem_com_a_ultima_vez(self):
+        self.client.post(self.url, self.dados(**{'carga-' + self.chave(self.supino, 1): '45',
+                                                 'reps-' + self.chave(self.supino, 1): '7'}))
+        resposta = self.client.get(self.url)
+        self.assertContains(resposta, 'Última vez')
+        form = resposta.context['form']
+        self.assertEqual(form['carga-' + self.chave(self.supino, 1)].initial, Decimal('45'))
+        self.assertEqual(form['reps-' + self.chave(self.supino, 1)].initial, 7)
+        self.assertEqual(form['carga-' + self.chave(self.supino, 2)].initial, Decimal('40'))
+
+    def test_ultima_vez_usa_o_treino_mais_recente(self):
+        semana_passada = timezone.now() - timedelta(days=7)
+        sessoes.registrar_treino(self.usuario, self.ficha, semana_passada, 60, 'moderada', [
+            (self.supino, [sessoes.SerieFeita(1, Decimal('30'), 12)]),
+        ])
+        sessoes.registrar_treino(self.usuario, self.ficha, timezone.now() - timedelta(days=1), 60, 'moderada', [
+            (self.supino, [sessoes.SerieFeita(1, Decimal('50'), 6), sessoes.SerieFeita(2, Decimal('50'), 5)]),
+        ])
+        sessao, series = sessoes.ultimas_series(self.usuario, [self.supino])[self.supino.id]
+        self.assertEqual([(s.carga_kg, s.repeticoes) for s in series], [(Decimal('50'), 6), (Decimal('50'), 5)])
+
+    def test_ficha_mostra_ultima_vez_e_botao(self):
+        self.client.post(self.url, self.dados())
+        resposta = self.client.get(reverse('treinos:treinos_ficha', args=[self.ficha.id]))
+        self.assertContains(resposta, 'Treinar agora')
+        self.assertContains(resposta, '40 kg × 10 · 40 kg × 10 · 40 kg × 10')
+        self.assertContains(resposta, 'último treino')
+
+    def test_ficha_vazia_nao_abre_treino(self):
+        vazia = servicos.criar_ficha(self.usuario, 'Vazia', [])
+        resposta = self.client.get(reverse('treinos:treinos_treinar', args=[vazia.id]))
+        self.assertRedirects(resposta, reverse('treinos:treinos_ficha', args=[vazia.id]))
+
+    def test_padroes_vem_do_perfil(self):
+        self.assertEqual(sessoes.padroes_do_perfil(self.usuario), (60, 'moderada'))
+
+
+class HistoricoTest(TestCase):
+    def setUp(self):
+        self.usuario = criar_usuario()
+        self.client.login(username='caio@email.com', password=SENHA)
+        self.ficha = servicos.criar_ficha(self.usuario, 'Treino A', [], True, ler_texto(TREINO_A).exercicios)
+        self.supino, self.prancha = self.ficha.exercicios.order_by('ordem_execucao')
+        self.sessao = sessoes.registrar_treino(self.usuario, self.ficha, timezone.now(), 50, 'intensa', [
+            (self.supino, [sessoes.SerieFeita(1, Decimal('40'), 10), sessoes.SerieFeita(2, Decimal('40'), 8)]),
+            (self.prancha, [sessoes.SerieFeita(1, Decimal('0'), tempo_segundos=45)]),
+        ])
+
+    def test_historico_lista_com_totais(self):
+        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        self.assertContains(resposta, 'Treino A')
+        sessao = resposta.context['pagina'].object_list[0]
+        self.assertEqual((sessao.total_series, sessao.total_exercicios), (3, 2))
+        self.assertEqual(sessao.volume_kg, Decimal('720'))  # 40x10 + 40x8; a prancha não entra
+
+    def test_historico_vazio(self):
+        SessaoAtividade.objects.all().delete()
+        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        self.assertContains(resposta, 'Nenhum treino registrado ainda')
+
+    def test_detalhe_da_sessao(self):
+        resposta = self.client.get(reverse('treinos:treinos_sessao', args=[self.sessao.id]))
+        self.assertContains(resposta, 'Supino reto')
+        self.assertContains(resposta, '40 kg × 8')
+        self.assertContains(resposta, '45s')
+        self.assertEqual(resposta.context['volume'], Decimal('720'))
+
+    def test_excluir_sessao(self):
+        resposta = self.client.post(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id]))
+        self.assertRedirects(resposta, reverse('treinos:treinos_historico'))
+        self.assertFalse(SessaoAtividade.objects.exists())
+        self.assertFalse(SerieExecutada.objects.exists())
+        self.assertTrue(FichaTreino.objects.filter(id=self.ficha.id).exists())
+
+    def test_excluir_exige_post(self):
+        resposta = self.client.get(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id]))
+        self.assertEqual(resposta.status_code, 405)
+
+    def test_historico_sobrevive_a_ficha_inativa(self):
+        servicos.alternar_ativa(self.ficha)
+        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        self.assertContains(resposta, 'Treino A')
+
+    def test_outra_pessoa_nao_ve_nem_mexe(self):
+        outro = criar_usuario(email='bia@email.com', cpf='11144477735')
+        self.client.logout()
+        self.client.login(username='bia@email.com', password=SENHA)
+        self.assertEqual(self.client.get(reverse('treinos:treinos_sessao', args=[self.sessao.id])).status_code, 404)
+        self.assertEqual(self.client.post(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id])).status_code, 404)
+        self.assertEqual(self.client.get(reverse('treinos:treinos_treinar', args=[self.ficha.id])).status_code, 404)
+        self.assertNotContains(self.client.get(reverse('treinos:treinos_historico')), 'Treino A')
+        self.assertTrue(SessaoAtividade.objects.filter(id=self.sessao.id).exists())
+        # e a "Última vez" de uma pessoa nunca aparece para outra
+        self.assertEqual(sessoes.ultimas_series(outro, [self.supino]), {})
+
+    def test_banco_exige_repeticoes_ou_tempo(self):
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            SerieExecutada.objects.create(sessao=self.sessao, exercicio=self.supino, numero_serie=9, carga_kg=0)
+
+    def test_filtros(self):
+        serie = SerieExecutada(carga_kg=Decimal('42.5'), repeticoes=8)
+        self.assertEqual(serie_feita(serie), '42,5 kg × 8')
+        self.assertEqual(serie_feita(SerieExecutada(carga_kg=Decimal('0'), repeticoes=12)), '12 reps')
+        self.assertEqual(serie_feita(SerieExecutada(carga_kg=Decimal('0'), tempo_segundos=45)), '45s')
+        self.assertEqual(toneladas(Decimal('720')), '720 kg')
+        self.assertEqual(toneladas(Decimal('12340')), '12,3 t')
+        self.assertEqual(toneladas(None), '—')
+
+
+class RegistrarTreinoLivreTest(TestCase):
+    """Tela "Registrar treino" (protótipo App Saúde/Registro de treino ligado ao banco)."""
+
+    def setUp(self):
+        self.usuario = criar_usuario()
+        self.client.login(username='caio@email.com', password=SENHA)
+        self.url = reverse('treinos:treinos_registrar')
+        self.corrida = Esporte.objects.get(nome='Corrida')
+        self.musculacao = Esporte.objects.get(nome='Musculação')
+
+    def dados(self, exercicios=(), **mudancas):
+        ontem = timezone.localdate() - timedelta(days=1)
+        dados = {
+            'nome': 'Treino A — peito e tríceps', 'esporte': str(self.musculacao.id),
+            'data': ontem.isoformat(), 'hora': '18:30', 'duracao': '50', 'intensidade': 'intensa',
+            'distancia': '', 'observacoes': '',
+            'ex-TOTAL_FORMS': str(max(len(exercicios), 1)), 'ex-INITIAL_FORMS': '0',
+            'ex-MIN_NUM_FORMS': '0', 'ex-MAX_NUM_FORMS': '30',
+        }
+        for i, (nome, series, reps, carga) in enumerate(exercicios):
+            dados.update({'ex-%d-nome' % i: nome, 'ex-%d-series' % i: series,
+                          'ex-%d-repeticoes' % i: reps, 'ex-%d-carga' % i: carga})
+        dados.update(mudancas)
+        return dados
+
+    def test_tela_vem_com_musculacao_e_hoje(self):
+        resposta = self.client.get(self.url)
+        self.assertContains(resposta, 'Registrar treino')
+        self.assertContains(resposta, 'checked><span>Musculação</span>')
+        self.assertContains(resposta, timezone.localdate().isoformat())
+        self.assertContains(resposta, 'Corrida')
+        self.assertContains(resposta, 'id="ex-modelo"')
+
+    def test_corrida_sem_exercicios(self):
+        resposta = self.client.post(self.url, self.dados(
+            nome='Corrida na Lagoa', esporte=str(self.corrida.id), distancia='7.5',
+            observacoes='Joelho bem, ritmo forte no fim.'))
+        sessao = SessaoAtividade.objects.get()
+        self.assertRedirects(resposta, reverse('treinos:treinos_sessao', args=[sessao.id]))
+        self.assertEqual((sessao.nome, sessao.esporte, sessao.distancia_km), ('Corrida na Lagoa', self.corrida, Decimal('7.5')))
+        self.assertEqual(sessao.observacoes, 'Joelho bem, ritmo forte no fim.')
+        self.assertIsNone(sessao.ficha)
+        self.assertFalse(sessao.series.exists())
+        detalhe = self.client.get(reverse('treinos:treinos_sessao', args=[sessao.id]))
+        self.assertContains(detalhe, 'Joelho bem')
+        self.assertContains(detalhe, '7,5 km')
+
+    def test_musculacao_com_exercicios_vira_series(self):
+        self.client.post(self.url, self.dados(exercicios=[
+            ('Supino reto', '4', '12', '40'), ('Flexão', '3', '15', ''),
+        ]))
+        sessao = SessaoAtividade.objects.get()
+        series = list(sessao.series.order_by('ordem', 'numero_serie'))
+        self.assertEqual(len(series), 7)
+        self.assertEqual({(s.nome_exercicio, s.ordem) for s in series}, {('Supino reto', 1), ('Flexão', 2)})
+        self.assertTrue(all(s.exercicio is None for s in series))
+        self.assertEqual([s.numero_serie for s in series if s.ordem == 1], [1, 2, 3, 4])
+        self.assertEqual(series[-1].carga_kg, Decimal('0'))
+        self.assertEqual(sessoes.volume(series), Decimal('1920'))  # 4 x 12 x 40; a flexão sem carga não soma
+
+    def test_linhas_vazias_e_removidas_sao_ignoradas(self):
+        # o JavaScript só aumenta o TOTAL_FORMS; a linha 1 foi removida da tela e a 2 ficou vazia
+        dados = self.dados(exercicios=[('Remada', '3', '10', '30')], **{
+            'ex-TOTAL_FORMS': '3', 'ex-2-nome': '', 'ex-2-series': '', 'ex-2-repeticoes': '', 'ex-2-carga': '',
+        })
+        resposta = self.client.post(self.url, dados)
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(SessaoAtividade.objects.get().series.count(), 3)
+
+    def test_exercicio_sem_repeticoes_da_erro(self):
+        resposta = self.client.post(self.url, self.dados(exercicios=[('Supino', '4', '', '40')]))
+        self.assertContains(resposta, 'Quantas repetições?')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_numeros_sem_nome_dao_erro(self):
+        resposta = self.client.post(self.url, self.dados(exercicios=[('', '4', '12', '')]))
+        self.assertContains(resposta, 'Dê um nome ao exercício.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_nome_do_treino_obrigatorio(self):
+        resposta = self.client.post(self.url, self.dados(nome='   '))
+        self.assertContains(resposta, 'Dê um nome para o treino.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_treino_no_futuro_da_erro(self):
+        amanha = (timezone.localdate() + timedelta(days=1)).isoformat()
+        resposta = self.client.post(self.url, self.dados(data=amanha))
+        self.assertContains(resposta, 'O treino não pode ser no futuro.')
+        self.assertFalse(SessaoAtividade.objects.exists())
+
+    def test_erro_mantem_o_que_foi_digitado(self):
+        resposta = self.client.post(self.url, self.dados(nome='', exercicios=[('Agachamento', '4', '8', '60')]))
+        self.assertContains(resposta, 'value="Agachamento"')
+
+    def test_historico_mostra_os_dois_tipos(self):
+        self.client.post(self.url, self.dados(nome='Corrida leve', esporte=str(self.corrida.id), distancia='5'))
+        ficha = servicos.criar_ficha(self.usuario, 'Treino B', [], True, ler_texto('Remada\nSéries: 3x10').exercicios)
+        sessoes.registrar_treino(self.usuario, ficha, timezone.now(), 40, 'moderada', [
+            (ficha.exercicios.get(), [sessoes.SerieFeita(1, Decimal('30'), 10)]),
+        ])
+        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        self.assertContains(resposta, 'Corrida leve')
+        self.assertContains(resposta, 'Treino B')
+        self.assertContains(resposta, '5 km')
+
+    def test_esportes_do_perfil_vem_primeiro(self):
+        EsporteUsuario.objects.create(usuario=self.usuario, esporte=self.corrida, frequencia_semanal=3, intensidade='leve')
+        nomes = [e.nome for e in sessoes.esportes_para_escolher(self.usuario)]
+        self.assertEqual(nomes[0], 'Corrida')
+        self.assertEqual(len(nomes), Esporte.objects.count())
+
+
+class HistoricoSobreviveTest(TestCase):
+    def test_apagar_exercicio_da_ficha_nao_apaga_o_historico(self):
+        usuario = criar_usuario()
+        ficha = servicos.criar_ficha(usuario, 'Treino A', [], True, ler_texto(TREINO_A).exercicios)
+        supino = ficha.exercicios.get(nome_exercicio='Supino reto')
+        sessao = sessoes.registrar_treino(usuario, ficha, timezone.now(), 60, 'moderada', [
+            (supino, [sessoes.SerieFeita(1, Decimal('40'), 10)]),
+        ])
+        servicos.excluir_exercicio(supino)
+        serie = sessao.series.get()
+        self.assertIsNone(serie.exercicio)
+        self.assertEqual(serie.nome_exercicio, 'Supino reto')
+        self.client.login(username='caio@email.com', password=SENHA)
+        self.assertContains(self.client.get(reverse('treinos:treinos_sessao', args=[sessao.id])), 'Supino reto')

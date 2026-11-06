@@ -511,9 +511,17 @@ class SessaoAtividade(models.Model):
         null=True,
         blank=True,
     )
+    # Treino livre (tela "Registrar treino"): nome dado pela pessoa. Treino de uma série usa o nome da série.
+    nome = models.CharField(max_length=100, blank=True)
+    observacoes = models.TextField(blank=True)  # como se sentiu, ajustes de carga, dores...
 
     def __str__(self):
         return '%s - %s em %s' % (self.usuario, self.esporte, self.inicio.date())
+
+    @property
+    def titulo(self):
+        """Como o treino aparece no histórico: o nome dado, o nome da série ou o esporte."""
+        return self.nome or (self.ficha.nome_ficha if self.ficha else self.esporte.nome)
 
     class Meta:
         db_table = 'sessoes_atividade'
@@ -526,30 +534,42 @@ class SerieExecutada(models.Model):
     """Onde fica salva a carga de cada série."""
     id = chave_uuid()
     sessao = models.ForeignKey(SessaoAtividade, on_delete=models.CASCADE, related_name='series')
-    exercicio = models.ForeignKey(ExercicioFicha, on_delete=models.CASCADE, related_name='series')
+    # Exercício da ficha, quando o treino veio de uma série ("Treinar agora"). Fica vazio no treino
+    # livre e se o exercício for apagado da ficha: o histórico continua pelo nome guardado abaixo.
+    exercicio = models.ForeignKey(
+        ExercicioFicha,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='series',
+    )
+    nome_exercicio = models.CharField(max_length=100)
+    ordem = models.PositiveSmallIntegerField(default=1)  # posição do exercício dentro do treino
     numero_serie = models.IntegerField(validators=[MinValueValidator(1)])
     carga_kg = models.DecimalField(
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
     )
-    # Exercício por repetições guarda as repetições; exercício por tempo (prancha) guarda os segundos
+    # Séries por repetições guardam as repetições; séries por tempo (prancha) guardam os segundos.
     repeticoes = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
-    tempo_segundos = models.PositiveIntegerField(null=True, blank=True)
-
-    def volume_kg(self):
-        """Carga x repetições (o "volume" da série); zero para exercício por tempo."""
-        return self.carga_kg * (self.repeticoes or 0)
+    tempo_segundos = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
 
     def __str__(self):
-        feito = '%d reps' % self.repeticoes if self.repeticoes else '%ds' % (self.tempo_segundos or 0)
-        return '%s: %s kg x %s' % (self.exercicio.nome_exercicio, self.carga_kg, feito)
+        feito = '%ds' % self.tempo_segundos if self.tempo_segundos else '%s reps' % self.repeticoes
+        return '%s: %s kg x %s' % (self.nome_exercicio, self.carga_kg, feito)
 
     class Meta:
         db_table = 'series_executadas_historico'
         verbose_name = 'série executada'
         verbose_name_plural = 'séries executadas'
-        ordering = ['-sessao__inicio', 'exercicio', 'numero_serie']
+        ordering = ['-sessao__inicio', 'ordem', 'numero_serie']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(repeticoes__isnull=False) | models.Q(tempo_segundos__isnull=False),
+                name='serie_com_repeticoes_ou_tempo',
+            ),
+        ]
 
 
 # =====================================================================

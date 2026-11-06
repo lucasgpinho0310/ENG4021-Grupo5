@@ -151,7 +151,7 @@ class SerieExecutadaInline(admin.TabularInline):
 
 
 class SessaoAtividadeAdmin(admin.ModelAdmin):
-    list_display = ['usuario', 'esporte', 'inicio', 'duracao_minutos', 'intensidade', 'distancia_km']
+    list_display = ['usuario', 'titulo', 'esporte', 'inicio', 'duracao_minutos', 'intensidade', 'distancia_km']
     ordering = ['-inicio']
     list_filter = ['usuario', 'esporte', 'intensidade']
     inlines = [SerieExecutadaInline]
@@ -160,7 +160,7 @@ admin.site.register(SessaoAtividade, SessaoAtividadeAdmin)
 
 
 class SerieExecutadaAdmin(admin.ModelAdmin):
-    list_display = ['exercicio', 'sessao', 'numero_serie', 'carga_kg', 'repeticoes']
+    list_display = ['nome_exercicio', 'sessao', 'numero_serie', 'carga_kg', 'repeticoes', 'tempo_segundos']
     list_filter = ['exercicio__ficha']
 
 admin.site.register(SerieExecutada, SerieExecutadaAdmin)

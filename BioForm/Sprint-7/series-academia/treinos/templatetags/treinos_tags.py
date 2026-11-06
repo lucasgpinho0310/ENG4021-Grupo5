@@ -49,3 +49,29 @@ def video_embed(url):
     """Endereço para incorporar o vídeo do YouTube na página; vazio para outros sites."""
     achado = YOUTUBE.search(url or '')
     return 'https://www.youtube-nocookie.com/embed/%s' % achado.group(1) if achado else ''
+
+
+@register.filter
+def serie_feita(serie):
+    """Uma série feita: "40 kg × 10", "12 reps" (sem carga), "30s" ou "5 kg × 45s"."""
+    feito = intervalo(serie.tempo_segundos) if serie.tempo_segundos else str(serie.repeticoes)
+    if serie.carga_kg:
+        return '%s × %s' % (carga(serie.carga_kg), feito)
+    return feito if serie.tempo_segundos else '%s reps' % feito
+
+
+@register.filter
+def series_feitas(series):
+    """Todas as séries de um exercício numa linha: "40 kg × 10 · 40 kg × 9 · 42,5 kg × 8"."""
+    return ' · '.join(serie_feita(serie) for serie in series)
+
+
+@register.filter
+def toneladas(kg):
+    """Volume do treino: 850 -> "850 kg"; 12340 -> "12,3 t"."""
+    if not kg:
+        return '—'
+    kg = Decimal(kg)
+    if kg >= 1000:
+        return ('%.1f t' % (kg / 1000)).replace('.', ',')
+    return '%s kg' % '{:,.0f}'.format(kg).replace(',', '.')

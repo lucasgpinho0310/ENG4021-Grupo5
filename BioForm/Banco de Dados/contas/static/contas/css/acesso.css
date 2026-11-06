@@ -589,5 +589,6 @@ form { display: grid; gap: 18px; }
   .goal strong { font-size: 32px; }
   .onb-top .brand-name small { display: none; }
   .actions { flex-direction: column-reverse; }
-  .actions .btn, .actions .btn-primary { width: 100%; max-width: none; }
+  /* flex: none — em coluna, o flex: 1 de .actions .btn-primary achatava o botão para a altura do texto */
+  .actions .btn, .actions .btn-primary { width: 100%; max-width: none; flex: none; }
 }
