@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Entrar — BioForm</title>
+  <meta name="theme-color" content="#0B0B0D">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0B0B0D; --surface:#141418; --surface-2:#1B1B21;
+      --line:rgba(255,255,255,.1); --text:#FAFAFA; --muted:#A4A4AE;
+      --flame:#FF5722; --flame-light:#FF8A50; --flame-deep:#FF3D00;
+      --grad:linear-gradient(135deg,var(--flame-light),var(--flame-deep));
+      --danger:#FF4D5E; --warn:#FFB020;
+      --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:var(--font);background:var(--bg);color:var(--text);
+      min-height:100vh;min-height:100svh;
+      display:grid;place-items:center;
+      padding:24px 18px calc(24px + env(safe-area-inset-bottom,0px));
+      line-height:1.5;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;
+    }
+    body::before{
+      content:"";position:fixed;inset:0;z-index:-1;
+      background:
+        radial-gradient(520px 420px at 50% 8%,rgba(255,87,34,.26),transparent 70%),
+        radial-gradient(800px 500px at 50% 112%,rgba(255,87,34,.12),transparent 70%);
+    }
+    :focus-visible{outline:3px solid var(--flame-light);outline-offset:3px;border-radius:12px}
+
+    .card{
+      width:100%;max-width:420px;
+      background:var(--surface);border:1px solid var(--line);border-radius:28px;
+      padding:34px 24px 26px;
+      box-shadow:0 30px 80px -30px rgba(0,0,0,.8);
+    }
+    .logo{display:block;width:64px;height:64px;margin:0 auto 18px;filter:drop-shadow(0 10px 24px rgba(255,87,34,.45))}
+    h1{text-align:center;font-size:1.7rem;font-weight:800;letter-spacing:-.035em;line-height:1.15}
+    .sub{text-align:center;color:var(--muted);font-size:.95rem;margin:8px 0 26px}
+
+    form[hidden]{display:none}
+    fieldset{border:0;min-inline-size:0}
+    fieldset:disabled{opacity:.45;pointer-events:none}
+
+    .field{margin-bottom:16px}
+    label{display:block;font-size:.85rem;font-weight:600;margin-bottom:7px}
+    .input-wrap{position:relative}
+    input{
+      width:100%;height:54px;padding:0 16px;
+      font:inherit;font-size:1rem; /* 16px evita zoom no iOS */
+      color:var(--text);background:var(--bg);
+      border:1.5px solid var(--line);border-radius:14px;
+      transition:border-color .25s ease,box-shadow .25s ease;
+    }
+    input::placeholder{color:#6d6d78}
+    input:focus{outline:none;border-color:var(--flame);box-shadow:0 0 0 4px rgba(255,87,34,.18)}
+    input.invalid{border-color:var(--danger)}
+    .input-wrap input{padding-right:58px}
+    .toggle{
+      position:absolute;right:6px;top:6px;width:42px;height:42px;
+      display:grid;place-items:center;background:none;border:0;border-radius:10px;
+      color:var(--muted);cursor:pointer;transition:color .2s ease,background .2s ease;
+    }
+    .toggle svg{width:22px;height:22px}
+    @media (hover:hover){.toggle:hover{color:var(--text);background:rgba(255,255,255,.06)}}
+
+    /* ---- Indicador de tentativas ---- */
+    .attempts{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
+    .dots{display:flex;gap:6px}
+    .dots i{width:26px;height:6px;border-radius:99px;background:rgba(255,255,255,.12);transition:background .3s ease}
+    .dots i.used{background:var(--warn)}
+    .dots.danger i.used{background:var(--danger)}
+    .attempts-text{font-size:.82rem;color:var(--muted);white-space:nowrap}
+
+    .msg{min-height:1.4em;font-size:.88rem;margin-bottom:14px}
+    .msg.error{color:var(--danger)}
+    .msg.warn{color:var(--warn)}
+    .msg.ok{color:#3DDC97}
+
+    .btn{
+      width:100%;min-height:56px;border:0;border-radius:999px;cursor:pointer;
+      font:inherit;font-weight:700;font-size:1.05rem;color:#fff;background:var(--grad);
+      box-shadow:0 12px 32px -10px rgba(255,87,34,.65);
+      transition:transform .25s ease,box-shadow .25s ease,opacity .25s ease;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn[aria-busy="true"]{opacity:.7;cursor:progress}
+    @media (hover:hover){.btn:hover{transform:translateY(-3px);box-shadow:0 18px 42px -8px rgba(255,87,34,.85)}}
+
+    .forgot{display:block;text-align:center;margin-top:18px;font-size:.9rem;color:var(--muted);text-decoration:none;transition:color .2s ease}
+    @media (hover:hover){.forgot:hover{color:var(--flame-light)}}
+
+    /* ---- Painel de bloqueio ---- */
+    .lock{text-align:center;padding:6px 0 18px}
+    .lock[hidden]{display:none}
+    .ring{position:relative;width:150px;height:150px;margin:0 auto 18px}
+    .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+    .ring circle{fill:none;stroke-width:8}
+    .ring .track{stroke:rgba(255,255,255,.08)}
+    .ring .bar{stroke:var(--danger);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:0;transition:stroke-dashoffset .3s linear}
+    .ring .time{
+      position:absolute;inset:0;display:grid;place-items:center;
+      font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+    }
+    .lock h2{font-size:1.2rem;font-weight:800;letter-spacing:-.025em;margin-bottom:6px}
+    .lock p{color:var(--muted);font-size:.92rem;max-width:30ch;margin:0 auto}
+
+    .demo{
+      margin-top:22px;padding:12px 14px;border:1px dashed rgba(255,255,255,.18);border-radius:14px;
+      font-size:.78rem;color:var(--muted);line-height:1.5;
+    }
+    .demo code{color:var(--flame-light);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+    .shake{animation:shake .4s ease}
+    @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+
+<body>
+  <main class="card" id="card">
+
+    <svg class="logo" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A50"/><stop offset="1" stop-color="#FF3D00"/></linearGradient></defs>
+      <rect x="4" y="4" width="112" height="112" rx="32" fill="url(#g)"/>
+      <path d="M60 26a34 34 0 1 1-30.6 19.2" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".95"/>
+      <path d="M29.4 45.2 24 30l15.6 4.2" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M44 72l11-14 9 9 13-19" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <h1>Entrar no BioForm</h1>
+    <p class="sub">Seu treino, sua dieta, seu ciclo, seu ritmo.</p>
+
+    <!-- Painel exibido quando a conta está bloqueada -->
+    <section class="lock" id="lock" hidden aria-live="polite">
+      <div class="ring">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="track" cx="60" cy="60" r="52"/>
+          <circle class="bar" id="bar" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="time" id="time">00:00</div>
+      </div>
+      <h2>Muitas tentativas</h2>
+      <p>Por segurança, o acesso foi pausado. Tente novamente quando o tempo acabar.</p>
+    </section>
+
+    <form id="form" novalidate>
+      <fieldset id="fields">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="username" placeholder="voce@email.com" required>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <div class="input-wrap">
+            <input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+            <button class="toggle" type="button" id="toggle" aria-label="Mostrar senha" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="attempts" aria-hidden="true">
+          <div class="dots" id="dots"></div>
+          <span class="attempts-text" id="attemptsText"></span>
+        </div>
+
+        <p class="msg" id="msg" role="alert" aria-live="assertive"></p>
+
+        <button class="btn" type="submit" id="submit">Entrar</button>
+      </fieldset>
+    </form>
+
+    <a class="forgot" href="#">Esqueci minha senha</a>
+
+    <!-- REMOVER em produção: dica do modo demonstração -->
+    <p class="demo" id="demo">
+      <strong>Modo demonstração:</strong> use <code>demo@bioform.app</code> / <code>bioform123</code>.
+      Qualquer outra combinação conta como tentativa errada.
+    </p>
+  </main>
+
+  <script>
+    /* ===================== CONFIGURAÇÃO ===================== */
+    const CONFIG = {
+      maxAttempts: 5,                    // erros permitidos antes de bloquear
+      lockSeconds: [30, 60, 300, 900],   // bloqueio progressivo: 30s → 1min → 5min → 15min (repete o último)
+      storageKey: 'bioform_login_guard'
+    };
+
+    /* ===================== AUTENTICAÇÃO ===================== */
+    /* TROCAR: aqui entra a chamada real ao seu servidor, por exemplo:
+       const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
+                 body: JSON.stringify({email, senha})});
+       return r.ok;
+       O limite de tentativas DEVE ser aplicado também lá (veja as notas de segurança). */
+    async function authenticate(email, senha) {
+      await new Promise(r => setTimeout(r, 600));                 // simula a rede
+      return email === 'demo@bioform.app' && senha === 'bioform123'; // apenas demonstração
+    }
+
+    /* ===================== ESTADO (persiste ao recarregar) ===================== */
+    const $ = id => document.getElementById(id);
+    const form = $('form'), fields = $('fields'), email = $('email'), senha = $('senha'),
+          msg = $('msg'), dots = $('dots'), attemptsText = $('attemptsText'),
+          lockEl = $('lock'), timeEl = $('time'), bar = $('bar'), submit = $('submit');
+
+    const DEFAULT = { fails: 0, lockCount: 0, lockUntil: 0, lockTotal: 0 };
+    let state = load();
+    let timer = null;
+
+    function load() {
+      try { return { ...DEFAULT, ...JSON.parse(localStorage.getItem(CONFIG.storageKey)) }; }
+      catch { return { ...DEFAULT }; }
+    }
+    function save() {
+      try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(state)); } catch {}
+    }
+
+    const remainingMs = () => Math.max(0, state.lockUntil - Date.now());
+    const isLocked = () => remainingMs() > 0;
+
+    /* ===================== INTERFACE ===================== */
+    function setMsg(text, type = '') { msg.textContent = text; msg.className = 'msg ' + type; }
+
+    function renderDots() {
+      dots.innerHTML = '';
+      for (let i = 0; i < CONFIG.maxAttempts; i++) {
+        const d = document.createElement('i');
+        if (i < state.fails) d.className = 'used';
+        dots.appendChild(d);
+      }
+      const left = CONFIG.maxAttempts - state.fails;
+      dots.classList.toggle('danger', left <= 2 && state.fails > 0);
+      attemptsText.textContent = state.fails === 0
+        ? `${CONFIG.maxAttempts} tentativas`
+        : `${left} ${left === 1 ? 'tentativa restante' : 'tentativas restantes'}`;
+    }
+
+    function fmt(ms) {
+      const s = Math.ceil(ms / 1000);
+      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function renderLock() {
+      const ms = remainingMs();
+      timeEl.textContent = fmt(ms);
+      const pct = state.lockTotal ? ms / (state.lockTotal * 1000) : 0;
+      bar.style.strokeDashoffset = String(327 * (1 - pct));
+      if (ms <= 0) unlock();
+    }
+
+    function lockUI() {
+      lockEl.hidden = false;
+      form.hidden = true;
+      fields.disabled = true;
+      $('demo').hidden = true;
+      clearInterval(timer);
+      renderLock();
+      timer = setInterval(renderLock, 250);
+    }
+
+    function unlock() {
+      clearInterval(timer);
+      state.fails = 0; state.lockUntil = 0; state.lockTotal = 0; // lockCount fica: o próximo bloqueio será maior
+      save();
+      lockEl.hidden = true;
+      form.hidden = false;
+      fields.disabled = false;
+      $('demo').hidden = false;
+      renderDots();
+      setMsg('Você já pode tentar novamente.', 'ok');
+      senha.value = '';
+      email.focus();
+    }
+
+    function startLock() {
+      const idx = Math.min(state.lockCount, CONFIG.lockSeconds.length - 1);
+      const secs = CONFIG.lockSeconds[idx];
+      state.lockCount += 1;
+      state.lockTotal = secs;
+      state.lockUntil = Date.now() + secs * 1000;
+      save();
+      setMsg('');
+      lockUI();
+    }
+
+    /* ===================== ENVIO DO FORMULÁRIO ===================== */
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (isLocked()) return;
+
+      // Campos vazios/inválidos NÃO contam como tentativa
+      email.classList.remove('invalid'); senha.classList.remove('invalid');
+      const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+      if (!okEmail || !senha.value) {
+        if (!okEmail) email.classList.add('invalid');
+        if (!senha.value) senha.classList.add('invalid');
+        setMsg(!okEmail ? 'Digite um e-mail válido.' : 'Digite a sua senha.', 'error');
+        (!okEmail ? email : senha).focus();
+        return;
+      }
+
+      submit.setAttribute('aria-busy', 'true'); submit.disabled = true; submit.textContent = 'Entrando…';
+      let ok = false;
+      try { ok = await authenticate(email.value.trim(), senha.value); } catch { ok = false; }
+      submit.removeAttribute('aria-busy'); submit.disabled = false; submit.textContent = 'Entrar';
+
+      if (ok) {
+        state = { ...DEFAULT }; save(); renderDots();
+        setMsg('Login realizado com sucesso! (demonstração)', 'ok');
+        return; // aqui você redireciona: location.href = '/app';
+      }
+
+      state.fails += 1; save(); renderDots();
+      senha.value = '';
+      form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+
+      if (state.fails >= CONFIG.maxAttempts) { startLock(); return; }
+
+      const left = CONFIG.maxAttempts - state.fails;
+      // Mensagem genérica: não revela se o e-mail existe
+      setMsg(`E-mail ou senha incorretos. ${left === 1 ? 'Resta 1 tentativa' : 'Restam ' + left + ' tentativas'}.`, left <= 2 ? 'warn' : 'error');
+      senha.focus();
+    });
+
+    /* ===================== MOSTRAR / OCULTAR SENHA ===================== */
+    $('toggle').addEventListener('click', e => {
+      const show = senha.type === 'password';
+      senha.type = show ? 'text' : 'password';
+      e.currentTarget.setAttribute('aria-pressed', String(show));
+      e.currentTarget.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+    });
+
+    /* ===================== INICIALIZAÇÃO ===================== */
+    renderDots();
+    if (isLocked()) lockUI(); else if (state.lockUntil) unlock(); // bloqueio expirou enquanto a página estava fechada
+  </script>
+</body>
+</html>
