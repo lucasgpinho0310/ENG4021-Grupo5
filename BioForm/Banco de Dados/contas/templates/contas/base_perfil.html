@@ -13,6 +13,7 @@
           {% url 'treinos:treinos_lista' as url_treinos %}{% if url_treinos %}<a href="{{ url_treinos }}"{% if secao == 'treinos' %} class="ativo"{% endif %}>Treinos</a>{% endif %}
           {% url 'rotina:rotina_semana' as url_semana %}{% if url_semana %}<a href="{{ url_semana }}"{% if secao == 'rotina' %} class="ativo"{% endif %}>Semana</a>{% endif %}
           {% url 'evolucao:peso' as url_peso %}{% if url_peso %}<a href="{{ url_peso }}"{% if secao == 'evolucao' %} class="ativo"{% endif %}>Peso</a>{% endif %}
+          {% url 'ranking:semana' as url_ranking %}{% if url_ranking %}<a href="{{ url_ranking }}"{% if secao == 'ranking' %} class="ativo"{% endif %}>Ranking</a>{% endif %}
           <a href="{% url 'metas:perfil_metas' %}"{% if passo == 4 %} class="ativo"{% endif %}>Metas</a>
           <a href="{% url 'contas:conta' %}">Editar perfil</a>
           {% if user.is_staff %}<a href="{% url 'contas:usuarios' %}">Usuários</a>{% endif %}

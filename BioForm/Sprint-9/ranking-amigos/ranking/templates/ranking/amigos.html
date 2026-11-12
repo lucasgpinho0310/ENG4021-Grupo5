@@ -1,0 +1,38 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static %}
+{% block titulo %}Meus amigos{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'ranking/css/ranking.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'ranking:semana' %}">← Ranking da semana</a></p>
+    <h1>Meus amigos</h1>
+    <p class="subtitle">Quem está na sua lista aparece no seu ranking, e você aparece no ranking da pessoa.</p>
+
+    <section class="block">
+      <h2 class="block-title">Adicionar amigo</h2>
+      <p class="block-sub">Digite o e-mail que o seu amigo usa para entrar no BioForm.</p>
+      <form method="post" class="amigo-form" novalidate>
+        {% csrf_token %}
+        {% include 'contas/_campo_app.html' with campo=form.email %}
+        <button type="submit" class="btn btn-primary">Adicionar</button>
+      </form>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title">Amigos ({{ amigos|length }})</h2>
+      {% if amigos %}
+      <ul class="amigos-lista">
+        {% for amigo in amigos %}
+        <li>
+          <div class="pessoa"><b>{{ amigo }}</b><small>{{ amigo.nome_completo }}</small></div>
+          <form method="post" action="{% url 'ranking:remover' amigo.id %}">
+            {% csrf_token %}
+            <button type="submit" class="remover" aria-label="Desfazer amizade com {{ amigo }}">Remover</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="block-sub">Ninguém por aqui ainda.</p>
+      {% endif %}
+    </section>
+{% endblock %}

@@ -14,6 +14,7 @@
           <a href="{% url 'rotina:rotina_semana' %}" class="btn btn-ghost">Semana</a>
           <a href="{% url 'historico:lista' %}" class="btn btn-ghost">Histórico de treinos</a>
           <a href="{% url 'evolucao:peso' %}" class="btn btn-ghost">Peso</a>
+          <a href="{% url 'ranking:semana' %}" class="btn btn-ghost">Ranking entre amigos</a>
           <a href="{% url 'metas:perfil_metas' %}" class="btn btn-ghost">Metas</a>
           <a href="{% url 'contas:conta' %}" class="btn btn-ghost">Editar perfil</a>
           {% if user.is_staff %}<a href="{% url 'contas:usuarios' %}" class="btn btn-ghost">Usuários</a>{% endif %}
