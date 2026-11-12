@@ -46,7 +46,7 @@ class TreinoFeito:
 
     @property
     def titulo(self):
-        return self.sessao.ficha.nome_ficha if self.sessao.ficha else self.sessao.esporte.nome
+        return self.sessao.titulo  # nome do treino livre, nome da série ou o esporte
 
 
 @dataclass
@@ -106,9 +106,17 @@ def semanas_do_usuario(usuario, hoje=None, quantas=SEMANAS_NO_HISTORICO):
 
 @dataclass
 class ExercicioFeito:
-    exercicio: object  # ExercicioFicha
+    exercicio: object  # ExercicioFicha; None no treino livre ou se o exercício saiu da ficha
     series: list
     recorde: bool  # bateu a maior carga (ou o maior tempo) de antes deste treino
+
+    @property
+    def nome(self):
+        return self.series[0].nome_exercicio
+
+    @property
+    def por_tempo(self):
+        return any(s.tempo_segundos for s in self.series)
 
     @property
     def volume_kg(self):
@@ -116,13 +124,17 @@ class ExercicioFeito:
 
 
 def exercicios_da_sessao(sessao):
-    """As séries feitas, agrupadas por exercício na ordem da ficha, marcando os recordes batidos."""
-    series = list(sessao.series.select_related('exercicio').order_by('exercicio__ordem_execucao', 'numero_serie'))
+    """As séries feitas, agrupadas por exercício na ordem em que foram feitos, marcando os recordes batidos."""
+    series = list(sessao.series.select_related('exercicio').order_by('ordem', 'numero_serie'))
     grupos = {}
     for serie in series:
-        grupos.setdefault(serie.exercicio, []).append(serie)
+        grupos.setdefault(serie.ordem, []).append(serie)
     feitos = []
-    for exercicio, lista in grupos.items():
+    for lista in grupos.values():
+        exercicio = lista[0].exercicio
+        if exercicio is None:  # treino livre: sem exercício da ficha para comparar
+            feitos.append(ExercicioFeito(None, lista, False))
+            continue
         antes = SerieExecutada.objects.filter(exercicio=exercicio, sessao__inicio__lt=sessao.inicio)
         if exercicio.tempo_segundos:
             melhor_antes = antes.aggregate(maior=Max('tempo_segundos'))['maior']

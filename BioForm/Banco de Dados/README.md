@@ -27,11 +27,12 @@ Django, cria as tabelas e liga o servidor na porta 8000 sozinho (configuração 
 `.devcontainer/devcontainer.json`). O site abre numa aba de pré-visualização; para abrir no
 navegador, use a aba **Portas** → porta 8000 → ícone do globo.
 
-Para criar o administrador, rode num terminal novo:
+Para criar o administrador e preencher o banco com pessoas de exemplo, rode num terminal novo:
 
 ```bash
 cd "BioForm/Banco de Dados"
 python manage.py createsuperuser
+python manage.py popular_exemplo
 ```
 
 ### No computador
@@ -43,6 +44,7 @@ python -m venv .venv
 pip install -r requirements.txt
 python manage.py migrate        # cria as tabelas e já popula alimentos, esportes e medidas caseiras
 python manage.py createsuperuser
+python manage.py popular_exemplo  # opcional: 3 pessoas de exemplo com semanas de registros
 python manage.py runserver
 ```
 
@@ -68,6 +70,13 @@ MET de referência aproximado (Compendium of Physical Activities) para o cálcul
 Dá para ajustar os valores pelo admin.
 
 Rodar `migrate` de novo não duplica nada (cada registro tem UUID fixo).
+
+**Pessoas de exemplo** (`python manage.py popular_exemplo`, em `saude/management/commands/`):
+Ana, Bruno e Carla (`ana@exemplo.com`, `bruno@exemplo.com`, `carla@exemplo.com`, senha `bioform2026`),
+cada uma com perfil completo, metas, 7 pesagens (gráfico do peso), séries de academia, 6 semanas de
+treinos com a carga subindo, corridas e um funcional, 7 dias de diário com água, um combo salvo,
+XP, amizades, o grupo "Turma ENG4021" e um desafio. Serve para apresentar o site e o admin já com
+dados. Rodar de novo apaga e recria só essas três contas; o resto do banco não muda.
 
 ## Regras que já estão no banco
 

@@ -29,7 +29,7 @@ class HistoricoTest(TestCase):
             inicio=momento(data), duracao_minutos=minutos, intensidade=intensidade,
         )
         for numero, carga in enumerate(cargas, 1):
-            SerieExecutada.objects.create(sessao=sessao, exercicio=self.agachamento, numero_serie=numero,
+            SerieExecutada.objects.create(sessao=sessao, exercicio=self.agachamento, nome_exercicio='Agachamento', numero_serie=numero,
                                           carga_kg=Decimal(carga), repeticoes=10)
         return sessao
 

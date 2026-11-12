@@ -9,7 +9,6 @@ Dois jeitos de registrar, que vão para as mesmas tabelas e o mesmo histórico:
 """
 from dataclasses import dataclass
 from decimal import Decimal
-from itertools import groupby
 
 from django.db import transaction
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum
@@ -163,15 +162,6 @@ def sessoes_do_usuario(usuario):
         )
         .order_by('-inicio')
     )
-
-
-def exercicios_da_sessao(sessao):
-    """[(nome do exercício, [séries])] na ordem em que foram feitos."""
-    series = sessao.series.order_by('ordem', 'numero_serie')
-    return [
-        (grupo[0].nome_exercicio, grupo)
-        for grupo in (list(g) for _, g in groupby(series, key=lambda s: s.ordem))
-    ]
 
 
 def volume(series):

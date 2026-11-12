@@ -15,21 +15,28 @@
       {% if sessao.distancia_km %}<div><small>Distância</small><strong>{{ sessao.distancia_km|decimal_br }} km</strong></div>{% endif %}
     </div>
 
+    {% if sessao.observacoes %}
+    <section class="block">
+      <h2 class="block-title">Observações</h2>
+      <p class="block-sub">{{ sessao.observacoes|linebreaksbr }}</p>
+    </section>
+    {% endif %}
+
     {% for item in exercicios %}
     <section class="block exercicio-feito">
       <div class="exercicio-feito-topo">
-        <h2 class="block-title">{{ item.exercicio.nome_exercicio }}</h2>
+        <h2 class="block-title">{{ item.nome }}</h2>
         {% if item.recorde %}<span class="tag tag-green">🏆 Novo recorde</span>{% endif %}
       </div>
       <table class="series-feitas">
-        <thead><tr><th>Série</th><th>Carga</th><th>{% if item.exercicio.tempo_segundos %}Tempo{% else %}Repetições{% endif %}</th>{% if not item.exercicio.tempo_segundos %}<th>Volume</th>{% endif %}</tr></thead>
+        <thead><tr><th>Série</th><th>Carga</th><th>{% if item.por_tempo %}Tempo{% else %}Repetições{% endif %}</th>{% if not item.por_tempo %}<th>Volume</th>{% endif %}</tr></thead>
         <tbody>
           {% for s in item.series %}
           <tr>
             <td>{{ s.numero_serie }}</td>
             <td>{{ s.carga_kg|carga }}</td>
             <td>{% if s.tempo_segundos %}{{ s.tempo_segundos|intervalo }}{% else %}{{ s.repeticoes }}{% endif %}</td>
-            {% if not item.exercicio.tempo_segundos %}<td>{{ s.volume_kg|milhar }} kg</td>{% endif %}
+            {% if not item.por_tempo %}<td>{{ s.volume_kg|milhar }} kg</td>{% endif %}
           </tr>
           {% endfor %}
         </tbody>
