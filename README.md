@@ -172,6 +172,10 @@ Treinos livres com o mesmo nome de exercício também entram.
 
 ![Progressão de carga](img/progressao-carga.png)
 
+### 13. Disputar o ranking com os amigos
+
+Em **Ranking**, o site mostra você e os seus amigos ordenados pelo XP da semana (segunda a domingo), com a sua posição e quanto falta para subir. O 1º treino do dia vale 50 XP, os outros treinos do mesmo dia 20 XP e cada refeição registrada no diário 10 XP. Em **Meus amigos**, adicione um amigo pelo e-mail que ele usa para entrar no BioForm; a amizade vale para os dois lados e pode ser desfeita em **Remover**. As setas voltam até 11 semanas.
+
 ## Organização do repositório
 
 | Pasta | O que tem |
@@ -180,7 +184,7 @@ Treinos livres com o mesmo nome de exercício também entram.
 | [`BioForm/Sprint-6`](BioForm/Sprint-6) | apps entregues na Sprint 6: `diario`, `medidas_caseiras` e `metas` |
 | [`BioForm/Sprint-7`](BioForm/Sprint-7) | apps entregues na Sprint 7: `rotina` e `treinos` |
 | [`BioForm/Sprint-8`](BioForm/Sprint-8) | apps entregues na Sprint 8: `execucao` (treino do dia), `historico` (histórico de treinos) e `evolucao` (evolução do peso) |
-| [`BioForm/Sprint-9`](BioForm/Sprint-9) | apps entregues na Sprint 9: `balanco` (balanço calórico do dia), `aderencia` (semana feita) e `progressao` (progressão de carga) |
+| [`BioForm/Sprint-9`](BioForm/Sprint-9) | apps entregues na Sprint 9: `balanco` (balanço calórico do dia), `aderencia` (semana feita), `progressao` (progressão de carga) e `ranking` (ranking entre amigos) |
 | [`BioForm/App Saúde`](BioForm/App%20Sa%C3%BAde) | pesquisa, requisitos, modelagem de dados e protótipos das primeiras sprints |
 | [`BioForm/Escopo Técnico`](BioForm/Escopo%20T%C3%A9cnico), [`BioForm/Sprint-Usuarios`](BioForm/Sprint-Usuarios), [`BioForm/usuários`](BioForm/usu%C3%A1rios) | documentos e protótipos HTML das primeiras sprints |
 | [`Calculadora`](Calculadora) | tarefa da Sprint 1 (Git e Codespace) |
