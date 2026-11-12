@@ -141,3 +141,43 @@ class GamificacaoTest(TestCase):
                 grupo=grupo, criador=self.ana, nome='Outubro', metrica='xp',
                 data_inicio=date(2026, 10, 31), data_fim=date(2026, 10, 1),
             )
+
+
+class PopularExemploTest(TestCase):
+    """python manage.py popular_exemplo: povoa o banco com contas de exemplo e pode rodar de novo."""
+
+    def test_povoa_e_pode_rodar_de_novo(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from contas.onboarding import proximo_passo
+        from saude.management.commands.popular_exemplo import SENHA
+        from saude.models import (
+            Desafio, DiarioConsumo, FichaTreino, Grupo, HistoricoMedida, RefeicaoPersonalizada, SerieExecutada,
+            SessaoAtividade, Usuario,
+        )
+
+        call_command('popular_exemplo', stdout=StringIO())
+        call_command('popular_exemplo', stdout=StringIO())  # a segunda vez recria, sem duplicar
+        self.assertEqual(Usuario.objects.count(), 3)
+        for usuario in Usuario.objects.all():
+            self.assertIsNone(proximo_passo(usuario))  # perfil completo: o site abre direto
+            self.assertEqual(HistoricoMedida.objects.filter(usuario=usuario).count(), 7)
+            self.assertEqual(DiarioConsumo.objects.filter(usuario=usuario).count(), 7)
+            self.assertTrue(SessaoAtividade.objects.filter(usuario=usuario).exists())
+        self.assertEqual(FichaTreino.objects.count(), 4)
+        self.assertTrue(SerieExecutada.objects.exclude(nome_exercicio='').exists())
+        self.assertEqual((Grupo.objects.count(), Desafio.objects.count(), RefeicaoPersonalizada.objects.count()), (1, 1, 3))
+        self.assertTrue(self.client.login(username='ana@exemplo.com', password=SENHA))
+        self.assertContains(self.client.get('/treinos/historico/'), 'Corrida na Lagoa')
+
+    def test_nao_mexe_em_outras_contas(self):
+        from io import StringIO
+
+        from django.contrib.auth import get_user_model
+        from django.core.management import call_command
+
+        get_user_model().objects.create_user('real@puc-rio.br', 'real@puc-rio.br', 'x')
+        call_command('popular_exemplo', stdout=StringIO())
+        self.assertTrue(get_user_model().objects.filter(username='real@puc-rio.br').exists())

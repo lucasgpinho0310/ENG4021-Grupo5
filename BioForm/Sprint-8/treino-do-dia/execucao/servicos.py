@@ -145,9 +145,11 @@ def salvar_treino(usuario, ficha, plano, data, minutos, intensidade):
     SerieExecutada.objects.bulk_create([
         SerieExecutada(
             sessao=sessao, exercicio=item.exercicio, numero_serie=linha.numero, carga_kg=linha.carga_kg,
+            # nome e posição ficam na série: o histórico continua se o exercício sair da ficha
+            nome_exercicio=item.exercicio.nome_exercicio, ordem=posicao,
             repeticoes=None if item.por_tempo else linha.repeticoes,
             tempo_segundos=linha.tempo_segundos if item.por_tempo else None,
         )
-        for item in plano for linha in item.linhas if linha.feita
+        for posicao, item in enumerate(plano, start=1) for linha in item.linhas if linha.feita
     ])
     return sessao

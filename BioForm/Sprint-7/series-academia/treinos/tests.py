@@ -543,7 +543,7 @@ class TreinoFeitoTest(TestCase):
         dados = self.dados(**{'carga-' + self.chave(self.supino, 3): '42.5', 'reps-' + self.chave(self.supino, 3): '8'})
         resposta = self.client.post(self.url, dados)
         sessao = SessaoAtividade.objects.get()
-        self.assertRedirects(resposta, reverse('treinos:treinos_sessao', args=[sessao.id]))
+        self.assertRedirects(resposta, reverse('historico:sessao', args=[sessao.id]))
         self.assertEqual((sessao.usuario, sessao.ficha, sessao.esporte.nome), (self.usuario, self.ficha, 'Musculação'))
         self.assertEqual((sessao.duracao_minutos, sessao.intensidade), (60, 'intensa'))
         series = list(SerieExecutada.objects.filter(exercicio=self.supino).order_by('numero_serie'))
@@ -644,48 +644,49 @@ class HistoricoTest(TestCase):
         ])
 
     def test_historico_lista_com_totais(self):
-        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        resposta = self.client.get(reverse('historico:lista'))
         self.assertContains(resposta, 'Treino A')
-        sessao = resposta.context['pagina'].object_list[0]
+        sessao = sessoes.sessoes_do_usuario(self.usuario).get()
         self.assertEqual((sessao.total_series, sessao.total_exercicios), (3, 2))
         self.assertEqual(sessao.volume_kg, Decimal('720'))  # 40x10 + 40x8; a prancha não entra
 
     def test_historico_vazio(self):
         SessaoAtividade.objects.all().delete()
-        resposta = self.client.get(reverse('treinos:treinos_historico'))
-        self.assertContains(resposta, 'Nenhum treino registrado ainda')
+        resposta = self.client.get(reverse('historico:lista'))
+        self.assertContains(resposta, 'Nenhum treino ainda')
+        self.assertContains(resposta, reverse('treinos:treinos_registrar'))
 
     def test_detalhe_da_sessao(self):
-        resposta = self.client.get(reverse('treinos:treinos_sessao', args=[self.sessao.id]))
+        resposta = self.client.get(reverse('historico:sessao', args=[self.sessao.id]))
         self.assertContains(resposta, 'Supino reto')
-        self.assertContains(resposta, '40 kg × 8')
+        self.assertContains(resposta, 'Prancha')
         self.assertContains(resposta, '45s')
-        self.assertEqual(resposta.context['volume'], Decimal('720'))
+        self.assertEqual(resposta.context['treino'].volume_kg, Decimal('720'))
 
     def test_excluir_sessao(self):
-        resposta = self.client.post(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id]))
-        self.assertRedirects(resposta, reverse('treinos:treinos_historico'))
+        resposta = self.client.post(reverse('historico:excluir', args=[self.sessao.id]))
+        self.assertRedirects(resposta, reverse('historico:lista'))
         self.assertFalse(SessaoAtividade.objects.exists())
         self.assertFalse(SerieExecutada.objects.exists())
         self.assertTrue(FichaTreino.objects.filter(id=self.ficha.id).exists())
 
     def test_excluir_exige_post(self):
-        resposta = self.client.get(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id]))
+        resposta = self.client.get(reverse('historico:excluir', args=[self.sessao.id]))
         self.assertEqual(resposta.status_code, 405)
 
     def test_historico_sobrevive_a_ficha_inativa(self):
         servicos.alternar_ativa(self.ficha)
-        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        resposta = self.client.get(reverse('historico:lista'))
         self.assertContains(resposta, 'Treino A')
 
     def test_outra_pessoa_nao_ve_nem_mexe(self):
         outro = criar_usuario(email='bia@email.com', cpf='11144477735')
         self.client.logout()
         self.client.login(username='bia@email.com', password=SENHA)
-        self.assertEqual(self.client.get(reverse('treinos:treinos_sessao', args=[self.sessao.id])).status_code, 404)
-        self.assertEqual(self.client.post(reverse('treinos:treinos_excluir_sessao', args=[self.sessao.id])).status_code, 404)
+        self.assertEqual(self.client.get(reverse('historico:sessao', args=[self.sessao.id])).status_code, 404)
+        self.assertEqual(self.client.post(reverse('historico:excluir', args=[self.sessao.id])).status_code, 404)
         self.assertEqual(self.client.get(reverse('treinos:treinos_treinar', args=[self.ficha.id])).status_code, 404)
-        self.assertNotContains(self.client.get(reverse('treinos:treinos_historico')), 'Treino A')
+        self.assertNotContains(self.client.get(reverse('historico:lista')), 'Treino A')
         self.assertTrue(SessaoAtividade.objects.filter(id=self.sessao.id).exists())
         # e a "Última vez" de uma pessoa nunca aparece para outra
         self.assertEqual(sessoes.ultimas_series(outro, [self.supino]), {})
@@ -742,12 +743,12 @@ class RegistrarTreinoLivreTest(TestCase):
             nome='Corrida na Lagoa', esporte=str(self.corrida.id), distancia='7.5',
             observacoes='Joelho bem, ritmo forte no fim.'))
         sessao = SessaoAtividade.objects.get()
-        self.assertRedirects(resposta, reverse('treinos:treinos_sessao', args=[sessao.id]))
+        self.assertRedirects(resposta, reverse('historico:sessao', args=[sessao.id]))
         self.assertEqual((sessao.nome, sessao.esporte, sessao.distancia_km), ('Corrida na Lagoa', self.corrida, Decimal('7.5')))
         self.assertEqual(sessao.observacoes, 'Joelho bem, ritmo forte no fim.')
         self.assertIsNone(sessao.ficha)
         self.assertFalse(sessao.series.exists())
-        detalhe = self.client.get(reverse('treinos:treinos_sessao', args=[sessao.id]))
+        detalhe = self.client.get(reverse('historico:sessao', args=[sessao.id]))
         self.assertContains(detalhe, 'Joelho bem')
         self.assertContains(detalhe, '7,5 km')
 
@@ -804,7 +805,7 @@ class RegistrarTreinoLivreTest(TestCase):
         sessoes.registrar_treino(self.usuario, ficha, timezone.now(), 40, 'moderada', [
             (ficha.exercicios.get(), [sessoes.SerieFeita(1, Decimal('30'), 10)]),
         ])
-        resposta = self.client.get(reverse('treinos:treinos_historico'))
+        resposta = self.client.get(reverse('historico:lista'))
         self.assertContains(resposta, 'Corrida leve')
         self.assertContains(resposta, 'Treino B')
         self.assertContains(resposta, '5 km')
@@ -829,4 +830,4 @@ class HistoricoSobreviveTest(TestCase):
         self.assertIsNone(serie.exercicio)
         self.assertEqual(serie.nome_exercicio, 'Supino reto')
         self.client.login(username='caio@email.com', password=SENHA)
-        self.assertContains(self.client.get(reverse('treinos:treinos_sessao', args=[sessao.id])), 'Supino reto')
+        self.assertContains(self.client.get(reverse('historico:sessao', args=[sessao.id])), 'Supino reto')

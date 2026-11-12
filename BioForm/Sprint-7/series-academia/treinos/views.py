@@ -2,14 +2,13 @@ from datetime import timedelta
 from functools import wraps
 
 from django.contrib import messages
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from contas.onboarding import perfil_obrigatorio, proximo_passo
-from saude.models import ExercicioFicha, FichaTreino, SessaoAtividade, dias_da_lista
+from saude.models import ExercicioFicha, FichaTreino, dias_da_lista
 
 from . import servicos, sessoes
 from .forms import (
@@ -209,14 +208,9 @@ def mover_exercicio(request, usuario, exercicio_id):
 
 
 # =====================================================================
-# Treino feito e histórico (RF06 / RF07)
+# Registrar o treino feito (RF06). A lista e o detalhe dos treinos ficam no
+# histórico da Sprint 8 (Sprint-8/historico-treinos, rotas historico:...).
 # =====================================================================
-
-POR_PAGINA = 20
-
-
-def _sessao(usuario, sessao_id):
-    return get_object_or_404(SessaoAtividade.objects.select_related('ficha'), id=sessao_id, usuario=usuario)
 
 
 @treinos_view
@@ -242,7 +236,7 @@ def treinar(request, usuario, ficha_id):
         series = sum(len(s) for _, s in form.feitos)
         messages.success(request, 'Treino salvo: %d série%s de %d exercício%s.' % (
             series, '' if series == 1 else 's', len(form.feitos), '' if len(form.feitos) == 1 else 's'))
-        return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
+        return redirect('historico:sessao', sessao_id=sessao.id)
     return render(request, 'treinos/treinar.html', _contexto(usuario, ficha=ficha, form=form))
 
 
@@ -268,30 +262,5 @@ def registrar(request, usuario):
                 exercicios=exercicios.exercicios(),
             )
             messages.success(request, 'Treino "%s" salvo.' % sessao.nome)
-            return redirect('treinos:treinos_sessao', sessao_id=sessao.id)
+            return redirect('historico:sessao', sessao_id=sessao.id)
     return render(request, 'treinos/registrar.html', _contexto(usuario, form=form, exercicios=exercicios))
-
-
-@treinos_view
-def historico(request, usuario):
-    pagina = Paginator(sessoes.sessoes_do_usuario(usuario), POR_PAGINA).get_page(request.GET.get('pagina'))
-    return render(request, 'treinos/historico.html', _contexto(usuario, pagina=pagina))
-
-
-@treinos_view
-def sessao(request, usuario, sessao_id):
-    sessao = _sessao(usuario, sessao_id)
-    feitos = sessoes.exercicios_da_sessao(sessao)
-    todas = [serie for _, series in feitos for serie in series]
-    return render(request, 'treinos/sessao.html', _contexto(
-        usuario, sessao=sessao, feitos=feitos, total_series=len(todas), volume=sessoes.volume(todas),
-    ))
-
-
-@require_POST
-@treinos_view
-def excluir_sessao(request, usuario, sessao_id):
-    sessao = _sessao(usuario, sessao_id)
-    sessao.delete()  # as séries vão junto (CASCADE)
-    messages.success(request, 'Treino excluído do histórico.')
-    return redirect('treinos:treinos_historico')

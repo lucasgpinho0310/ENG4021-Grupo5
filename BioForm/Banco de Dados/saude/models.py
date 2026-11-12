@@ -555,6 +555,10 @@ class SerieExecutada(models.Model):
     repeticoes = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
     tempo_segundos = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
 
+    def volume_kg(self):
+        """Carga x repetições (o "volume" da série); zero para exercício por tempo."""
+        return self.carga_kg * (self.repeticoes or 0)
+
     def __str__(self):
         feito = '%ds' % self.tempo_segundos if self.tempo_segundos else '%s reps' % self.repeticoes
         return '%s: %s kg x %s' % (self.nome_exercicio, self.carga_kg, feito)

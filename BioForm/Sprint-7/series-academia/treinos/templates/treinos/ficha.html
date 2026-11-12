@@ -7,9 +7,10 @@
     <div class="treinos-topo">
       <div>
         <h1>{{ ficha.nome_ficha }} {% if ficha.ativa %}<span class="tag tag-green">Ativa</span>{% else %}<span class="tag tag-neutra">Inativa</span>{% endif %}</h1>
-        <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}{% if ultimo_treino %} · último treino <a href="{% url 'treinos:treinos_sessao' ultimo_treino.id %}">{{ ultimo_treino.inicio|date:"d/m" }}</a>{% endif %}</p>
+        <p class="subtitle">{{ exercicios|length }} exercício{{ exercicios|length|pluralize }}{% if ficha.dias_semana %} · {{ ficha.dias_semana|dias_curtos }}{% else %} · sem dia fixo{% endif %}{% if ultimo_treino %} · último treino <a href="{% url 'historico:sessao' ultimo_treino.id %}">{{ ultimo_treino.inicio|date:"d/m" }}</a>{% endif %}</p>
       </div>
       <div class="ficha-acoes">
+        {% url 'execucao:fazer' ficha.id as url_fazer %}{% if url_fazer and exercicios %}<a href="{{ url_fazer }}" class="btn-mini btn-mini-destaque">▶ Começar treino</a>{% endif %}
         {% if exercicios %}<a href="{% url 'treinos:treinos_treinar' ficha.id %}" class="btn-mini btn-treinar">▶ Treinar agora</a>{% endif %}
         <a href="{% url 'treinos:treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
         <form method="post" action="{% url 'treinos:treinos_alternar_ativa' ficha.id %}">
