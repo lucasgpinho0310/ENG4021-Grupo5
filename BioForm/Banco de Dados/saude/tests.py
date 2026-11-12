@@ -144,40 +144,69 @@ class GamificacaoTest(TestCase):
 
 
 class PopularExemploTest(TestCase):
-    """python manage.py popular_exemplo: povoa o banco com contas de exemplo e pode rodar de novo."""
+    """python manage.py popular_exemplo: povoa o banco com personas de exemplo e pode rodar de novo."""
 
-    def test_povoa_e_pode_rodar_de_novo(self):
+    def popular(self, vezes=1):
         from io import StringIO
 
         from django.core.management import call_command
 
+        for _ in range(vezes):
+            call_command('popular_exemplo', stdout=StringIO())
+
+    def test_povoa_e_pode_rodar_de_novo(self):
         from contas.onboarding import proximo_passo
-        from saude.management.commands.popular_exemplo import SENHA
+        from saude.management.commands.popular_exemplo import PESSOAS, SENHA
         from saude.models import (
-            Desafio, DiarioConsumo, FichaTreino, Grupo, HistoricoMedida, RefeicaoPersonalizada, SerieExecutada,
+            Desafio, DiarioConsumo, Grupo, HistoricoMedida, RefeicaoPersonalizada, SerieExecutada,
             SessaoAtividade, Usuario,
         )
 
-        call_command('popular_exemplo', stdout=StringIO())
-        call_command('popular_exemplo', stdout=StringIO())  # a segunda vez recria, sem duplicar
-        self.assertEqual(Usuario.objects.count(), 3)
-        for usuario in Usuario.objects.all():
+        self.popular(vezes=2)  # a segunda vez recria, sem duplicar
+        self.assertEqual(Usuario.objects.count(), len(PESSOAS))
+        for dados in PESSOAS:
+            usuario = Usuario.objects.get(conta__email=dados['email'])
             self.assertIsNone(proximo_passo(usuario))  # perfil completo: o site abre direto
             self.assertEqual(HistoricoMedida.objects.filter(usuario=usuario).count(), 7)
-            self.assertEqual(DiarioConsumo.objects.filter(usuario=usuario).count(), 7)
-            self.assertTrue(SessaoAtividade.objects.filter(usuario=usuario).exists())
-        self.assertEqual(FichaTreino.objects.count(), 4)
+            self.assertEqual(DiarioConsumo.objects.filter(usuario=usuario).count(), dados['dias_diario'])
+            self.assertTrue(SessaoAtividade.objects.filter(usuario=usuario).exists(), dados['nome'])
         self.assertTrue(SerieExecutada.objects.exclude(nome_exercicio='').exists())
-        self.assertEqual((Grupo.objects.count(), Desafio.objects.count(), RefeicaoPersonalizada.objects.count()), (1, 1, 3))
+        self.assertEqual(Grupo.objects.count(), 2)
+        self.assertEqual(Desafio.objects.count(), 2)
+        self.assertEqual(RefeicaoPersonalizada.objects.count(), len(PESSOAS))
         self.assertTrue(self.client.login(username='ana@exemplo.com', password=SENHA))
         self.assertContains(self.client.get('/treinos/historico/'), 'Corrida na Lagoa')
 
-    def test_nao_mexe_em_outras_contas(self):
-        from io import StringIO
+    def test_personas_diferentes(self):
+        """As personas cobrem idades, sexos, objetivos, biotipos e todos os esportes do catálogo."""
+        from saude.models import Esporte, EsporteUsuario, HistoricoMedida, SessaoAtividade, Usuario
 
+        self.popular()
+        hoje = timezone.localdate()
+        idades = [hoje.year - u.data_nascimento.year for u in Usuario.objects.all()]
+        self.assertLess(min(idades), 18)
+        self.assertGreaterEqual(max(idades), 70)
+        self.assertEqual(set(Usuario.objects.values_list('sexo_biologico', flat=True)), {'feminino', 'masculino'})
+        self.assertEqual(set(Usuario.objects.values_list('biotipo', flat=True)), {'ectomorfo', 'mesomorfo', 'endomorfo'})
+        self.assertEqual(set(HistoricoMedida.objects.values_list('objetivo_momento', flat=True)),
+                         {'emagrecimento', 'manutencao', 'hipertrofia', 'saude'})
+        todos = set(Esporte.objects.values_list('nome', flat=True))
+        self.assertEqual(set(EsporteUsuario.objects.values_list('esporte__nome', flat=True)), todos)
+        self.assertEqual(set(SessaoAtividade.objects.values_list('esporte__nome', flat=True)), todos)
+
+    def test_cada_persona_entra_e_ve_os_proprios_dados(self):
+        from saude.management.commands.popular_exemplo import PESSOAS, SENHA
+
+        self.popular()
+        for dados in PESSOAS:
+            self.client.logout()
+            self.assertTrue(self.client.login(username=dados['email'], password=SENHA))
+            for url in ('/diario/', '/treinos/historico/', '/evolucao/', '/perfil/metas/'):
+                self.assertEqual(self.client.get(url).status_code, 200, '%s %s' % (dados['email'], url))
+
+    def test_nao_mexe_em_outras_contas(self):
         from django.contrib.auth import get_user_model
-        from django.core.management import call_command
 
         get_user_model().objects.create_user('real@puc-rio.br', 'real@puc-rio.br', 'x')
-        call_command('popular_exemplo', stdout=StringIO())
+        self.popular()
         self.assertTrue(get_user_model().objects.filter(username='real@puc-rio.br').exists())

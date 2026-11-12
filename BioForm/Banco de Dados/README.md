@@ -72,11 +72,27 @@ Dá para ajustar os valores pelo admin.
 Rodar `migrate` de novo não duplica nada (cada registro tem UUID fixo).
 
 **Pessoas de exemplo** (`python manage.py popular_exemplo`, em `saude/management/commands/`):
-Ana, Bruno e Carla (`ana@exemplo.com`, `bruno@exemplo.com`, `carla@exemplo.com`, senha `bioform2026`),
-cada uma com perfil completo, metas, 7 pesagens (gráfico do peso), séries de academia, 6 semanas de
-treinos com a carga subindo, corridas e um funcional, 7 dias de diário com água, um combo salvo,
-XP, amizades, o grupo "Turma ENG4021" e um desafio. Serve para apresentar o site e o admin já com
-dados. Rodar de novo apaga e recria só essas três contas; o resto do banco não muda.
+11 personas bem diferentes, para mostrar que o BioForm serve para todo mundo. Senha de todas: `bioform2026`.
+
+| E-mail | Quem é |
+|---|---|
+| `ana@exemplo.com` | Ana, 28: quer emagrecer com academia e corrida |
+| `bruno@exemplo.com` | Bruno, 24: quer ganhar massa; academia 4x e futebol |
+| `carla@exemplo.com` | Carla, 36: corrida, yoga e funcional pela saúde, sem meta de peso |
+| `lucia@exemplo.com` | Dona Lúcia, 68: aposentada; natação, hidroginástica e alongamento |
+| `antonio@exemplo.com` | Seu Antônio, 74: musculação leve para manter força e equilíbrio |
+| `rafael@exemplo.com` | Rafael, 31: cadeirante; treino adaptado de superiores e natação |
+| `juliana@exemplo.com` | Juliana, 16: vôlei no time da escola |
+| `marcos@exemplo.com` | Marcos, 46: começando agora (118 kg); bike e academia para iniciantes |
+| `beatriz@exemplo.com` | Beatriz, 27: quer ganhar massa; academia e jiu-jitsu |
+| `thiago@exemplo.com` | Thiago, 37: usa o app de vez em quando; futevôlei no fim de semana |
+| `fernanda@exemplo.com` | Fernanda, 33: vegetariana; corrida e yoga |
+
+Cada uma tem perfil, metas, 7 pesagens (gráfico do peso), treinos das últimas semanas (séries com a carga
+subindo e treinos livres com distância), diário com cardápio próprio (comum, leve 60+ ou vegetariano),
+água, combo salvo e XP. Há amizades, os grupos "Turma ENG4021" e "Movimento 60+" e um desafio em cada.
+Juntas, cobrem os 10 esportes, os 4 objetivos e os 3 biotipos. Rodar de novo apaga e recria só essas
+contas (@exemplo.com); o resto do banco não muda.
 
 ## Regras que já estão no banco
 
