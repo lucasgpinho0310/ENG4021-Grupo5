@@ -59,6 +59,7 @@
             {% endif %}
           </div>
           <div class="exercicio-acoes">
+            {% url 'progressao:exercicio' e.id as url_progressao %}{% if url_progressao %}<a href="{{ url_progressao }}" class="btn-icone" title="Progressão de carga" aria-label="Progressão de {{ e.nome_exercicio }}">📈</a>{% endif %}
             <form method="post" action="{% url 'treinos:treinos_mover_exercicio' e.id %}">
               {% csrf_token %}
               <button type="submit" name="direcao" value="cima" class="btn-icone" title="Subir" aria-label="Subir {{ e.nome_exercicio }}"{% if forloop.parentloop.first and forloop.first %} disabled{% endif %}>↑</button>

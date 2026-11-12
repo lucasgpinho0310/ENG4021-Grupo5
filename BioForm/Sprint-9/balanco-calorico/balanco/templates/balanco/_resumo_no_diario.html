@@ -1,0 +1,14 @@
+{% load bioform %}{% comment %}
+Resumo do balanço que aparece no diário, logo abaixo do "Restam para a meta".
+Recebe: meta (MetaComTreinos) e data.
+{% endcomment %}
+<a href="{% url 'balanco:dia' data %}" class="balanco-resumo">
+  <span aria-hidden="true">🔥</span>
+  <span>
+    {% if meta.usando_previsto %}Sem treino registrado hoje: a meta usa a média de {{ meta.previsto|milhar }} kcal dos esportes.
+    {% elif meta.ajuste > 0 %}Seus treinos de hoje gastaram {{ meta.real|milhar }} kcal: a meta subiu {{ meta.ajuste|milhar }} kcal.
+    {% elif meta.ajuste < 0 %}{% if meta.treinos %}Treinos de {{ meta.real|milhar }} kcal, abaixo da média{% else %}Dia sem treino{% endif %}: a meta baixou {{ meta.ajuste|absoluto|milhar }} kcal.
+    {% else %}Treinos de {{ meta.real|milhar }} kcal, iguais à média do perfil.{% endif %}
+  </span>
+  <b>Ver balanço ›</b>
+</a>

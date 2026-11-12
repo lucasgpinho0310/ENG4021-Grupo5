@@ -1,0 +1,78 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform %}
+{% block titulo %}Semana feita{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'aderencia/css/aderencia.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'rotina:rotina_semana' %}">← Minha semana</a></p>
+    <div class="semana-nav">
+      {% if anterior is not None %}<a href="?semana={{ anterior }}" class="seta" aria-label="Semana anterior">‹</a>{% else %}<span class="seta desativada" aria-hidden="true">‹</span>{% endif %}
+      <div>
+        <h1>{% if semanas_atras == 0 %}Esta semana{% elif semanas_atras == 1 %}Semana passada{% else %}Há {{ semanas_atras }} semanas{% endif %}</h1>
+        <small>{{ semana.inicio|date:'d/m' }} a {{ semana.fim|date:'d/m' }} · previsto x feito</small>
+      </div>
+      {% if seguinte is not None %}<a href="{% if seguinte %}?semana={{ seguinte }}{% else %}?{% endif %}" class="seta" aria-label="Semana seguinte">›</a>{% else %}<span class="seta desativada" aria-hidden="true">›</span>{% endif %}
+    </div>
+
+    <!-- Números da semana -->
+    <div class="feita-numeros">
+      <div><small>Treinos feitos</small><strong>{{ semana.total_feito }}{% if semana.total_previsto %} <span>de {{ semana.total_previsto }}</span>{% endif %}</strong></div>
+      <div><small>Aderência</small><strong>{% if semana.aderencia is not None %}{{ semana.aderencia }}<span>%</span>{% else %}—{% endif %}</strong></div>
+      <div><small>Gasto real</small><strong>{{ semana.kcal_real|milhar }} <span>kcal</span></strong></div>
+      <div><small>Gasto previsto</small><strong>{% if semana.kcal_previsto is not None %}{{ semana.kcal_previsto|milhar }} <span>kcal</span>{% else %}—{% endif %}</strong></div>
+    </div>
+
+    <!-- Dia a dia -->
+    <section class="block">
+      <h2 class="block-title">Dia a dia</h2>
+      <p class="block-sub">✓ feito no dia fixo · ✗ dia fixo que passou sem treino · os outros treinos aparecem no dia em que foram feitos.</p>
+      <ol class="feita-dias">
+        {% for dia in semana.dias %}
+        <li class="feita-dia{% if dia.hoje %} hoje{% endif %}{% if dia.futuro %} futuro{% endif %}">
+          <b>{{ dia.nome|slice:':3' }}{% if dia.hoje %} <em>hoje</em>{% endif %}</b>
+          <small>{{ dia.data|date:'d/m' }}</small>
+          {% for p in dia.previstos %}
+          <span class="previsto{% if p.feito %} feito{% elif p.faltou %} faltou{% endif %}" title="{{ p.nome }}: {% if p.feito %}feito{% elif p.faltou %}não foi feito{% else %}previsto{% endif %}">{{ p.emoji }} {% if p.feito %}✓{% elif p.faltou %}✗{% endif %}</span>
+          {% endfor %}
+          {% for t in dia.feitos %}
+          <a href="{% url 'historico:sessao' t.sessao.id %}" class="feito-chip" title="{{ t.titulo }} · {{ t.sessao.duracao_minutos }} min">{{ t.emoji }} {{ t.sessao.duracao_minutos }}′</a>
+          {% endfor %}
+          {% if not dia.previstos and not dia.feitos %}<span class="vazio">—</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+
+    <!-- Por esporte -->
+    {% if semana.esportes or semana.extras %}
+    <section class="block">
+      <h2 class="block-title">Por esporte</h2>
+      <ul class="feita-esportes">
+        {% for e in semana.esportes %}
+        <li>
+          <div class="esporte-topo">
+            <span>{{ e.emoji }} {{ e.nome }}</span>
+            <b>{{ e.feitos }} de {{ e.previstos }}</b>
+          </div>
+          <div class="bar"><span style="width: {{ e.percentual }}%"></span></div>
+          <small>{{ e.kcal_real|milhar }} kcal feitas{% if e.kcal_previsto is not None %} · {{ e.kcal_previsto|milhar }} previstas{% endif %}</small>
+        </li>
+        {% endfor %}
+        {% if semana.extras %}
+        <li>
+          <div class="esporte-topo"><span>➕ Fora do perfil</span><b>{{ semana.extras|length }}</b></div>
+          <small>{% for t in semana.extras %}{{ t.titulo }}{% if not forloop.last %}, {% endif %}{% endfor %}</small>
+        </li>
+        {% endif %}
+      </ul>
+    </section>
+    {% else %}
+    <section class="block">
+      <p class="block-sub">Marque os esportes no perfil e registre os treinos para comparar o previsto com o feito.</p>
+    </section>
+    {% endif %}
+
+    <div class="actions">
+      <a href="{% url 'historico:lista' %}" class="btn btn-ghost">Histórico de treinos</a>
+      <a href="{% url 'treinos:treinos_registrar' %}" class="btn btn-primary">Registrar treino</a>
+    </div>
+{% endblock %}

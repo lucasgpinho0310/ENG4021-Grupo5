@@ -1,0 +1,71 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static l10n bioform treinos_tags %}
+{% block titulo %}Progressão · {{ exercicio.nome_exercicio }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'progressao/css/progressao.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% url 'treinos:treinos_ficha' exercicio.ficha_id %}">← {{ exercicio.ficha.nome_ficha }}</a></p>
+    <h1>📈 {{ exercicio.nome_exercicio }}</h1>
+    <p class="subtitle">A melhor série de cada treino: {% if progressao.por_tempo %}o maior tempo{% else %}a maior carga{% endif %} que você fez.</p>
+
+    {% if progressao.marcas %}
+    <div class="progressao-numeros">
+      {% with r=progressao.recorde.melhor %}
+      <div><small>Recorde</small><strong>{% if progressao.por_tempo %}{{ r.tempo_segundos|intervalo }}{% else %}{{ r.carga_kg|carga }}{% endif %}</strong><em>{% if not progressao.por_tempo %}{{ r.repeticoes }} rep · {% endif %}{{ progressao.recorde.data|date:'d/m/Y' }}</em></div>
+      {% endwith %}
+      <div><small>Primeiro treino</small><strong>{% if progressao.por_tempo %}{{ progressao.primeira.melhor.tempo_segundos|intervalo }}{% else %}{{ progressao.primeira.melhor.carga_kg|carga }}{% endif %}</strong><em>{{ progressao.primeira.data|date:'d/m/Y' }}</em></div>
+      <div><small>Último treino</small><strong>{% if progressao.por_tempo %}{{ progressao.ultima.melhor.tempo_segundos|intervalo }}{% else %}{{ progressao.ultima.melhor.carga_kg|carga }}{% endif %}</strong><em>{{ progressao.ultima.data|date:'d/m/Y' }}</em></div>
+      <div>
+        <small>Evolução</small>
+        <strong class="{% if progressao.evolucao > 0 %}subiu{% elif progressao.evolucao < 0 %}desceu{% endif %}">{% if progressao.evolucao is None %}—{% elif progressao.por_tempo %}{% if progressao.evolucao > 0 %}+{% elif progressao.evolucao < 0 %}−{% endif %}{{ progressao.evolucao|absoluto }}s{% else %}{% if progressao.evolucao > 0 %}+{% elif progressao.evolucao < 0 %}−{% endif %}{{ progressao.evolucao|absoluto|carga }}{% endif %}</strong>
+        <em>{% if progressao.percentual is not None %}{{ progressao.percentual }}% desde o primeiro treino{% else %}{{ progressao.marcas|length }} treino{{ progressao.marcas|length|pluralize }}{% endif %}</em>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2 class="block-title">Treino a treino</h2>
+      {% with g=progressao.grafico %}
+      {% if g %}
+      {% localize off %}{# coordenadas do SVG com ponto decimal, não vírgula #}
+      <svg class="grafico-progressao" viewBox="0 0 {{ g.largura }} {{ g.altura }}" role="img" aria-label="Gráfico da progressão de {{ exercicio.nome_exercicio }}">
+        {% for y, rotulo in g.marcas_y %}
+        <line x1="{{ g.esquerda }}" x2="{{ g.direita }}" y1="{{ y }}" y2="{{ y }}" class="grade"/>
+        <text x="{{ g.esquerda|add:'-8' }}" y="{{ y }}" class="rotulo-y">{{ rotulo }}</text>
+        {% endfor %}
+        <polyline points="{{ g.linha }}" class="linha"/>
+        {% for p in g.pontos %}
+        <circle cx="{{ p.x }}" cy="{{ p.y }}" r="4" class="ponto"><title>{{ p.marca.data|date:'d/m/Y' }}</title></circle>
+        {% endfor %}
+        <text x="{{ g.esquerda }}" y="{{ g.altura }}" dy="-8" class="rotulo-x">{{ progressao.primeira.data|date:'d/m' }}</text>
+        <text x="{{ g.direita }}" y="{{ g.altura }}" dy="-8" class="rotulo-x fim">{{ progressao.ultima.data|date:'d/m' }}</text>
+      </svg>
+      {% endlocalize %}
+      <p class="legenda">Eixo vertical em {% if progressao.por_tempo %}segundos{% else %}kg{% endif %}.</p>
+      {% else %}
+      <p class="block-sub">O gráfico aparece a partir do segundo treino com este exercício.</p>
+      {% endif %}
+      {% endwith %}
+    </section>
+
+    <section class="block">
+      <h2 class="block-title">Treinos</h2>
+      <table class="tabela-progressao">
+        <thead><tr><th>Data</th><th>Melhor série</th><th>Séries</th>{% if not progressao.por_tempo %}<th>Volume</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for m in progressao.mais_recentes_primeiro %}
+          <tr>
+            <td><a href="{% url 'historico:sessao' m.sessao.id %}">{{ m.data|date:'d/m/Y' }}</a></td>
+            <td>{% if progressao.por_tempo %}{{ m.melhor.tempo_segundos|intervalo }}{% else %}{{ m.melhor.carga_kg|carga }} × {{ m.melhor.repeticoes }}{% endif %}{% if m == progressao.recorde %} 🏆{% endif %}</td>
+            <td>{{ m.total_series }}</td>
+            {% if not progressao.por_tempo %}<td>{{ m.volume_kg|milhar }} kg</td>{% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% else %}
+    <section class="block">
+      <h2 class="block-title">Ainda sem treinos</h2>
+      <p class="block-sub">Faça um treino com esta série e marque as séries feitas: a progressão começa a aparecer aqui.</p>
+    </section>
+    {% endif %}
+{% endblock %}

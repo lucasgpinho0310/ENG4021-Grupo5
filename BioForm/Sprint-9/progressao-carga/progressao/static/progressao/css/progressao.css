@@ -1,0 +1,30 @@
+/* =========================================================
+   BioForm — progressão de carga (progressao/exercicio.html).
+   Usa as variáveis de cor de acesso.css.
+   ========================================================= */
+
+.voltar { margin-bottom: 12px; font-size: 14px; }
+
+/* ---------- Números do topo ---------- */
+.progressao-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.progressao-numeros div { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.progressao-numeros small { font-size: 12px; color: var(--text-3); }
+.progressao-numeros strong { font-size: 24px; font-weight: 800; }
+.progressao-numeros em { font-style: normal; font-size: 13px; color: var(--text-2); }
+.subiu { color: var(--green); }
+.desceu { color: var(--flame); }
+
+/* ---------- Gráfico (SVG desenhado pelo servidor) ---------- */
+.grafico-progressao { display: block; width: 100%; height: auto; }
+.grafico-progressao .grade { stroke: var(--line); stroke-width: 1; }
+.grafico-progressao .linha { fill: none; stroke: var(--green); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.grafico-progressao .ponto { fill: var(--surface); stroke: var(--green); stroke-width: 2.5; }
+.grafico-progressao text { font-size: 12px; fill: var(--text-3); }
+.grafico-progressao .rotulo-y { text-anchor: end; dominant-baseline: middle; }
+.grafico-progressao .rotulo-x.fim { text-anchor: end; }
+.legenda { margin: 6px 0 0; font-size: 12px; color: var(--text-3); }
+
+/* ---------- Tabela ---------- */
+.tabela-progressao { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabela-progressao th { padding: 6px 0; font-size: 12px; font-weight: 600; color: var(--text-3); text-align: left; }
+.tabela-progressao td { padding: 10px 0; border-top: 1px solid var(--line); }

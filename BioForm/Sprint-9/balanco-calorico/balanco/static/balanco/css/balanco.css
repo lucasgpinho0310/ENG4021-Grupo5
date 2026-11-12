@@ -1,0 +1,60 @@
+/* =========================================================
+   BioForm — balanço calórico do dia (balanco/dia.html e o resumo no diário).
+   Usa as variáveis de cor e as classes .calc / .calc-row de acesso.css.
+   ========================================================= */
+
+.voltar { margin-bottom: 12px; font-size: 14px; }
+
+/* ---------- Comido − gasto = saldo ---------- */
+.balanco-conta {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.balanco-conta div { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.balanco-conta small { font-size: 12px; color: var(--text-3); }
+.balanco-conta strong { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.balanco-conta span { font-size: 13px; color: var(--text-2); }
+.balanco-conta > b { font-size: 22px; color: var(--text-3); }
+.balanco-conta .deficit strong { color: var(--green); }
+.balanco-conta .superavit strong { color: var(--flame); }
+
+/* ---------- Treinos do dia ---------- */
+.treinos-do-dia { list-style: none; display: grid; gap: 8px; margin: 14px 0 0; padding: 0; }
+.treinos-do-dia li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 14px;
+}
+.treinos-do-dia a { color: var(--text); }
+.treinos-do-dia b { color: var(--green); white-space: nowrap; }
+
+/* ---------- Resumo no diário ---------- */
+.balanco-resumo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -8px 0 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 14px;
+}
+.balanco-resumo:hover { border-color: var(--line-strong); text-decoration: none; }
+.balanco-resumo span:nth-child(2) { flex: 1; }
+.balanco-resumo b { color: var(--flame); white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .balanco-conta { grid-template-columns: 1fr; }
+  .balanco-conta > b { display: none; }
+}
