@@ -50,3 +50,6 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* Link para a progressão de carga (app progressao, Sprint 9) */
+.link-progressao { font-size: 15px; text-decoration: none; }

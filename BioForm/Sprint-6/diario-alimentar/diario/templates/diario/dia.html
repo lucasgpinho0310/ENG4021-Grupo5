@@ -1,7 +1,7 @@
 {% extends 'contas/base_perfil.html' %}
 {% load static bioform diario_tags %}
 {% block titulo %}Diário · {{ data|nome_do_dia }}{% endblock %}
-{% block estilos_extra %}<link rel="stylesheet" href="{% static 'diario/css/diario.css' %}">{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'diario/css/diario.css' %}"><link rel="stylesheet" href="{% static 'balanco/css/balanco.css' %}">{% endblock %}
 {% block conteudo %}
     <!-- Navegação entre os dias -->
     <div class="dia-nav">
@@ -23,6 +23,7 @@
       </div>
       {% if resumo.dieta_confirmada %}<span class="tag tag-green">✓ Dieta perfeita</span>{% elif resumo.dentro_da_meta %}<span class="tag tag-water">Dentro da meta</span>{% endif %}
     </div>
+    {% if resumo.meta.base %}{# meta ajustada pelo balanço (Sprint 9) #}{% include 'balanco/_resumo_no_diario.html' with meta=resumo.meta data=data %}{% endif %}
 
     <!-- Macros e água -->
     <section class="block">

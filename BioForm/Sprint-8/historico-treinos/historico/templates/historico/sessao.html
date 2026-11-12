@@ -25,7 +25,7 @@
     {% for item in exercicios %}
     <section class="block exercicio-feito">
       <div class="exercicio-feito-topo">
-        <h2 class="block-title">{{ item.nome }}</h2>
+        <h2 class="block-title">{{ item.nome }}{% if item.exercicio %} <a href="{% url 'progressao:exercicio' item.exercicio.id %}" class="link-progressao" title="Progressão de carga">📈</a>{% endif %}</h2>
         {% if item.recorde %}<span class="tag tag-green">🏆 Novo recorde</span>{% endif %}
       </div>
       <table class="series-feitas">

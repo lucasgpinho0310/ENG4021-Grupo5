@@ -66,9 +66,14 @@ def somar(itens):
 
 
 def meta_do_dia(usuario, data):
-    """A meta que valia naquele dia (a mais recente com início até a data)."""
+    """
+    A meta que valia naquele dia (a mais recente com início até a data), ajustada pelos treinos feitos
+    no dia (balanço calórico, Sprint 9: a média dos esportes do perfil é trocada pelo gasto real).
+    """
+    from balanco.servicos import meta_com_treinos
+
     meta = MetaNutricional.objects.filter(usuario=usuario, data_inicio__lte=data).order_by('-data_inicio').first()
-    return meta or usuario.meta_atual()
+    return meta_com_treinos(usuario, data, meta or usuario.meta_atual())
 
 
 def refeicao_sugerida(agora=None):

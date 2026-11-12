@@ -1,0 +1,63 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform diario_tags %}
+{% block titulo %}Balanço · {{ data|nome_do_dia }}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'balanco/css/balanco.css' %}">{% endblock %}
+{% block conteudo %}
+    <p class="voltar"><a href="{% if eh_hoje %}{% url 'diario:diario_hoje' %}{% else %}{% url 'diario:diario_dia' data %}{% endif %}">← Diário de {{ data|nome_do_dia|lower }}</a></p>
+    <h1>Balanço do dia</h1>
+    <p class="subtitle">{{ data|date:'l, d/m/Y' }}: o que você comeu, o que gastou e como os treinos mudaram a meta.</p>
+
+    {% if balanco %}
+    {% with meta=balanco.meta %}
+    <!-- Comido x gasto -->
+    <div class="balanco-conta">
+      <div><small>Comido</small><strong>{{ balanco.comido_kcal|inteiro|milhar }}</strong><span>kcal</span></div>
+      <b aria-hidden="true">−</b>
+      <div><small>Gasto do dia</small><strong>{{ meta.gasto_total|milhar }}</strong><span>kcal</span></div>
+      <b aria-hidden="true">=</b>
+      <div class="{% if balanco.saldo < 0 %}deficit{% elif balanco.saldo > 0 %}superavit{% endif %}">
+        <small>{% if balanco.saldo < 0 %}Déficit{% elif balanco.saldo > 0 %}Superávit{% else %}Equilíbrio{% endif %}</small>
+        <strong>{{ balanco.saldo|absoluto|milhar }}</strong><span>kcal</span>
+      </div>
+    </div>
+
+    <!-- De onde vem o gasto -->
+    <section class="block">
+      <h2 class="block-title">Gasto do dia</h2>
+      <div class="calc">
+        <div class="calc-row"><div><span>Metabolismo basal (TMB)</span><small>o que o corpo gasta em repouso</small></div><b>{{ meta.tmb|milhar }} kcal</b></div>
+        <div class="calc-row"><div><span>Atividade diária e digestão</span><small>NEAT + efeito térmico dos alimentos</small></div><b>{{ meta.atividade_diaria|milhar }} kcal</b></div>
+        <div class="calc-row">
+          <div>
+            <span>Treinos</span>
+            <small>{% if meta.usando_previsto %}Nenhum treino registrado hoje: vale a média prevista no perfil{% elif meta.treinos %}{{ meta.treinos|length }} treino{{ meta.treinos|length|pluralize }} registrado{{ meta.treinos|length|pluralize }}{% else %}Nenhum treino registrado neste dia{% endif %}</small>
+          </div>
+          <b class="plus">+{{ meta.gasto_esportes|milhar }} kcal</b>
+        </div>
+      </div>
+      {% if meta.treinos %}
+      <ul class="treinos-do-dia">
+        {% for t in meta.treinos %}
+        <li><a href="{% url 'historico:sessao' t.sessao.id %}"><span aria-hidden="true">{{ t.emoji }}</span> {{ t.titulo }} · {{ t.sessao.duracao_minutos }} min · {{ t.sessao.get_intensidade_display|lower }}</a><b>{% if t.kcal is not None %}{{ t.kcal|milhar }} kcal{% endif %}</b></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+
+    <!-- Como a meta mudou -->
+    <section class="block">
+      <h2 class="block-title">Meta de calorias do dia</h2>
+      <div class="calc">
+        <div class="calc-row"><div><span>Meta do perfil</span><small>já conta {{ meta.previsto|milhar }} kcal por dia de esportes (média da semana)</small></div><b>{{ meta.base.meta_calorias|milhar }} kcal</b></div>
+        <div class="calc-row"><div><span>Troca a média pelos treinos do dia</span><small>{{ meta.gasto_esportes|milhar }} − {{ meta.previsto|milhar }} kcal{% if meta.ajuste %} · a diferença vai para os carboidratos{% endif %}</small></div><b class="{% if meta.ajuste < 0 %}minus{% else %}plus{% endif %}">{% if meta.ajuste > 0 %}+{% elif meta.ajuste < 0 %}−{% endif %}{{ meta.ajuste|absoluto|milhar }} kcal</b></div>
+        <div class="calc-row total"><div><span>Meta de hoje</span><small>carboidratos: {{ meta.meta_carbo_g|inteiro }} g · nunca abaixo da TMB</small></div><b>{{ meta.meta_calorias|milhar }} kcal</b></div>
+      </div>
+      <p class="disclaimer">{% if balanco.restante >= 0 %}Faltam {{ balanco.restante|milhar }} kcal para a meta do dia.{% else %}Passou {{ balanco.restante|absoluto|milhar }} kcal da meta do dia.{% endif %} O gasto é uma estimativa (fórmula de Mifflin-St Jeor e MET de cada esporte) e não substitui nutricionista.</p>
+    </section>
+    {% endwith %}
+    {% else %}
+    <section class="block">
+      <p class="block-sub">Complete o perfil (peso e meta) para ver o balanço do dia.</p>
+    </section>
+    {% endif %}
+{% endblock %}

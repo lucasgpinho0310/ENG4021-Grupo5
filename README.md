@@ -145,6 +145,33 @@ quanto falta para o peso desejado e o IMC. Uma pesagem nova de hoje recalcula as
 
 ![Evolução do peso](img/evolucao-peso.png)
 
+### 10. Ver o balanço calórico do dia
+
+O diário passa a contar os treinos registrados no dia, de qualquer esporte. A meta do perfil já inclui a
+média diária dos esportes; no dia, essa média é trocada pelo gasto dos treinos feitos (num dia que já
+passou sem treino, ela sai da conta; hoje, enquanto nenhum treino for registrado, a média continua
+valendo). A diferença entra nos carboidratos, e a meta nunca fica abaixo da TMB. Em **Diário → Ver balanço**
+aparece a conta completa: comido − gasto do dia = déficit ou superávit. O histórico do diário mostra o
+gasto de cada dia.
+
+![Balanço do dia](img/balanco-do-dia.png)
+
+### 11. Comparar a semana prevista com a feita
+
+Em **Semana → Ver o que você já fez nesta semana**, cada dia mostra os dias fixos feitos (✓), os que
+passaram sem treino (✗) e os outros treinos registrados. Aparecem também a aderência da semana, o gasto
+real comparado com o previsto e o andamento de cada esporte. As setas voltam até 11 semanas.
+
+![Semana feita](img/semana-feita.png)
+
+### 12. Ver a progressão de carga de um exercício
+
+Na página de uma série, o ícone 📈 de cada exercício abre o gráfico da melhor série de cada treino (maior
+carga ou, em exercício por tempo, maior tempo), com o recorde e quanto você evoluiu desde o primeiro treino.
+Treinos livres com o mesmo nome de exercício também entram.
+
+![Progressão de carga](img/progressao-carga.png)
+
 ## Organização do repositório
 
 | Pasta | O que tem |
@@ -153,6 +180,7 @@ quanto falta para o peso desejado e o IMC. Uma pesagem nova de hoje recalcula as
 | [`BioForm/Sprint-6`](BioForm/Sprint-6) | apps entregues na Sprint 6: `diario`, `medidas_caseiras` e `metas` |
 | [`BioForm/Sprint-7`](BioForm/Sprint-7) | apps entregues na Sprint 7: `rotina` e `treinos` |
 | [`BioForm/Sprint-8`](BioForm/Sprint-8) | apps entregues na Sprint 8: `execucao` (treino do dia), `historico` (histórico de treinos) e `evolucao` (evolução do peso) |
+| [`BioForm/Sprint-9`](BioForm/Sprint-9) | apps entregues na Sprint 9: `balanco` (balanço calórico do dia), `aderencia` (semana feita) e `progressao` (progressão de carga) |
 | [`BioForm/App Saúde`](BioForm/App%20Sa%C3%BAde) | pesquisa, requisitos, modelagem de dados e protótipos das primeiras sprints |
 | [`BioForm/Escopo Técnico`](BioForm/Escopo%20T%C3%A9cnico), [`BioForm/Sprint-Usuarios`](BioForm/Sprint-Usuarios), [`BioForm/usuários`](BioForm/usu%C3%A1rios) | documentos e protótipos HTML das primeiras sprints |
 | [`Calculadora`](Calculadora) | tarefa da Sprint 1 (Git e Codespace) |
@@ -161,7 +189,7 @@ Cada app tem o seu `urls.py` com `app_name` e entra no `urls.py` principal com o
 (`path('diario/', include('diario.urls'))`). Nos templates, os links usam o nome do app,
 por exemplo `{% url 'diario:diario_hoje' %}`.
 
-Os apps das Sprints 6, 7 e 8 ficam na pasta da sprint em que foram entregues, para que os links das entregas
+Os apps das Sprints 6 a 9 ficam na pasta da sprint em que foram entregues, para que os links das entregas
 continuem valendo. O `settings.py` acrescenta essas pastas ao caminho do Python, então o Django os carrega
 como se estivessem ao lado do `manage.py`.
 

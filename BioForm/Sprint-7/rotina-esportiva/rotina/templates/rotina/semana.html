@@ -14,6 +14,8 @@
     </section>
     {% else %}
 
+    {% url 'aderencia:semana' as url_feita %}{% if url_feita %}<p class="link-feita"><a href="{{ url_feita }}">Ver o que você já fez nesta semana →</a></p>{% endif %}
+
     <!-- Números da semana -->
     <div class="semana-numeros">
       <div><small>Treinos</small><strong>{{ semana.treinos_semana }}</strong></div>
