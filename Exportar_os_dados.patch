@@ -1,0 +1,461 @@
+From 62845ab22f0b3774b4b34fefada4a0331e354d5a Mon Sep 17 00:00:00 2001
+From: Gustavo Yin <zheyingustavo@gmail.com>
+Date: Wed, 25 Nov 2026 20:55:41 -0300
+Subject: [PATCH] Sprint 10: baixar meus dados (RNF12)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Em Editar perfil > Seus dados, "Baixar meus dados" (backup e LGPD, art. 18):
+- .zip com 10 planilhas (perfil, pesagens, metas, esportes, séries,
+  treinos, séries feitas, diário, dias, XP) e um LEIA-ME
+- abre direto no Excel em português (separador ;, vírgula decimal, BOM)
+- só os dados da própria pessoa; sem senha; sem cache no navegador
+
+9 testes novos.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018gcqhbFS5ZxoB1aPpg74fq
+---
+ BioForm/Banco de Dados/contas/exportar.py     | 224 ++++++++++++++++++
+ .../contas/templates/contas/conta.html        |  10 +-
+ .../Banco de Dados/contas/test_exportar.py    | 121 ++++++++++
+ BioForm/Banco de Dados/contas/urls.py         |   1 +
+ BioForm/Banco de Dados/contas/views.py        |  11 +
+ 5 files changed, 366 insertions(+), 1 deletion(-)
+ create mode 100644 BioForm/Banco de Dados/contas/exportar.py
+ create mode 100644 BioForm/Banco de Dados/contas/test_exportar.py
+
+diff --git a/BioForm/Banco de Dados/contas/exportar.py b/BioForm/Banco de Dados/contas/exportar.py
+new file mode 100644
+index 0000000..da9cdcd
+--- /dev/null
++++ b/BioForm/Banco de Dados/contas/exportar.py	
+@@ -0,0 +1,224 @@
++"""
++Exportar meus dados (RNF12 Backup e LGPD, art. 18: portabilidade).
++
++Gera um .zip com uma planilha (.csv) para cada tipo de dado da pessoa e um LEIA-ME.txt.
++As planilhas abrem direto no Excel e no Google Planilhas em português: separador ";", vírgula
++decimal e UTF-8 com BOM (para os acentos aparecerem certos).
++
++Só entram os dados da própria pessoa. A senha não entra (o Django só guarda um hash dela) e
++dos amigos não sai nada.
++"""
++import csv
++import io
++import zipfile
++from decimal import Decimal
++
++from django.utils import timezone
++
++from saude.models import (
++    DiarioConsumo,
++    EsporteUsuario,
++    FichaTreino,
++    HistoricoMedida,
++    MetaNutricional,
++    RegistroRefeicaoItem,
++    RegistroXP,
++    SerieExecutada,
++    SessaoAtividade,
++)
++
++LEIA_ME = """Seus dados no BioForm
++=====================
++
++Arquivo gerado em {gerado} para {nome} ({email}).
++
++Cada arquivo .csv é uma planilha. Abra com o Excel, o Google Planilhas ou o LibreOffice.
++
++  perfil.csv      seus dados pessoais e de corpo
++  pesagens.csv    cada peso registrado, com o objetivo da época
++  metas.csv       as metas de calorias, macros e água calculadas para você
++  esportes.csv    os esportes da sua rotina
++  series.csv      as suas séries de academia e os exercícios de cada uma
++  treinos.csv     cada treino registrado (academia, corrida e qualquer outro)
++  series_feitas.csv  cada série feita nos treinos, com carga e repetições
++  diario.csv      cada alimento registrado no diário
++  dias.csv        água e "dieta perfeita" de cada dia do diário
++  xp.csv          os pontos de experiência ganhos
++
++A sua senha não está no arquivo: o BioForm guarda só uma versão embaralhada dela.
++Para apagar tudo, use "Excluir conta" em Editar perfil.
++"""
++
++
++def numero(valor, casas=None):
++    """Número com vírgula decimal (padrão brasileiro); vazio quando não há valor."""
++    if valor is None or valor == '':
++        return ''
++    if casas is not None:
++        valor = Decimal(valor).quantize(Decimal(1).scaleb(-casas))
++    texto = str(valor)
++    if '.' in texto:
++        texto = texto.rstrip('0').rstrip('.')
++    return texto.replace('.', ',')
++
++
++def data(valor):
++    return valor.strftime('%d/%m/%Y') if valor else ''
++
++
++def data_hora(valor):
++    return timezone.localtime(valor).strftime('%d/%m/%Y %H:%M') if valor else ''
++
++
++def sim_nao(valor):
++    return 'sim' if valor else 'não'
++
++
++def planilha(cabecalho, linhas):
++    """O texto de um .csv: UTF-8 com BOM, separador ;"""
++    saida = io.StringIO()
++    escritor = csv.writer(saida, delimiter=';', lineterminator='\r\n')
++    escritor.writerow(cabecalho)
++    escritor.writerows(linhas)
++    return '﻿' + saida.getvalue()
++
++
++# =====================================================================
++# Uma função por planilha: devolve (cabeçalho, linhas)
++# =====================================================================
++
++def perfil(usuario):
++    conta = usuario.conta
++    linhas = [
++        ('Nome completo', usuario.nome_completo),
++        ('Apelido', usuario.apelido),
++        ('E-mail', conta.email),
++        ('CPF', usuario.cpf),
++        ('Celular', usuario.celular),
++        ('Data de nascimento', data(usuario.data_nascimento)),
++        ('Sexo biológico', usuario.get_sexo_biologico_display() if usuario.sexo_biologico else ''),
++        ('Altura (cm)', numero(usuario.altura_cm)),
++        ('Biotipo', usuario.get_biotipo_display() if usuario.biotipo else ''),
++        ('Peso desejado (kg)', numero(usuario.peso_meta_kg)),
++        ('Aceitou os termos', sim_nao(usuario.aceitou_termos)),
++        ('Cadastro em', data_hora(usuario.data_cadastro)),
++    ]
++    return ('Campo', 'Valor'), linhas
++
++
++def pesagens(usuario):
++    linhas = [
++        (data_hora(m.data_registro), numero(m.peso_kg), m.get_objetivo_momento_display())
++        for m in HistoricoMedida.objects.filter(usuario=usuario).order_by('data_registro')
++    ]
++    return ('Data', 'Peso (kg)', 'Objetivo'), linhas
++
++
++def metas(usuario):
++    linhas = [
++        (data(m.data_inicio), m.meta_calorias, numero(m.meta_proteina_g), numero(m.meta_carbo_g),
++         numero(m.meta_gordura_g), m.meta_agua_ml)
++        for m in MetaNutricional.objects.filter(usuario=usuario).order_by('data_inicio')
++    ]
++    return ('Válida desde', 'Calorias (kcal)', 'Proteína (g)', 'Carboidratos (g)', 'Gorduras (g)', 'Água (ml)'), linhas
++
++
++def esportes(usuario):
++    linhas = [
++        (e.esporte.nome, e.frequencia_semanal, e.get_intensidade_display(), e.duracao_minutos, e.dias_fixos)
++        for e in EsporteUsuario.objects.filter(usuario=usuario).select_related('esporte').order_by('esporte__nome')
++    ]
++    return ('Esporte', 'Vezes por semana', 'Intensidade', 'Minutos', 'Dias fixos'), linhas
++
++
++def series_de_academia(usuario):
++    linhas = []
++    for ficha in FichaTreino.objects.filter(usuario=usuario).order_by('nome_ficha'):
++        for e in ficha.exercicios.order_by('ordem_execucao'):
++            linhas.append((
++                ficha.nome_ficha, ficha.dias_semana, sim_nao(ficha.ativa), e.ordem_execucao, e.nome_exercicio,
++                e.series_planejadas, e.repeticoes_planejadas or '', e.tempo_segundos or '', numero(e.carga_kg),
++                e.intervalo_segundos or '',
++            ))
++    return ('Série', 'Dias', 'Ativa', 'Ordem', 'Exercício', 'Séries', 'Repetições', 'Tempo (s)', 'Carga (kg)',
++            'Intervalo (s)'), linhas
++
++
++def treinos(usuario):
++    linhas = [
++        (data_hora(s.inicio), s.titulo, s.esporte.nome, s.duracao_minutos, s.get_intensidade_display(),
++         numero(s.distancia_km), s.observacoes)
++        for s in SessaoAtividade.objects.filter(usuario=usuario).select_related('esporte', 'ficha').order_by('inicio')
++    ]
++    return ('Início', 'Treino', 'Esporte', 'Duração (min)', 'Intensidade', 'Distância (km)', 'Observações'), linhas
++
++
++def series_feitas(usuario):
++    linhas = [
++        (data_hora(s.sessao.inicio), s.sessao.titulo, s.nome_exercicio, s.numero_serie, numero(s.carga_kg),
++         s.repeticoes or '', s.tempo_segundos or '')
++        for s in SerieExecutada.objects.filter(sessao__usuario=usuario)
++        .select_related('sessao__esporte', 'sessao__ficha').order_by('sessao__inicio', 'ordem', 'numero_serie')
++    ]
++    return ('Treino em', 'Treino', 'Exercício', 'Série', 'Carga (kg)', 'Repetições', 'Tempo (s)'), linhas
++
++
++def diario(usuario):
++    itens = (
++        RegistroRefeicaoItem.objects.filter(registro__diario__usuario=usuario)
++        .select_related('registro__diario', 'alimento', 'medida_caseira')
++        .order_by('registro__diario__data_referencia', 'registro__horario')
++    )
++    linhas = []
++    for item in itens:
++        macros = item.macros()
++        linhas.append((
++            data(item.registro.diario.data_referencia), item.registro.get_tipo_refeicao_display(), item.alimento.nome,
++            numero(item.quantidade), item.medida_caseira.nome if item.medida_caseira else 'porção',
++            numero(item.gramas(), 0), numero(macros['kcal'], 0), numero(macros['proteina_g'], 1),
++            numero(macros['carbo_g'], 1), numero(macros['gordura_g'], 1),
++        ))
++    return ('Data', 'Refeição', 'Alimento', 'Quantidade', 'Medida', 'Gramas', 'Calorias (kcal)', 'Proteína (g)',
++            'Carboidratos (g)', 'Gorduras (g)'), linhas
++
++
++def dias(usuario):
++    linhas = [
++        (data(d.data_referencia), d.total_agua_consumida_ml, sim_nao(d.status_dieta_cumprida))
++        for d in DiarioConsumo.objects.filter(usuario=usuario).order_by('data_referencia')
++    ]
++    return ('Data', 'Água (ml)', 'Dieta perfeita'), linhas
++
++
++def xp(usuario):
++    linhas = [
++        (data(r.data_referencia), r.get_acao_display(), r.pontos)
++        for r in RegistroXP.objects.filter(usuario=usuario).order_by('data_referencia', 'criado_em')
++    ]
++    return ('Data', 'Ação', 'Pontos'), linhas
++
++
++PLANILHAS = [
++    ('perfil.csv', perfil), ('pesagens.csv', pesagens), ('metas.csv', metas), ('esportes.csv', esportes),
++    ('series.csv', series_de_academia), ('treinos.csv', treinos), ('series_feitas.csv', series_feitas),
++    ('diario.csv', diario), ('dias.csv', dias), ('xp.csv', xp),
++]
++
++
++def nome_do_arquivo(usuario, hoje=None):
++    hoje = hoje or timezone.localdate()
++    return 'bioform-meus-dados-%s.zip' % hoje.strftime('%Y-%m-%d')
++
++
++def gerar_zip(usuario):
++    """Os bytes do .zip com todas as planilhas da pessoa e o LEIA-ME."""
++    memoria = io.BytesIO()
++    with zipfile.ZipFile(memoria, 'w', zipfile.ZIP_DEFLATED) as arquivo:
++        arquivo.writestr('LEIA-ME.txt', LEIA_ME.format(
++            gerado=timezone.localtime().strftime('%d/%m/%Y às %H:%M'), nome=usuario.nome_completo,
++            email=usuario.conta.email,
++        ))
++        for nome, funcao in PLANILHAS:
++            cabecalho, linhas = funcao(usuario)
++            arquivo.writestr(nome, planilha(cabecalho, linhas))
++    return memoria.getvalue()
+diff --git a/BioForm/Banco de Dados/contas/templates/contas/conta.html b/BioForm/Banco de Dados/contas/templates/contas/conta.html
+index 68ff388..9868217 100644
+--- a/BioForm/Banco de Dados/contas/templates/contas/conta.html	
++++ b/BioForm/Banco de Dados/contas/templates/contas/conta.html	
+@@ -61,11 +61,19 @@
+       </div>
+     </section>
+ 
++    <section class="section">
++      <h2 class="section-title">Seus dados</h2>
++      <p class="section-hint">Baixe uma cópia de tudo o que você registrou: perfil, pesagens, metas, treinos, séries, diário e XP. Vem num arquivo .zip com planilhas que abrem no Excel ou no Google Planilhas.</p>
++      <div class="links-perfil">
++        <a href="{% url 'contas:exportar_dados' %}" class="btn btn-secondary btn-sm" download>Baixar meus dados</a>
++      </div>
++    </section>
++
+     <section class="section danger">
+       <div class="danger-row">
+         <div>
+           <h2 class="section-title">Excluir conta</h2>
+-          <p>Apaga sua conta e todo o histórico (treinos, refeições, medidas e XP). Não dá para desfazer.</p>
++          <p>Apaga sua conta e todo o histórico (treinos, refeições, medidas e XP). Não dá para desfazer: se quiser guardar uma cópia, use "Baixar meus dados" antes.</p>
+         </div>
+         <a href="{% url 'contas:excluir_conta' %}" class="btn btn-danger">Excluir conta</a>
+       </div>
+diff --git a/BioForm/Banco de Dados/contas/test_exportar.py b/BioForm/Banco de Dados/contas/test_exportar.py
+new file mode 100644
+index 0000000..78a8f47
+--- /dev/null
++++ b/BioForm/Banco de Dados/contas/test_exportar.py	
+@@ -0,0 +1,121 @@
++"""Baixar meus dados (RNF12 / LGPD): contas/exportar.py e a view contas:exportar_dados."""
++import io
++import zipfile
++from datetime import date, timedelta
++from decimal import Decimal
++
++from django.contrib.auth import get_user_model
++from django.test import TestCase
++from django.urls import reverse
++from django.utils import timezone
++
++from diario import servicos as diario
++from metas.calculo import salvar_meta
++from saude.models import Alimento, Esporte, HistoricoMedida, SerieExecutada, SessaoAtividade, Usuario
++
++from .exportar import PLANILHAS, numero
++
++SENHA = 'exportar-bioform-2026'
++
++
++def criar_usuario(email, cpf, nome):
++    conta = get_user_model().objects.create_user(username=email, email=email, password=SENHA)
++    usuario = Usuario.objects.create(
++        conta=conta, nome_completo=nome, apelido=nome.split()[0], cpf=cpf, celular='21999990000',
++        data_nascimento=date(1995, 3, 2), sexo_biologico='feminino', altura_cm=165, biotipo='mesomorfo',
++        rotina_confirmada_em=timezone.localdate(), aceitou_termos=True,
++    )
++    HistoricoMedida.objects.create(usuario=usuario, data_registro=timezone.now(), peso_kg=Decimal('63.5'),
++                                   objetivo_momento='saude')
++    salvar_meta(usuario)
++    return usuario
++
++
++class ExportarDadosTest(TestCase):
++    def setUp(self):
++        self.ana = criar_usuario('ana@email.com', '52998224725', 'Ana Souza')
++        self.bia = criar_usuario('bia@email.com', '11144477735', 'Beatriz Lima')
++        ontem = timezone.localdate() - timedelta(days=1)
++        arroz = Alimento.objects.filter(nome__istartswith='Arroz, tipo 1, cozido').first()
++        feijao = Alimento.objects.filter(nome__istartswith='Feijão, carioca, cozido').first()
++        diario.registrar_item(self.ana, ontem, 'almoco', arroz, Decimal('1.5'))
++        diario.adicionar_agua(self.ana, ontem, 1800)
++        diario.registrar_item(self.bia, ontem, 'jantar', feijao, Decimal('1'))
++        corrida = Esporte.objects.get(nome='Corrida')
++        sessao = SessaoAtividade.objects.create(
++            usuario=self.ana, esporte=corrida, inicio=timezone.now() - timedelta(days=2), duracao_minutos=35,
++            intensidade='moderada', nome='Corrida da Ana', distancia_km=Decimal('5.25'), observacoes='Joelho ok',
++        )
++        SerieExecutada.objects.create(sessao=sessao, nome_exercicio='Prancha', numero_serie=1, carga_kg=0,
++                                      tempo_segundos=40)
++        SessaoAtividade.objects.create(usuario=self.bia, esporte=corrida, inicio=timezone.now(), duracao_minutos=20,
++                                       intensidade='leve', nome='Corrida da Bia')
++        self.client.login(username='ana@email.com', password=SENHA)
++
++    def baixar(self):
++        resposta = self.client.get(reverse('contas:exportar_dados'))
++        self.assertEqual(resposta.status_code, 200)
++        arquivo = zipfile.ZipFile(io.BytesIO(resposta.content))
++        return resposta, {nome: arquivo.read(nome).decode('utf-8-sig') for nome in arquivo.namelist()}
++
++    def test_baixa_um_zip_com_todas_as_planilhas(self):
++        resposta, arquivos = self.baixar()
++        self.assertEqual(resposta['Content-Type'], 'application/zip')
++        self.assertIn('attachment; filename="bioform-meus-dados-', resposta['Content-Disposition'])
++        self.assertEqual(resposta['Cache-Control'], 'no-store')
++        self.assertEqual(set(arquivos), {'LEIA-ME.txt'} | {nome for nome, _ in PLANILHAS})
++        self.assertIn('Ana Souza (ana@email.com)', arquivos['LEIA-ME.txt'])
++
++    def test_traz_os_dados_da_pessoa(self):
++        _, arquivos = self.baixar()
++        self.assertIn('Nome completo;Ana Souza', arquivos['perfil.csv'])
++        self.assertIn(';63,5;Saúde', arquivos['pesagens.csv'])
++        self.assertIn('Corrida da Ana;Corrida;35;Moderada;5,25;Joelho ok', arquivos['treinos.csv'])
++        self.assertIn('Corrida da Ana;Prancha;1;0;;40', arquivos['series_feitas.csv'])
++        self.assertIn('Almoço;Arroz, tipo 1, cozido;1,5;porção', arquivos['diario.csv'])
++        self.assertIn(';1800;não', arquivos['dias.csv'])
++        self.assertEqual(len(arquivos['metas.csv'].splitlines()), 2)  # cabeçalho + a meta salva
++
++    def test_nao_traz_dados_de_outra_pessoa(self):
++        _, arquivos = self.baixar()
++        tudo = '\n'.join(arquivos.values())
++        for texto in ('Beatriz', 'bia@email.com', '11144477735', 'Corrida da Bia', 'Feijão'):
++            self.assertNotIn(texto, tudo)
++
++    def test_nao_traz_a_senha(self):
++        _, arquivos = self.baixar()
++        tudo = '\n'.join(arquivos.values())
++        self.assertNotIn(self.ana.conta.password, tudo)
++        self.assertNotIn('pbkdf2', tudo)
++
++    def test_planilha_no_formato_do_excel_em_portugues(self):
++        resposta = self.client.get(reverse('contas:exportar_dados'))
++        arquivo = zipfile.ZipFile(io.BytesIO(resposta.content))
++        bruto = arquivo.read('treinos.csv')
++        self.assertTrue(bruto.startswith('﻿'.encode('utf-8')))  # BOM: acentos certos no Excel
++        self.assertTrue(bruto.decode('utf-8-sig').startswith('Início;Treino;Esporte'))
++
++    def test_pessoa_sem_registros_baixa_planilhas_so_com_cabecalho(self):
++        criar_usuario('nova@email.com', '39053344705', 'Nova Pessoa')
++        self.client.logout()
++        self.client.login(username='nova@email.com', password=SENHA)
++        _, arquivos = self.baixar()
++        self.assertEqual(len(arquivos['treinos.csv'].splitlines()), 1)
++        self.assertEqual(len(arquivos['diario.csv'].splitlines()), 1)
++
++    def test_exige_login(self):
++        self.client.logout()
++        resposta = self.client.get(reverse('contas:exportar_dados'))
++        self.assertEqual(resposta.status_code, 302)
++        self.assertIn('login', resposta.url)
++
++    def test_botao_na_tela_da_conta(self):
++        resposta = self.client.get(reverse('contas:conta'))
++        self.assertContains(resposta, 'Baixar meus dados')
++        self.assertContains(resposta, reverse('contas:exportar_dados'))
++
++    def test_numero_com_virgula(self):
++        self.assertEqual(numero(Decimal('63.50')), '63,5')
++        self.assertEqual(numero(Decimal('120.00')), '120')
++        self.assertEqual(numero(Decimal('12.345'), 1), '12,3')
++        self.assertEqual(numero(None), '')
+diff --git a/BioForm/Banco de Dados/contas/urls.py b/BioForm/Banco de Dados/contas/urls.py
+index 5f44814..670fd6a 100644
+--- a/BioForm/Banco de Dados/contas/urls.py	
++++ b/BioForm/Banco de Dados/contas/urls.py	
+@@ -42,6 +42,7 @@ urlpatterns = [
+     # Editar perfil (dados da conta)
+     path('conta/', views.conta, name='conta'),
+     path('conta/senha/', views.TrocarSenhaView.as_view(), name='trocar_senha'),
++    path('conta/exportar/', views.exportar_dados, name='exportar_dados'),
+     path('conta/excluir/', views.excluir_conta, name='excluir_conta'),
+ 
+     # Equipe
+diff --git a/BioForm/Banco de Dados/contas/views.py b/BioForm/Banco de Dados/contas/views.py
+index 8624a94..e61d5ed 100644
+--- a/BioForm/Banco de Dados/contas/views.py	
++++ b/BioForm/Banco de Dados/contas/views.py	
+@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test
+ from django.core.paginator import Paginator
+ from django.db import transaction
+ from django.db.models import Exists, OuterRef, Q
++from django.http import HttpResponse
+ from django.shortcuts import redirect, render
+ from django.urls import reverse_lazy
+ from django.utils import timezone
+@@ -25,6 +26,7 @@ from .forms import (
+     ObjetivoForm,
+     so_digitos,
+ )
++from . import exportar
+ from .onboarding import SESSAO_ONBOARDING, SESSAO_PESO, em_onboarding, perfil_obrigatorio, proximo_passo
+ 
+ 
+@@ -202,6 +204,15 @@ def conta(request, usuario):
+     })
+ 
+ 
++@perfil_obrigatorio
++def exportar_dados(request, usuario):
++    """Baixar meus dados (RNF12 / LGPD): um .zip com uma planilha para cada tipo de dado da pessoa."""
++    resposta = HttpResponse(exportar.gerar_zip(usuario), content_type='application/zip')
++    resposta['Content-Disposition'] = 'attachment; filename="%s"' % exportar.nome_do_arquivo(usuario)
++    resposta['Cache-Control'] = 'no-store'  # dados pessoais: o navegador não guarda cópia em cache
++    return resposta
++
++
+ class TrocarSenhaView(auth_views.PasswordChangeView):
+     template_name = 'contas/trocar_senha.html'
+     success_url = reverse_lazy('contas:conta')
+-- 
+2.43.0
+
