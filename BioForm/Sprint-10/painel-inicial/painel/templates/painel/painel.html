@@ -1,0 +1,176 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static l10n bioform diario_tags %}
+{% block titulo %}Hoje{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'painel/css/painel.css' %}">{% endblock %}
+{% block conteudo %}
+  {% with a=painel.alimentacao t=painel.treino s=painel.semana %}
+    <div class="painel-topo">
+      <div>
+        <h1>Olá, {{ usuario.apelido|default:usuario.nome_completo }}!</h1>
+        <p class="subtitle">{{ painel.hoje|date:'l, j \d\e F'|lower }} · seu dia em um olhar</p>
+      </div>
+      <div class="painel-atalhos">
+        <a href="{% url 'diario:diario_hoje' %}" class="atalho">+ Refeição</a>
+        <a href="{% url 'treinos:treinos_registrar' %}" class="atalho">+ Treino</a>
+        {% url 'evolucao:peso' as url_peso %}{% if url_peso %}<a href="{{ url_peso }}" class="atalho">+ Peso</a>{% endif %}
+      </div>
+    </div>
+
+    <div class="painel-grade">
+      <!-- Alimentação de hoje -->
+      <section class="block cartao" aria-labelledby="titulo-alimentacao">
+        <div class="cartao-topo">
+          <h2 class="block-title" id="titulo-alimentacao">🍽️ Alimentação</h2>
+          <a href="{% url 'diario:diario_hoje' %}" class="ver">Diário →</a>
+        </div>
+        {% if a.meta %}
+        <div class="kcal-hoje">
+          <strong>{{ a.total.kcal|inteiro|milhar }}</strong>
+          <span>de {{ a.meta.meta_calorias|milhar }} kcal</span>
+        </div>
+        <div class="bar bar-kcal{% if a.percentual_kcal > 110 %} passou{% endif %}"><span style="width: {% if a.percentual_kcal > 100 %}100{% else %}{{ a.percentual_kcal }}{% endif %}%"></span></div>
+        <p class="nota">
+          {% if not a.tem_itens %}Nada registrado ainda hoje.
+          {% elif a.restante_kcal >= 0 %}Restam {{ a.restante_kcal|inteiro|milhar }} kcal para a meta.
+          {% else %}Passou {{ a.restante_kcal|absoluto|inteiro|milhar }} kcal da meta.{% endif %}
+          {% if a.meta.base and a.meta.real %} A meta já conta os {{ a.meta.real|milhar }} kcal dos treinos de hoje.{% endif %}
+        </p>
+        <ul class="mini-macros">
+          {% for barra in a.barras %}
+          <li class="{% if barra.macro == 'proteina_g' %}m-prot{% elif barra.macro == 'carbo_g' %}m-carb{% else %}m-gord{% endif %}">
+            <small>{% if barra.macro == 'proteina_g' %}Proteína{% elif barra.macro == 'carbo_g' %}Carbo{% else %}Gordura{% endif %}</small>
+            <b>{{ barra.consumido|inteiro }}<span>/{{ barra.alvo|inteiro }} g</span></b>
+            <div class="bar"><span style="width: {{ barra.largura }}%"></span></div>
+          </li>
+          {% endfor %}
+          <li class="m-agua">
+            <small>💧 Água</small>
+            <b>{{ a.agua_ml|milhar }}<span>/{{ a.meta.meta_agua_ml|milhar }} ml</span></b>
+            <div class="bar"><span style="width: {% if a.percentual_agua > 100 %}100{% else %}{{ a.percentual_agua }}{% endif %}%"></span></div>
+          </li>
+        </ul>
+        {% else %}
+        <p class="nota">Calcule as suas metas para acompanhar as calorias. <a href="{% url 'metas:perfil_metas' %}">Ver metas →</a></p>
+        {% endif %}
+      </section>
+
+      <!-- Treino de hoje -->
+      <section class="block cartao" aria-labelledby="titulo-treino">
+        <div class="cartao-topo">
+          <h2 class="block-title" id="titulo-treino">🏋️ Treino de hoje</h2>
+          {% url 'historico:lista' as url_historico %}{% if url_historico %}<a href="{{ url_historico }}" class="ver">Histórico →</a>{% endif %}
+        </div>
+        {% if t.descanso %}
+          <p class="nota">Nenhum treino previsto para hoje. Dia de descanso — ou registre algo que você fez.</p>
+        {% else %}
+          {% if t.previstos %}
+          <ul class="chips">
+            {% for p in t.previstos %}<li class="chip{% if p.feito %} feito{% endif %}">{% if p.feito %}✓{% else %}○{% endif %} {{ p.emoji }} {{ p.nome }}</li>{% endfor %}
+          </ul>
+          {% endif %}
+          {% for ficha in t.fichas %}
+          <div class="ficha-hoje">
+            <span>{{ ficha.nome_ficha }}</span>
+            {% url 'execucao:fazer' ficha.id as url_fazer %}<a href="{% if url_fazer %}{{ url_fazer }}{% else %}{% url 'treinos:treinos_ficha' ficha.id %}{% endif %}" class="btn-comecar">▶ Começar treino</a>
+          </div>
+          {% endfor %}
+          {% if t.feitos %}
+          <ul class="feitos">
+            {% for treino in t.feitos %}
+            <li><a href="{% url 'historico:sessao' treino.sessao.id %}">{{ treino.emoji }} {{ treino.titulo }}</a><small>{{ treino.sessao.duracao_minutos }} min{% if treino.kcal %} · {{ treino.kcal|milhar }} kcal{% endif %}</small></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        {% endif %}
+        <p class="nota"><a href="{% url 'treinos:treinos_registrar' %}">+ Registrar um treino</a>{% if t.kcal %} · {{ t.kcal|milhar }} kcal gastos hoje{% endif %}</p>
+      </section>
+    </div>
+
+    <!-- Semana -->
+    <section class="block" aria-labelledby="titulo-semana">
+      <div class="cartao-topo">
+        <h2 class="block-title" id="titulo-semana">📅 Esta semana <small>{{ s.inicio|date:'d/m' }} a {{ s.fim|date:'d/m' }}</small></h2>
+        {% url 'aderencia:semana' as url_feita %}{% if url_feita %}<a href="{{ url_feita }}" class="ver">Semana feita →</a>{% endif %}
+      </div>
+      <div class="numeros">
+        <div><small>Treinos</small><strong>{{ s.total_feito }}{% if s.total_previsto %}<span> de {{ s.total_previsto }}</span>{% endif %}</strong></div>
+        <div><small>Aderência</small><strong>{% if s.aderencia is not None %}{{ s.aderencia }}<span>%</span>{% else %}—{% endif %}</strong></div>
+        <div><small>Média consumida</small><strong>{% if s.media_kcal %}{{ s.media_kcal|milhar }}<span> kcal</span>{% else %}—{% endif %}</strong></div>
+        <div><small>Dias na meta</small><strong>{{ s.dias_na_meta }}<span> de {{ s.dias_com_registro }}</span></strong></div>
+      </div>
+      <div class="graficos">
+        <figure class="grafico" aria-label="Calorias consumidas por dia comparadas com a meta">
+          <figcaption>Calorias consumidas <span class="legenda"><i class="leg-meta"></i> meta do dia</span></figcaption>
+          <ol class="barras">
+            {% for d in s.dias %}
+            <li class="{% if d.hoje %}hoje{% endif %}{% if d.futuro %} futuro{% endif %}" title="{{ d.nome }}: {% if d.futuro %}ainda não chegou{% else %}{{ d.kcal|milhar }} kcal{% if d.meta %} de {{ d.meta|milhar }}{% endif %}{% endif %}">
+              <div class="area">
+                {% if d.altura_meta %}<i class="marca-meta" style="bottom: {{ d.altura_meta }}%"></i>{% endif %}
+                {% if d.altura_kcal %}<span class="barra barra-kcal{% if d.na_meta %} na-meta{% endif %}" style="height: {{ d.altura_kcal }}%"></span>{% endif %}
+              </div>
+              <small>{{ d.nome }}</small>
+            </li>
+            {% endfor %}
+          </ol>
+        </figure>
+        <figure class="grafico" aria-label="Calorias gastas nos treinos por dia">
+          <figcaption>Gasto nos treinos <span class="legenda">{{ s.kcal_treinos|milhar }} kcal na semana</span></figcaption>
+          <ol class="barras">
+            {% for d in s.dias %}
+            <li class="{% if d.hoje %}hoje{% endif %}{% if d.futuro %} futuro{% endif %}" title="{{ d.nome }}: {{ d.treinos }} treino{{ d.treinos|pluralize }}{% if d.gasto_treinos %}, {{ d.gasto_treinos|milhar }} kcal{% endif %}{% if d.previstos %} ({{ d.previstos }} previsto{{ d.previstos|pluralize }}){% endif %}">
+              <div class="area">
+                {% if d.altura_gasto %}<span class="barra barra-treino" style="height: {{ d.altura_gasto }}%"></span>{% endif %}
+              </div>
+              <small>{% if d.treinos %}<b>{{ d.treinos }}</b>{% elif d.previstos and not d.futuro and not d.hoje %}<em>✗</em>{% else %}{{ d.nome }}{% endif %}</small>
+            </li>
+            {% endfor %}
+          </ol>
+        </figure>
+      </div>
+    </section>
+
+    <div class="painel-grade">
+      <!-- Peso -->
+      <section class="block cartao" aria-labelledby="titulo-peso">
+        <div class="cartao-topo">
+          <h2 class="block-title" id="titulo-peso">⚖️ Peso</h2>
+          {% if url_peso %}<a href="{{ url_peso }}" class="ver">Evolução →</a>{% endif %}
+        </div>
+        {% if painel.peso %}
+        <div class="kcal-hoje">
+          <strong>{{ painel.peso.atual|decimal_br }}</strong><span>kg</span>
+          {% if painel.peso.variacao_mes is not None %}<em class="variacao">{% if painel.peso.variacao_mes > 0 %}+{% endif %}{{ painel.peso.variacao_mes|decimal_br }} kg no mês</em>{% endif %}
+        </div>
+        {% if painel.peso.linha %}
+        {% localize off %}<svg class="mini-peso" viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Peso no último mês"><polyline points="{{ painel.peso.linha }}"/></svg>{% endlocalize %}
+        {% endif %}
+        <p class="nota">
+          {% if painel.peso.falta is not None %}{% if painel.peso.falta > 0 %}Faltam {{ painel.peso.falta|decimal_br }} kg para perder.{% elif painel.peso.falta < 0 %}Faltam {{ painel.peso.falta|absoluto|decimal_br }} kg para ganhar.{% else %}Você chegou ao peso desejado!{% endif %}{% endif %}
+          {% if painel.peso.dias_sem_pesar >= 7 %}Última pesagem há {{ painel.peso.dias_sem_pesar }} dias.{% endif %}
+        </p>
+        {% else %}
+        <p class="nota">Nenhuma pesagem ainda.</p>
+        {% endif %}
+      </section>
+
+      <!-- Ranking -->
+      {% if painel.ranking %}
+      <section class="block cartao" aria-labelledby="titulo-ranking">
+        <div class="cartao-topo">
+          <h2 class="block-title" id="titulo-ranking">🏆 Ranking da semana</h2>
+          <a href="{% url 'ranking:semana' %}" class="ver">Ranking →</a>
+        </div>
+        {% if painel.ranking.tem_amigos %}
+        <div class="kcal-hoje">
+          <strong>{{ painel.ranking.voce.posicao }}º</strong><span>de {{ painel.ranking.linhas|length }} · {{ painel.ranking.voce.xp|milhar }} XP</span>
+        </div>
+        <p class="nota">{% if painel.ranking.falta_para_o_proximo %}Faltam {{ painel.ranking.falta_para_o_proximo|milhar }} XP para subir uma posição.{% else %}Você está na frente. Continue assim!{% endif %}</p>
+        {% else %}
+        <div class="kcal-hoje"><strong>{{ painel.ranking.voce.xp|milhar }}</strong><span>XP na semana</span></div>
+        <p class="nota">Adicione amigos para disputar o ranking. <a href="{% url 'ranking:amigos' %}">Meus amigos →</a></p>
+        {% endif %}
+      </section>
+      {% endif %}
+    </div>
+  {% endwith %}
+{% endblock %}

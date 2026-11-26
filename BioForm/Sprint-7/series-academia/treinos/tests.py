@@ -619,7 +619,7 @@ class TreinoFeitoTest(TestCase):
     def test_ficha_mostra_ultima_vez_e_botao(self):
         self.client.post(self.url, self.dados())
         resposta = self.client.get(reverse('treinos:treinos_ficha', args=[self.ficha.id]))
-        self.assertContains(resposta, 'Treinar agora')
+        self.assertContains(resposta, 'Anotar treino feito')
         self.assertContains(resposta, '40 kg × 10 · 40 kg × 10 · 40 kg × 10')
         self.assertContains(resposta, 'último treino')
 

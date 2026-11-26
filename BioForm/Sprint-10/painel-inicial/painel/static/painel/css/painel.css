@@ -1,0 +1,112 @@
+/* =========================================================
+   BioForm — painel do dia (painel/painel.html).
+   Usa as variáveis de cor e as classes .block, .bar e .subtitle de acesso.css.
+   ========================================================= */
+
+/* ---------- Topo ---------- */
+.painel-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.painel-topo h1 { margin: 0; }
+.painel-topo .subtitle { margin-bottom: 12px; }
+.painel-topo .subtitle::first-letter { text-transform: uppercase; }
+.painel-atalhos { display: flex; gap: 8px; flex-wrap: wrap; }
+.atalho {
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.atalho:hover { border-color: var(--flame); color: var(--flame); text-decoration: none; }
+
+/* ---------- Cartões ---------- */
+.painel-grade { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.painel-grade + .block, .block + .painel-grade { margin-top: 16px; }
+.painel-grade .block { margin: 0; }
+.cartao-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.cartao-topo .block-title { margin: 0; }
+.cartao-topo .block-title small { margin-left: 6px; font-size: 13px; font-weight: 500; color: var(--text-3); }
+.ver { flex-shrink: 0; font-size: 13px; font-weight: 600; }
+.nota { margin: 10px 0 0; font-size: 14px; color: var(--text-2); }
+
+.kcal-hoje { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.kcal-hoje strong { font-size: 34px; font-weight: 800; line-height: 1; }
+.kcal-hoje span { color: var(--text-2); }
+.kcal-hoje .variacao { margin-left: auto; font-style: normal; font-size: 13px; color: var(--text-3); }
+
+.bar-kcal { height: 10px; }
+.bar-kcal span { background: var(--flame); }
+.bar-kcal.passou span { background: var(--danger); }
+
+/* ---------- Macros e água ---------- */
+.mini-macros { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; margin: 16px 0 0; padding: 0; }
+.mini-macros small { display: block; font-size: 12px; color: var(--text-3); }
+.mini-macros b { display: block; margin: 2px 0 6px; font-size: 17px; }
+.mini-macros b span { font-size: 12px; font-weight: 500; color: var(--text-3); }
+.m-prot .bar span { background: var(--flame); }
+.m-carb .bar span { background: var(--violet); }
+.m-gord .bar span { background: #F59E0B; }
+.m-agua .bar span { background: var(--water); }
+
+/* ---------- Treino de hoje ---------- */
+.chips { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding: 0; }
+.chip { padding: 4px 10px; border: 1px dashed var(--line-strong); border-radius: 999px; font-size: 13px; }
+.chip.feito { border: 1px solid var(--green); color: var(--green); }
+.ficha-hoje {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2);
+}
+.ficha-hoje span { font-weight: 600; }
+.btn-comecar {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: var(--flame);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.btn-comecar:hover { filter: brightness(1.08); text-decoration: none; }
+.feitos { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
+.feitos li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 10px; background: var(--green-soft); }
+.feitos a { color: var(--green); font-weight: 600; }
+.feitos small { color: var(--text-2); white-space: nowrap; }
+
+/* ---------- Semana: números ---------- */
+.numeros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+.numeros div { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.numeros small { font-size: 12px; color: var(--text-3); }
+.numeros strong { font-size: 22px; font-weight: 800; }
+.numeros strong span { font-size: 13px; font-weight: 600; color: var(--text-2); }
+
+/* ---------- Semana: gráficos de barras ---------- */
+.graficos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.grafico { margin: 0; }
+.grafico figcaption { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+.legenda { font-size: 12px; font-weight: 500; color: var(--text-3); }
+.leg-meta { display: inline-block; width: 14px; border-top: 2px dashed var(--green); vertical-align: middle; }
+.barras { list-style: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 0; padding: 0; }
+.barras li { display: grid; gap: 6px; text-align: center; }
+.barras .area { position: relative; height: 120px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); }
+.barra { position: absolute; left: 18%; right: 18%; bottom: 0; min-height: 2px; border-radius: 6px 6px 2px 2px; }
+.barra-kcal { background: var(--flame); opacity: .8; }
+.barra-kcal.na-meta { background: var(--green); opacity: 1; }
+.barra-treino { background: var(--violet); }
+.marca-meta { position: absolute; left: 6%; right: 6%; z-index: 1; border-top: 2px dashed var(--green); }
+.barras small { font-size: 12px; color: var(--text-3); }
+.barras small b { color: var(--violet); }
+.barras small em { font-style: normal; color: var(--danger); }
+.barras li.hoje small { color: var(--flame); font-weight: 700; }
+.barras li.hoje .area { outline: 1px solid var(--flame); }
+.barras li.futuro { opacity: .45; }
+
+/* ---------- Peso ---------- */
+.mini-peso { display: block; width: 100%; height: 48px; margin: 4px 0; }
+.mini-peso polyline { fill: none; stroke: var(--flame); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 768px) {
+  .painel-grade, .graficos { grid-template-columns: 1fr; }
+  .numeros { grid-template-columns: repeat(2, 1fr); }
+}

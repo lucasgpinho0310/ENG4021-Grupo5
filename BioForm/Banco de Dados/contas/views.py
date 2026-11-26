@@ -66,7 +66,7 @@ def inicio(request):
     usuario = Usuario.objects.filter(conta=request.user).first()
     if usuario is None:
         return redirect('contas:usuarios' if request.user.is_staff else 'contas:cadastro')
-    return redirect(proximo_passo(usuario) or 'metas:perfil_metas')
+    return redirect(proximo_passo(usuario) or 'home')  # perfil completo: a home mostra o painel do dia
 
 
 class EntrarView(auth_views.LoginView):

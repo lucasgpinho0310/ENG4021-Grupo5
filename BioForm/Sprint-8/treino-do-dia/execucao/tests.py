@@ -98,6 +98,14 @@ class FazerTreinoTest(TestCase):
         resposta = self.client.get(reverse('treinos:treinos_ficha', args=[self.ficha.id]))
         self.assertContains(resposta, self.url)
 
+    def test_ficha_tem_um_so_botao_principal(self):
+        # "Começar treino" é para usar durante o treino; o outro serve para anotar um treino já feito
+        resposta = self.client.get(reverse('treinos:treinos_ficha', args=[self.ficha.id]))
+        self.assertContains(resposta, '▶ Começar treino', count=1)
+        self.assertContains(resposta, 'Anotar treino feito', count=1)
+        self.assertNotContains(resposta, 'Treinar agora')
+        self.assertNotContains(resposta, 'btn-treinar')
+
     def test_salvar_treino_grava_sessao_e_series(self):
         resposta = self.client.post(self.url, dados_treino(self.agachamento, self.prancha))
         sessao = SessaoAtividade.objects.get()

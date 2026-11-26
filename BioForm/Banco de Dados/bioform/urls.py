@@ -46,6 +46,7 @@ urlpatterns = [
     path('semana-feita/', include('aderencia.urls')),  # Sprint-9/semana-feita
     path('progressao/', include('progressao.urls')),   # Sprint-9/progressao-carga
     path('ranking/', include('ranking.urls')),         # Sprint-9/ranking-amigos
+    path('painel/', include('painel.urls')),           # Sprint-10/painel-inicial (também é a home de quem entrou)
 ]
 
 # Em desenvolvimento, o próprio Django entrega as imagens enviadas
