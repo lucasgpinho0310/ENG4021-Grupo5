@@ -1,0 +1,69 @@
+/* =========================================================
+   BioForm — ranking entre amigos (ranking/semana.html e ranking/amigos.html).
+   Usa as variáveis de cor e as classes .block, .bar e .btn de acesso.css.
+   ========================================================= */
+
+.voltar { margin-bottom: 12px; font-size: 14px; }
+
+/* ---------- Navegação entre semanas ---------- */
+.semana-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; text-align: center; }
+.semana-nav h1 { margin: 0; }
+.semana-nav small { color: var(--text-3); }
+.seta {
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--text);
+  font-size: 22px;
+}
+.seta:hover { border-color: var(--flame); text-decoration: none; }
+.seta.desativada { opacity: .3; }
+
+/* ---------- Seus números ---------- */
+.ranking-numeros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.ranking-numeros div { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.ranking-numeros small { font-size: 12px; color: var(--text-3); }
+.ranking-numeros strong { font-size: 24px; font-weight: 800; }
+.ranking-numeros strong span { font-size: 14px; font-weight: 600; color: var(--text-2); }
+
+/* ---------- Classificação ---------- */
+.ranking-lista { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+.ranking-linha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.ranking-linha.voce { border-color: var(--flame); background: var(--flame-soft); }
+.posicao { width: 36px; flex-shrink: 0; font-size: 18px; font-weight: 800; color: var(--text-2); text-align: center; }
+.podio-1 .posicao { color: #FBBF24; }
+.podio-2 .posicao { color: #D4D4D8; }
+.podio-3 .posicao { color: #D97706; }
+.pessoa { display: grid; gap: 4px; flex: 1; min-width: 0; }
+.pessoa b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pessoa em { margin-left: 4px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--flame); }
+.pessoa small { font-size: 12px; color: var(--text-3); }
+.ranking-linha .bar span { background: var(--flame); }
+.xp { flex-shrink: 0; font-size: 18px; font-weight: 800; }
+.xp span { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.ranking-vazio { margin: 16px 0 0; }
+
+/* ---------- Amigos ---------- */
+.amigo-form { display: grid; gap: 16px; }
+.amigo-form .btn { width: auto; padding: 0 28px; justify-self: start; }
+.amigos-lista { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+.amigos-lista li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.remover { padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 999px; background: none; color: var(--text-2); font: inherit; font-size: 13px; cursor: pointer; }
+.remover:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ---------- Celular ---------- */
+@media (max-width: 640px) {
+  .ranking-numeros { grid-template-columns: repeat(2, 1fr); }
+  .amigo-form .btn { width: 100%; justify-self: stretch; }
+}

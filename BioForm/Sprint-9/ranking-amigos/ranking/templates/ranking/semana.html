@@ -1,0 +1,48 @@
+{% extends 'contas/base_perfil.html' %}
+{% load static bioform %}
+{% block titulo %}Ranking entre amigos{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'ranking/css/ranking.css' %}">{% endblock %}
+{% block conteudo %}
+    <div class="semana-nav">
+      {% if anterior is not None %}<a href="?semana={{ anterior }}" class="seta" aria-label="Semana anterior">‹</a>{% else %}<span class="seta desativada" aria-hidden="true">‹</span>{% endif %}
+      <div>
+        <h1>Ranking entre amigos</h1>
+        <small>{% if semanas_atras == 0 %}Esta semana{% elif semanas_atras == 1 %}Semana passada{% else %}Há {{ semanas_atras }} semanas{% endif %} · {{ ranking.inicio|date:'d/m' }} a {{ ranking.fim|date:'d/m' }}</small>
+      </div>
+      {% if seguinte is not None %}<a href="{% if seguinte %}?semana={{ seguinte }}{% else %}?{% endif %}" class="seta" aria-label="Semana seguinte">›</a>{% else %}<span class="seta desativada" aria-hidden="true">›</span>{% endif %}
+    </div>
+
+    <!-- Seus números na semana -->
+    <div class="ranking-numeros">
+      <div><small>Sua posição</small><strong>{{ ranking.voce.posicao }}º <span>de {{ ranking.linhas|length }}</span></strong></div>
+      <div><small>Seu XP na semana</small><strong>{{ ranking.voce.xp|milhar }} <span>XP</span></strong></div>
+      <div><small>Treinos na semana</small><strong>{{ ranking.voce.treinos }}</strong></div>
+      <div><small>Para subir</small><strong>{% if ranking.falta_para_o_proximo %}{{ ranking.falta_para_o_proximo|milhar }} <span>XP</span>{% else %}—{% endif %}</strong></div>
+    </div>
+
+    <section class="block">
+      <h2 class="block-title">Classificação</h2>
+      <p class="block-sub">1º treino do dia vale 50 XP, outros treinos no mesmo dia 20 XP e cada refeição registrada 10 XP. A semana vai de segunda a domingo.</p>
+      <ol class="ranking-lista">
+        {% for linha in ranking.linhas %}
+        <li class="ranking-linha{% if linha.voce %} voce{% endif %}{% if linha.posicao <= 3 and linha.xp %} podio-{{ linha.posicao }}{% endif %}">
+          <span class="posicao">{{ linha.posicao }}º</span>
+          <div class="pessoa">
+            <b>{{ linha.usuario }}{% if linha.voce %} <em>você</em>{% endif %}</b>
+            <small>Nível {{ linha.nivel.numero }} · {{ linha.nivel.nome }} · {{ linha.treinos }} treino{{ linha.treinos|pluralize }}</small>
+            <div class="bar"><span style="width: {{ linha.percentual }}%"></span></div>
+          </div>
+          <strong class="xp">{{ linha.xp|milhar }} <span>XP</span></strong>
+        </li>
+        {% endfor %}
+      </ol>
+      {% if not ranking.tem_amigos %}
+      <p class="block-sub ranking-vazio">Você ainda não tem amigos no BioForm. Adicione um amigo pelo e-mail para começar a disputa.</p>
+      {% endif %}
+    </section>
+
+    <div class="actions">
+      <a href="{% url 'treinos:treinos_registrar' %}" class="btn btn-ghost">Registrar treino</a>
+      <a href="{% url 'ranking:amigos' %}" class="btn btn-primary">{% if ranking.tem_amigos %}Meus amigos{% else %}Adicionar amigo{% endif %}</a>
+    </div>
+{% endblock %}

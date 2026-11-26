@@ -27,7 +27,7 @@ SPRINT_8 = BASE_DIR.parent / 'Sprint-8'
 for pasta in ('treino-do-dia', 'historico-treinos', 'evolucao-peso'):
     sys.path.insert(0, str(SPRINT_8 / pasta))
 SPRINT_9 = BASE_DIR.parent / 'Sprint-9'
-for pasta in ('balanco-calorico', 'semana-feita', 'progressao-carga'):
+for pasta in ('balanco-calorico', 'semana-feita', 'progressao-carga', 'ranking-amigos'):
     sys.path.insert(0, str(SPRINT_9 / pasta))
 
 
@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'balanco',           # Sprint-9/balanco-calorico
     'aderencia',         # Sprint-9/semana-feita
     'progressao',        # Sprint-9/progressao-carga
+    'ranking',           # Sprint-9/ranking-amigos
 ]
 
 MIDDLEWARE = [
