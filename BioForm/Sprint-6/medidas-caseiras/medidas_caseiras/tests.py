@@ -23,8 +23,10 @@ def criar_usuario(nome, cpf):
 class MedidasCaseirasTest(TestCase):
     def test_todas_as_medidas_da_migracao_foram_carregadas(self):
         migracao = importlib.import_module('medidas_caseiras.migrations.0001_popular_medidas_caseiras')
-        esperado = sum(len(medidas) for _, medidas in migracao.MEDIDAS.values())
-        self.assertEqual(MedidaCaseira.objects.count(), esperado)
+        ids = [migracao.id_da_medida(taco_id, nome)
+               for taco_id, (_, medidas) in migracao.MEDIDAS.items() for nome, _ in medidas]
+        # conta só as medidas desta migração (a base de bebidas da Sprint 10 acrescenta outras)
+        self.assertEqual(MedidaCaseira.objects.filter(id__in=ids).count(), len(ids))
 
     def test_pao_frances_e_concha_de_feijao(self):
         pao = MedidaCaseira.objects.get(alimento__nome='Pão, trigo, francês', nome='1 unidade')

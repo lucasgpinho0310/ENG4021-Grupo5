@@ -38,7 +38,8 @@ def criar_usuario(nome, cpf):
 
 class CatalogosTest(TestCase):
     def test_catalogo_de_alimentos_populado_com_taco(self):
-        self.assertEqual(Alimento.objects.count(), 591)
+        # só os da TACO (porção de 100 g); a base de bebidas da Sprint 10 acrescenta outros, em 100 ml
+        self.assertEqual(Alimento.objects.filter(porcao_padrao='100g').count(), 591)
 
     def test_macros_do_peito_de_frango_grelhado(self):
         frango = Alimento.objects.get(nome='Frango, peito, sem pele, grelhado')
