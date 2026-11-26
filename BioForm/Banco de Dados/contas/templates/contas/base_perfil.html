@@ -9,6 +9,7 @@
         <span class="step-label">Passo <b>{{ passo }}</b> de 4</span>
       {% else %}
         <nav class="top-nav" aria-label="Menu">
+          {% url 'painel:hoje' as url_painel %}{% if url_painel %}<a href="{% url 'home' %}"{% if secao == 'painel' %} class="ativo"{% endif %}>Hoje</a>{% endif %}
           {% url 'diario:diario_hoje' as url_diario %}{% if url_diario %}<a href="{{ url_diario }}"{% if secao == 'diario' %} class="ativo"{% endif %}>Diário</a>{% endif %}
           {% url 'treinos:treinos_lista' as url_treinos %}{% if url_treinos %}<a href="{{ url_treinos }}"{% if secao == 'treinos' %} class="ativo"{% endif %}>Treinos</a>{% endif %}
           {% url 'rotina:rotina_semana' as url_semana %}{% if url_semana %}<a href="{{ url_semana }}"{% if secao == 'rotina' %} class="ativo"{% endif %}>Semana</a>{% endif %}

@@ -29,6 +29,9 @@ for pasta in ('treino-do-dia', 'historico-treinos', 'evolucao-peso'):
 SPRINT_9 = BASE_DIR.parent / 'Sprint-9'
 for pasta in ('balanco-calorico', 'semana-feita', 'progressao-carga', 'ranking-amigos'):
     sys.path.insert(0, str(SPRINT_9 / pasta))
+SPRINT_10 = BASE_DIR.parent / 'Sprint-10'
+for pasta in ('painel-inicial',):
+    sys.path.insert(0, str(SPRINT_10 / pasta))
 
 
 # Quick-start development settings - unsuitable for production
@@ -76,6 +79,7 @@ INSTALLED_APPS = [
     'aderencia',         # Sprint-9/semana-feita
     'progressao',        # Sprint-9/progressao-carga
     'ranking',           # Sprint-9/ranking-amigos
+    'painel',            # Sprint-10/painel-inicial
 ]
 
 MIDDLEWARE = [
