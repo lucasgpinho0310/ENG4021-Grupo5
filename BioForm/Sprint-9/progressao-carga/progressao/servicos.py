@@ -2,7 +2,7 @@
 Progressão de carga de um exercício: a melhor série de cada treino (maior carga ou, em exercício
 por tempo, maior tempo), o gráfico treino a treino, o recorde e quanto evoluiu desde o primeiro treino.
 
-Conta as séries feitas pela série de academia ("Começar treino" / "Treinar agora") e também as do
+Conta as séries feitas pela série de academia ("Começar treino" / "Anotar treino feito") e também as do
 treino livre com o mesmo nome de exercício.
 """
 from dataclasses import dataclass

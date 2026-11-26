@@ -11,7 +11,7 @@
       </div>
       <div class="ficha-acoes">
         {% url 'execucao:fazer' ficha.id as url_fazer %}{% if url_fazer and exercicios %}<a href="{{ url_fazer }}" class="btn-mini btn-mini-destaque">▶ Começar treino</a>{% endif %}
-        {% if exercicios %}<a href="{% url 'treinos:treinos_treinar' ficha.id %}" class="btn-mini btn-treinar">▶ Treinar agora</a>{% endif %}
+        {% if exercicios %}<a href="{% url 'treinos:treinos_treinar' ficha.id %}" class="btn-mini{% if not url_fazer %} btn-treinar{% endif %}" title="Para registrar depois um treino que você já fez, com horário e duração">✎ Anotar treino feito</a>{% endif %}
         <a href="{% url 'treinos:treinos_editar_ficha' ficha.id %}" class="btn-mini">Editar série</a>
         <form method="post" action="{% url 'treinos:treinos_alternar_ativa' ficha.id %}">
           {% csrf_token %}
